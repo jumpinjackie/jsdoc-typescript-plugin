@@ -1,0 +1,21 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "plugins": ["plugins/typescript"],
+    "typescript": {
+        "rootModuleName": "jsdoc3-examples",
+        "outDir": "./typings"
+    },
+    "templates": {
+        "default": {
+            "outputSourceFiles": true,
+            "outputSourceReference": true
+        }
+    },
+    "opts": {
+        "recurse": true,
+        "explain": false
+    }
+}

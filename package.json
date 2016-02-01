@@ -1,0 +1,26 @@
+{
+    "name": "jsdoc-typescript-plugin",
+    "version": "0.0.1",
+    "description": "A JSDoc plugin to generate a TypeScript definition file (.d.ts) from annotated JSDoc sources",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jumpinjackie/jsdoc-typescript-plugin.git"
+    },
+    "keywords": [
+        "jsdoc",
+        "typescript"
+    ],
+    "author": "Jackie Ng",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/jumpinjackie/jsdoc-typescript-plugin/issues"
+    },
+    "homepage": "https://github.com/jumpinjackie/jsdoc-typescript-plugin#readme",
+    "devDependencies": {
+        "jsdoc": "^3.4.0"
+    }
+}
