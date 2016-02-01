@@ -6,11 +6,14 @@
  */
 'use strict';
 
+var CLS_DESC_PLACEHOLDER = "%TYPENAME%";
+
 var fs = require('fs');
 var env = require('jsdoc/env');
 var config = env.conf.typescript || {};
 var moduleName = env.conf.typescript.rootModuleName || "generated";
 var outDir = env.conf.typescript.outDir || ".";
+var defaultCtorDesc = env.conf.typescript.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var indentLevel = 0;
 
@@ -18,6 +21,16 @@ var TS_ALIASES = {
     "Object": "any",
     "Function": "() => any"
 };
+
+function JsDocletStringifyFilter(key, value) { 
+    if (key === "comment") { 
+        return undefined; 
+    }
+    if (key == "meta") {
+        return undefined;
+    }
+    return value; 
+}
 
 function str_repeat(pattern, count) {
     if (count < 1) return '';
@@ -60,6 +73,13 @@ function outputSignature(name, desc, sig) {
         content += indent() + "/**\n";
         for (var i = 0; i < descParts.length; i++) {
             content += indent() + " * " + descParts[i] + "\n";
+        }
+        //If we have args, document them
+        if (sig != null && sig.length > 0) {
+            for (var i = 0; i < sig.length; i++) {
+            var arg = sig[i];
+            content += indent() + " * @param " + arg.name + " " + arg.description + "\n";
+            }
         }
         content += indent() + " */\n"
     }
@@ -105,22 +125,17 @@ function outputClass(cls) {
     
     if (cls.docletRef != null) {
         content += "/* doclet for class\n";
-        content += JSON.stringify(cls.docletRef, function(key, value) { 
-            if (key === "comment") { 
-                return undefined; 
-            }
-            return value; 
-        }, 4);
+        content += JSON.stringify(cls.docletRef, JsDocletStringifyFilter, 4);
         content += "\n */\n";
     }
     
     if (cls.description != null) {
-        var descParts = cls.description.split("\n");
         content += indent() + "/**\n";
+        var descParts = cls.description.split("\n");
         for (var i = 0; i < descParts.length; i++) {
             content += indent() + " * " + descParts[i] + "\n";
         }
-        content += indent() + " */\n"
+        content += indent() + " */\n";
     }
     content += indent() + "export class " + cls.name;
     if (cls.extends != null) {
@@ -130,7 +145,7 @@ function outputClass(cls) {
     
     indentLevel++; //Start class members
     if (cls.ctor != null) {
-        content += outputSignature("constructor", cls.ctor.description, cls.ctor.signature);
+        content += outputSignature("constructor", (cls.ctor.description || defaultCtorDesc.replace(CLS_DESC_PLACEHOLDER, cls.name)), cls.ctor.signature);
     }
     if (cls.methods.length > 0) {
         content += indent() + "//Methods\n\n";
