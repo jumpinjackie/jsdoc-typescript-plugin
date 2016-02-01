@@ -26,6 +26,9 @@ var TS_ALIASES = {
     "function": "Function"
 };
 
+/**
+ * Filter function for JSON.stringify calls on doclet instances
+ */
 function JsDocletStringifyFilter(key, value) { 
     if (key === "comment") { 
         return undefined; 
@@ -71,7 +74,7 @@ function ensureClassDef(classes, longname, bCreateIfNotExists) {
     return clsDef;
 }
 
-function outputSignature(name, desc, sig) {
+function outputSignature(name, desc, sig, scope) {
     var content = "";
     if (desc != null) {
         var descParts = desc.split("\n");
@@ -79,7 +82,7 @@ function outputSignature(name, desc, sig) {
         for (var i = 0; i < descParts.length; i++) {
             content += indent() + " * " + descParts[i] + "\n";
         }
-        //If we have args, document them. Becuase TypeScript is ... typed, the {type}
+        //If we have args, document them. Because TypeScript is ... typed, the {type}
         //annotation is not necessary
         if (sig != null && sig.length > 0) {
             for (var i = 0; i < sig.length; i++) {
@@ -89,7 +92,8 @@ function outputSignature(name, desc, sig) {
         }
         content += indent() + " */\n"
     }
-    content += indent() + name + "(";
+    var sc = (scope == "static" ? "static " : "");
+    content += indent() + sc + name + "(";
     //Output args
     if (sig != null && sig.length > 0) {
         for (var i = 0; i < sig.length; i++) {
@@ -163,7 +167,7 @@ function outputClass(cls) {
     }
     for (var i = 0; i < cls.methods.length; i++) {
         var method = cls.methods[i];
-        content += outputSignature(method.name, method.description, method.signature);
+        content += outputSignature(method.name, method.description, method.signature, method.scope);
     }
     indentLevel--; //End class members
     
@@ -178,7 +182,6 @@ function moduleDecl(name) {
 function process(doclets) {
     
     var classes = {};
-    var functions = {};
     
     var content = "/**";
     content += "\n * " + fileName
@@ -230,14 +233,16 @@ function process(doclets) {
             continue;
         }
         
-        if (doclet.kind == "member") {
+        if (doclet.kind == "value") {
             cls.properties.push({
+                scope: doclet.scope,
                 name: doclet.name,
                 description: doclet.description,
                 docletRef: doclet
             });
         } else if (doclet.kind == "function") {
             cls.methods.push({
+                scope: doclet.scope,
                 name: doclet.name,
                 description: doclet.description,
                 signature: doclet.params,
