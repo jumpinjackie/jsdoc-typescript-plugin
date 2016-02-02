@@ -11,10 +11,12 @@ var CLS_DESC_PLACEHOLDER = "%TYPENAME%";
 var fs = require('fs');
 var env = require('jsdoc/env');
 var config = env.conf.typescript || {};
-var moduleName = env.conf.typescript.rootModuleName || "generated";
-var outDir = env.conf.typescript.outDir || ".";
-var tsAliases = env.conf.typescript.typeReplacements || {};
-var defaultCtorDesc = env.conf.typescript.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
+var moduleName = config.rootModuleName || "generated";
+var outDir = config.outDir || ".";
+var tsAliases = config.typeReplacements || {};
+var defaultCtorDesc = config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
+var fillUndocumentedDoclets = !!config.fillUndocumentedDoclets;
+var outputDocletRefs = !!config.outputDocletRefs;
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var indentLevel = 0;
 
@@ -120,22 +122,38 @@ function getTypeReplacement(typeName) {
 
 function outputSignature(name, desc, sig, genericTypes, scope) {
     var content = "";
+    content += indent() + "/**\n";
     if (desc != null) {
         var descParts = desc.split("\n");
-        content += indent() + "/**\n";
         for (var i = 0; i < descParts.length; i++) {
             content += indent() + " * " + descParts[i] + "\n";
         }
-        //If we have args, document them. Because TypeScript is ... typed, the {type}
-        //annotation is not necessary
-        if (sig != null && sig.length > 0) {
-            for (var i = 0; i < sig.length; i++) {
-            var arg = sig[i];
-            content += indent() + " * @param " + arg.name + " " + (arg.description || "") + "\n";
-            }
-        }
-        content += indent() + " */\n"
+    } else if (fillUndocumentedDoclets) {
+        content += indent() + " * TODO: This method has no description. Contact the library author if this method should be documented\n";
     }
+    //If we have args, document them. Because TypeScript is ... typed, the {type}
+    //annotation is not necessary
+    if (sig != null && sig.length > 0) {
+        var forceNullable = false;
+        for (var i = 0; i < sig.length; i++) {
+            var arg = sig[i];
+            var req = "";
+            if (forceNullable || arg.nullable == true) {
+                // You can't have non-nullable arguments after a nullable argument. So by definition
+                // everything after the nullable argument has to be nullable as well
+                forceNullable = true;
+                req = " (Optional)";
+            } else {
+                req = " (Required)";
+            }
+            var argDesc = arg.description || "";
+            if (argDesc == "" && fillUndocumentedDoclets) {
+                argDesc = "TODO: This parameter has no description. Contact this library author if this parameter should be documented\n";
+            }
+            content += indent() + " * @param " + arg.name + " " + req + " " + argDesc + "\n";
+        }
+    }
+    content += indent() + " */\n"
     var sc = (scope == "static" ? "static " : "");
     content += indent() + sc + name;
     if (genericTypes && genericTypes.length > 0) {
@@ -144,18 +162,30 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
     content += "(";
     //Output args
     if (sig != null && sig.length > 0) {
+        var forceNullable = false;
         for (var i = 0; i < sig.length; i++) {
             var arg = sig[i];
             if (i > 0) {
                 content += ", ";
             }
-            content += arg.name + ": ";
+            content += arg.name;
+            if (forceNullable || arg.nullable == true) {
+                // You can't have non-nullable arguments after a nullable argument. So by definition
+                // everything after the nullable argument has to be nullable as well
+                forceNullable = true;
+                content += "?: ";
+            } else {
+                content += ": ";
+            }
             if (arg.type != null) {
                 //Output as TS union type
                 var utypes = [];
                 if (arg.type.names.length > 0) {
                     for (var j = 0; j < arg.type.names.length; j++) {
                         var typeName = getTypeReplacement(arg.type.names[j]);
+                        //Is undefined a valid JS type? Either way, I don't know what the equivalent to use for TypeScript, so skip
+                        if (typeName == "undefined")
+                            continue;
                         utypes.push(typeName);
                     }
                 }
@@ -182,7 +212,7 @@ function outputClass(cls) {
         
     var content = ""; 
     
-    if (cls.docletRef != null) {
+    if (cls.docletRef != null && outputDocletRefs) {
         content += "/* doclet for class\n";
         content += JSON.stringify(cls.docletRef, JsDocletStringifyFilter, 4);
         content += "\n */\n";
@@ -195,6 +225,10 @@ function outputClass(cls) {
         for (var i = 0; i < descParts.length; i++) {
             content += indent() + " * " + descParts[i] + "\n";
         }
+        content += indent() + " */\n";
+    } else if (fillUndocumentedDoclets) {
+        content += indent() + "/**\n";
+        content += indent() + " * TODO: This class has no documentation. Contact the library author if this class should be documented\n";
         content += indent() + " */\n";
     }
     content += indent() + "export class " + cls.name;
