@@ -30,6 +30,7 @@ var indentLevel = 0;
  */
 var TS_ALIASES = {
     "*": "any",
+    "?": "any",
     "Object": "any",
     "function": "Function"
 };
@@ -93,21 +94,11 @@ function getTypeReplacement(typeName) {
         return TS_ALIASES[typeName];
     } else {
         //Before returning, see if the type annotation matches known patterns
+        //
+        //NOTE: Regex-based checks take precedence as we want to check for specific
+        //patterns first before trying to look for things like array or union type
+        //notation
         
-        //Array - untyped
-        if (typeName.toLowerCase() == "array") {
-            //Warning: untyped array
-            return "any[]";
-        }
-        //Union-type - typeA|typeB
-        if (typeName.indexOf("|") >= 0) {
-            var types = typeName.split("|");
-            var replTypes = [];
-            for (var i = 0; i < types.length; i++) {
-                replTypes.push(getTypeReplacement(types[i].trim()));
-            }
-            return replTypes.join("|");
-        }
         //Array - Array.<type>
         var rgxm = typeName.match(/(Array\.)\<(.+)>/); 
         if (rgxm) {
@@ -131,6 +122,31 @@ function getTypeReplacement(typeName) {
             var genericType = getTypeReplacement(rgxm[1]);
             var genericTypeArgs = rgxm[3].split(",").map(function(tn) { return getTypeReplacement(tn.trim()); });
             return genericType + "<" + genericTypeArgs.join(",") + ">";
+        }
+        //Anonymous function
+        rgxm = typeName.match(/function\((.+)\)/);
+        if (rgxm) {
+            var typeArgs = rgxm[1].split(",")
+                                  .map(function(tn) { return getTypeReplacement(tn.trim()); });
+            var funcParams = [];
+            for (var i = 0; i < typeArgs.length; i++) {
+                funcParams.push("arg" + i + ": " + typeArgs[i]);
+            }
+            return "(" + funcParams.join(", ") + ") => any";
+        }
+        //Array - untyped
+        if (typeName.toLowerCase() == "array") {
+            //Warning: untyped array
+            return "any[]";
+        }
+        //Union-type - typeA|typeB
+        if (typeName.indexOf("|") >= 0) {
+            var types = typeName.split("|");
+            var replTypes = [];
+            for (var i = 0; i < types.length; i++) {
+                replTypes.push(getTypeReplacement(types[i].trim()));
+            }
+            return replTypes.join("|");
         }
         //No other replacement suggestions, return as is
         return typeName;

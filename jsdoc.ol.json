@@ -29,6 +29,9 @@
                 },
                 "goog.vec.Mat4": {
                     "Number": "any"
+                },
+                "ol": {
+                    "BingMapsImageryMetadataResponse": "any"
                 }
             }
         },
