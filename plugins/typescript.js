@@ -13,6 +13,7 @@ var env = require('jsdoc/env');
 var config = env.conf.typescript || {};
 var moduleName = env.conf.typescript.rootModuleName || "generated";
 var outDir = env.conf.typescript.outDir || ".";
+var tsAliases = env.conf.typescript.typeReplacements || {};
 var defaultCtorDesc = env.conf.typescript.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var indentLevel = 0;
@@ -22,6 +23,7 @@ var indentLevel = 0;
  * annotations will be replaced with the specified replacement here
  */
 var TS_ALIASES = {
+    "*": "any",
     "Object": "any",
     "function": "Function"
 };
@@ -65,7 +67,8 @@ function ensureClassDef(classes, longname, bCreateIfNotExists) {
             methods: [],
             properties: [],
             docletRef: null,
-            parentModule: null
+            parentModule: null,
+            genericTypes: []
         };
         classes[longname] = clsDef; 
     } else {
@@ -74,7 +77,48 @@ function ensureClassDef(classes, longname, bCreateIfNotExists) {
     return clsDef;
 }
 
-function outputSignature(name, desc, sig, scope) {
+function getTypeReplacement(typeName) {
+    //Look in user configured overrides
+    if (tsAliases.hasOwnProperty(typeName)) {
+        return tsAliases[typeName];
+    }
+    //Then look at plugin configured overrides
+    if (TS_ALIASES.hasOwnProperty(typeName)) {
+        return TS_ALIASES[typeName];
+    } else {
+        //Before returning, see if the type annotation matches known patterns
+        
+        //Array - Array.<type>
+        if (typeName.match(/Array(.)\<.+\>/)) {
+            var aggregatedType = typeName.substring(typeName.indexOf("<") + 1, typeName.length - 1).trim();
+            return getTypeReplacement(aggregatedType) + "[]";
+        }
+        //Array - type[]
+        if (typeName.match(/.+\[\]$/)) {
+            var aggregatedType = typeName.substring(0, typeName.length - 2).trim();
+            return getTypeReplacement(aggregatedType) + "[]";
+        }
+        //Multi-type - typeA|typeB
+        if (typeName.indexOf("|") >= 0) {
+            var types = typeName.split("|");
+            var replTypes = [];
+            for (var i = 0; i < types.length; i++) {
+                replTypes.push(getTypeReplacement(types[i].trim()));
+            }
+            return replTypes.join("|");
+        }
+        //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
+        if (typeName.match(/Object\.\<.+\,.+\>/)) {
+            var keyType = getTypeReplacement(typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(",")).trim());
+            var valueType = getTypeReplacement(typeName.substring(typeName.indexOf(",") + 1, typeName.length - 1).trim());
+            return "{ [key: " + keyType + "]: " + valueType + "; }";
+        }
+        
+        return typeName;
+    }
+}
+
+function outputSignature(name, desc, sig, genericTypes, scope) {
     var content = "";
     if (desc != null) {
         var descParts = desc.split("\n");
@@ -93,7 +137,11 @@ function outputSignature(name, desc, sig, scope) {
         content += indent() + " */\n"
     }
     var sc = (scope == "static" ? "static " : "");
-    content += indent() + sc + name + "(";
+    content += indent() + sc + name;
+    if (genericTypes && genericTypes.length > 0) {
+        content += "<" + genericTypes.join(", ") + ">";
+    }
+    content += "(";
     //Output args
     if (sig != null && sig.length > 0) {
         for (var i = 0; i < sig.length; i++) {
@@ -107,12 +155,8 @@ function outputSignature(name, desc, sig, scope) {
                 var utypes = [];
                 if (arg.type.names.length > 0) {
                     for (var j = 0; j < arg.type.names.length; j++) {
-                        var typeName = arg.type.names[j];
-                        if (TS_ALIASES.hasOwnProperty(typeName)) {
-                            utypes.push(TS_ALIASES[typeName]);
-                        } else {
-                            utypes.push(typeName);
-                        }
+                        var typeName = getTypeReplacement(arg.type.names[j]);
+                        utypes.push(typeName);
                     }
                 }
                 content += utypes.join("|");
@@ -144,6 +188,7 @@ function outputClass(cls) {
         content += "\n */\n";
     }
     
+    //Description as class comments
     if (cls.description != null) {
         content += indent() + "/**\n";
         var descParts = cls.description.split("\n");
@@ -153,6 +198,11 @@ function outputClass(cls) {
         content += indent() + " */\n";
     }
     content += indent() + "export class " + cls.name;
+    //Class generic parameters
+    if (cls.genericTypes.length > 0) {
+        content += "<" + cls.genericTypes.join(", ") + ">";
+    }
+    //Inheritance
     if (cls.extends != null) {
         content += " extends " + cls.extends.fullname;
     }
@@ -167,7 +217,7 @@ function outputClass(cls) {
     }
     for (var i = 0; i < cls.methods.length; i++) {
         var method = cls.methods[i];
-        content += outputSignature(method.name, method.description, method.signature, method.scope);
+        content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope);
     }
     indentLevel--; //End class members
     
@@ -179,6 +229,50 @@ function moduleDecl(name) {
     return "declare module \"" + name + "\"";
 }
 
+function beginModuleDecl(cls, writeFunc) {
+    if (!cls.parentModule) {
+        return;
+    }
+    
+    if (cls.parentModule.indexOf("/") >= 0) { //AMD-style
+        writeFunc("declare module \"" + cls.parentModule + "\" {\n");
+        indentLevel++;
+    } else {
+        writeFunc("declare module " + cls.parentModule + " {\n");
+        indentLevel++;
+    }
+}
+
+function endModuleDecl(cls, writeFunc) {
+    if (!cls.parentModule) {
+        return;
+    }
+    
+    if (cls.parentModule.indexOf("/") >= 0) { //AMD-style
+        writeFunc("}\n");
+        indentLevel--;
+    } else {
+        writeFunc("}\n");
+        indentLevel--;
+    }
+}
+
+function extractGenericTypesFromDocletTags(tags, genericTypes) {
+    //@template is non-standard, but the presence of this annotation conveys
+    //generic type information that we should capture
+    var genericTypeTags = tags.filter(function(tag) { return tag.originalTitle == "template"});
+    if (genericTypeTags.length > 0) {
+        for (var j = 0; j < genericTypeTags.length; j++) {
+            //No TS type replacement here as the value is the generic type placeholder
+            genericTypes.push(genericTypeTags[j].value);
+        }
+    }
+}
+
+function isPrivateDoclet(doclet) {
+    return doclet.access == "private";
+}
+
 function process(doclets) {
     
     var classes = {};
@@ -188,11 +282,16 @@ function process(doclets) {
     content += "\n * ";
     content += "\n * This file was automatically generated by the typescript JSDoc plugin";
     content += "\n * Do not edit this file unless you know what you're doing";
-    content += "\n */"
+    content += "\n */\n"
     
     //1st pass: Process classes
     for (var i = 0; i < doclets.length; i++) {
         var doclet = doclets[i];
+        //TypeScript definition covers a module's *public* API surface, so
+        //skip private classes
+        if (isPrivateDoclet(doclet))
+            continue;
+        
         if (doclet.kind == "class") {
             var parentModName = null;
             if (doclet.longname.indexOf("module:") >= 0) {
@@ -202,6 +301,8 @@ function process(doclets) {
                 if (dotIdx < 0)
                     dotIdx = doclet.longname.length;
                 parentModName = doclet.longname.substring(modLen, dotIdx);
+            } else if (doclet.memberof) {
+                parentModName = doclet.memberof;
             }
             
             //Key class definition on longname
@@ -214,16 +315,24 @@ function process(doclets) {
                     signature: doclet.params
                 };
             }
+            if (doclet.tags) {
+                extractGenericTypesFromDocletTags(doclet.tags, cls.genericTypes)
+            }
             if (parentModName != null)
                 cls.parentModule = parentModName;
-            if (doclet.description)
-                cls.description = doclet.description;
+            if (doclet.description || doclet.classdesc)
+                cls.description = doclet.description || doclet.classdesc;
         }
     }
     //2nd pass: Look for members
     for (var i = 0; i < doclets.length; i++) {
         var doclet = doclets[i];
         if (!doclet.memberof)
+            continue;
+
+        //TypeScript definition covers a module's *public* API surface, so
+        //skip private members
+        if (isPrivateDoclet(doclet))
             continue;
         
         //We've keyed class definition on longname, so memberof should
@@ -241,12 +350,17 @@ function process(doclets) {
                 docletRef: doclet
             });
         } else if (doclet.kind == "function") {
+            var genericTypeArgs = [];
+            if (doclet.tags) {
+                extractGenericTypesFromDocletTags(doclet.tags, genericTypeArgs);
+            }
             cls.methods.push({
                 scope: doclet.scope,
                 name: doclet.name,
                 description: doclet.description,
                 signature: doclet.params,
-                docletRef: doclet
+                docletRef: doclet,
+                genericTypes: genericTypeArgs
             });
         }
     }
@@ -254,13 +368,12 @@ function process(doclets) {
     for (var qClsName in classes) {
         var cls = classes[qClsName];
         //Begin module
-        content += "\n" + moduleDecl(cls.parentModule || moduleName) + " {\n";
-        indentLevel++;
+        //content += "\n" + moduleDecl(cls.parentModule || moduleName) + " {\n";
+        beginModuleDecl(cls, function(val) { content += val; });
         content += "\n" + indent() + "// ================= " + qClsName;
         content += "\n";
         content += outputClass(cls);
-        indentLevel--;
-        content += "}\n"; //End module
+        endModuleDecl(cls, function(val) { content += val; });
     }
     
     /*
