@@ -18,7 +18,20 @@
     "typescript": {
         "rootModuleName": "openlayers",
         "outDir": "./typings",
-        "fillUndocumentedDoclets": true
+        "fillUndocumentedDoclets": true,
+        "aliases": {
+            "module": {
+                "goog.events": {
+                    "Event": "any",
+                    "EventLike": "any",
+                    "Key": "any",
+                    "BrowserEvent": "any"
+                },
+                "goog.vec.Mat4": {
+                    "Number": "any"
+                }
+            }
+        }
     },
     "templates": {
         "default": {

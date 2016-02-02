@@ -17,6 +17,8 @@ var tsAliases = config.typeReplacements || {};
 var defaultCtorDesc = config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
 var fillUndocumentedDoclets = !!config.fillUndocumentedDoclets;
 var outputDocletRefs = !!config.outputDocletRefs;
+var globalTypeAliases = (config.aliases || {}).global || {};
+var moduleTypeAliases = (config.aliases || {}).module || {};
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var indentLevel = 0;
 
@@ -90,6 +92,11 @@ function getTypeReplacement(typeName) {
     } else {
         //Before returning, see if the type annotation matches known patterns
         
+        //Array - untyped
+        if (typeName.toLowerCase() == "array") {
+            //Warning: untyped array
+            return "any[]";
+        }
         //Array - Array.<type>
         if (typeName.match(/Array(.)\<.+\>/)) {
             var aggregatedType = typeName.substring(typeName.indexOf("<") + 1, typeName.length - 1).trim();
@@ -200,6 +207,44 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
     return content; 
 }
 
+function outputTypedef(tdf) {
+    if (tdf == null) {
+        //console.log("BOGUS: null typedef found");
+        return "";
+    }
+    if (tdf.name == null) {
+        //console.log("BOGUS: typedef has null name");
+        return "";
+    }
+
+    var content = "";
+    if (tdf.docletRef != null && outputDocletRefs) {
+        content += "/* doclet for typedef\n";
+        content += JSON.stringify(tdf.docletRef, JsDocletStringifyFilter, 4);
+        content += "\n */\n";
+    }
+    
+    //Description as class comments
+    if (tdf.description != null) {
+        content += indent() + "/**\n";
+        var descParts = tdf.description.split("\n");
+        for (var i = 0; i < descParts.length; i++) {
+            content += indent() + " * " + descParts[i] + "\n";
+        }
+        content += indent() + " */\n";
+    } else if (fillUndocumentedDoclets) {
+        content += indent() + "/**\n";
+        content += indent() + " * TODO: This typedef has no documentation. Contact the library author if this class should be documented\n";
+        content += indent() + " */\n";
+    }
+    content += indent() + "export type " + tdf.name;
+    
+    //Fallback
+    content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+    
+    return content;
+}
+
 function outputClass(cls) {
     if (cls == null)
         return "";
@@ -306,6 +351,7 @@ function isPrivateDoclet(doclet) {
 
 function process(doclets) {
     var classes = {};
+    var typedefs = {};
     
     var output = fs.createWriteStream(fileName);
     
@@ -318,7 +364,7 @@ function process(doclets) {
     
     output.write(content);
     
-    //1st pass: Process classes
+    //1st pass: Process classes and typedefs
     for (var i = 0; i < doclets.length; i++) {
         var doclet = doclets[i];
         //TypeScript definition covers a module's *public* API surface, so
@@ -356,6 +402,14 @@ function process(doclets) {
                 cls.parentModule = parentModName;
             if (doclet.description || doclet.classdesc)
                 cls.description = doclet.description || doclet.classdesc;
+        } else if (doclet.kind == "typedef") {
+            typedefs[doclet.longname] = {
+                name: doclet.name,
+                fullname: doclet.longname,
+                description: doclet.description,
+                parentModule: doclet.memberof,
+                docletRef: doclet
+            };
         }
     }
     //2nd pass: Look for members
@@ -399,18 +453,45 @@ function process(doclets) {
         }
     }
     
+    //Output user-injected type aliases
+    //global
+    for (var typeAlias in globalTypeAliases) {
+        var tdfContent = "export type " + typeAlias + " = " + globalTypeAliases[typeAlias] + ";\n";
+        output.write(tdfContent);
+    }
+    //module
+    for (var moduleName in moduleTypeAliases) {
+        var tdfContent = "";
+        beginModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
+        for (var typeAlias in moduleTypeAliases[moduleName]) {
+            tdfContent += indent() + "export type " + typeAlias + " = " + moduleTypeAliases[moduleName][typeAlias] + ";\n";
+        }
+        endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
+        output.write(tdfContent);
+    }
+    
+    //Output the typedefs
+    for (var qTypeName in typedefs) {
+        var tdfContent = "";
+        var tdf = typedefs[qTypeName];
+        beginModuleDecl(tdf, function(val) { tdfContent += val; });
+        tdfContent += outputTypedef(tdf);
+        endModuleDecl(tdf, function(val) { tdfContent += val; });
+        output.write(tdfContent);
+        console.log("Wrote typedef: " + qTypeName);
+    }
+    
+    //Output the classes
     for (var qClsName in classes) {
         var clsContent = "";
         var cls = classes[qClsName];
         //Begin module
-        //content += "\n" + moduleDecl(cls.parentModule || moduleName) + " {\n";
         beginModuleDecl(cls, function(val) { clsContent += val; });
         clsContent += outputClass(cls);
         endModuleDecl(cls, function(val) { clsContent += val; });
         output.write(clsContent);
+        console.log("Wrote class: " + qClsName);
     }
-    
-    
     
     output.on('finish', function () {
         console.log("Saved TypeScript definition file to: " + fileName);
