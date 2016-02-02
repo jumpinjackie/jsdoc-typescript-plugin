@@ -31,6 +31,17 @@
                     "Number": "any"
                 }
             }
+        },
+        "interfaces": {
+            "module": {
+                "ol": {
+                    "GeolocationPositionOptions": [
+                        "enableHighAccuracy: boolean",
+                        "maximumAge: number",
+                        "timeout: number"
+                    ]
+                }
+            }
         }
     },
     "templates": {

@@ -19,6 +19,8 @@ var fillUndocumentedDoclets = !!config.fillUndocumentedDoclets;
 var outputDocletRefs = !!config.outputDocletRefs;
 var globalTypeAliases = (config.aliases || {}).global || {};
 var moduleTypeAliases = (config.aliases || {}).module || {};
+var globalInterfaces = (config.interfaces || {}).global || {};
+var moduleInterfaces = (config.interfaces || {}).module || {};
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var indentLevel = 0;
 
@@ -355,7 +357,8 @@ function extractGenericTypesFromDocletTags(tags, genericTypes) {
 }
 
 function isPrivateDoclet(doclet) {
-    return doclet.access == "private";
+    return doclet.access == "private" || 
+           doclet.access == "protected"; //TODO: Currently maintaining a "omit anything not public" stance. TypeScript allows extending from declared classes, so in such cases, knowledge of protected members is probably required
 }
 
 function process(doclets) {
@@ -474,6 +477,36 @@ function process(doclets) {
         beginModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
         for (var typeAlias in moduleTypeAliases[moduleName]) {
             tdfContent += indent() + "export type " + typeAlias + " = " + moduleTypeAliases[moduleName][typeAlias] + ";\n";
+        }
+        endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
+        output.write(tdfContent);
+    }
+    
+    //Output user-injected interfaces
+    for (var typeName in globalInterfaces) {
+        var iface = globalInterfaces[typeName];
+        var tdfContent = indent() + "export interface " + typeName + "{\n"; //BEGIN INTERFACE
+        indentLevel++;
+        for (var i = 0; i < iface.length; i++) {
+            tdfContent += indent() + iface[i] + ";\n";
+        }
+        indentLevel--;
+        tdfContent += indent() + "}\n"; //END INTERFACE
+        output.write(tdfContent);
+    }
+    //module
+    for (var moduleName in moduleInterfaces) {
+        var tdfContent = "";
+        beginModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
+        for (var typeName in moduleInterfaces[moduleName]) {
+            var iface = moduleInterfaces[moduleName][typeName];
+            tdfContent += indent() + "export interface " + typeName + " {\n"; //BEGIN INTERFACE
+            indentLevel++;
+            for (var i = 0; i < iface.length; i++) {
+                tdfContent += indent() + iface[i] + ";\n";
+            }
+            indentLevel--;
+            tdfContent += indent() + "}\n"; //END INTERFACE
         }
         endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
         output.write(tdfContent);
