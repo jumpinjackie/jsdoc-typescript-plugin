@@ -481,11 +481,21 @@ function process(doclets) {
         }
     }
     
+    var stats = {
+        typedefs: {
+            user: 0,
+            gen: 0
+        },
+        ifaces: 0,
+        classes: 0
+    };
+    
     //Output user-injected type aliases
     //global
     for (var typeAlias in globalTypeAliases) {
         var tdfContent = "export type " + typeAlias + " = " + globalTypeAliases[typeAlias] + ";\n";
         output.write(tdfContent);
+        stats.typedefs.user++;
     }
     //module
     for (var moduleName in moduleTypeAliases) {
@@ -496,6 +506,7 @@ function process(doclets) {
         }
         endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
         output.write(tdfContent);
+        stats.typedefs.user++;
     }
     
     //Output user-injected interfaces
@@ -509,6 +520,7 @@ function process(doclets) {
         indentLevel--;
         tdfContent += indent() + "}\n"; //END INTERFACE
         output.write(tdfContent);
+        stats.ifaces++;
     }
     //module
     for (var moduleName in moduleInterfaces) {
@@ -526,6 +538,7 @@ function process(doclets) {
         }
         endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
         output.write(tdfContent);
+        stats.ifaces++;
     }
     
     //Output the typedefs
@@ -537,6 +550,7 @@ function process(doclets) {
         endModuleDecl(tdf, function(val) { tdfContent += val; });
         output.write(tdfContent);
         console.log("Wrote typedef: " + qTypeName);
+        stats.typedefs.gen++;
     }
     
     //Output the classes
@@ -549,9 +563,15 @@ function process(doclets) {
         endModuleDecl(cls, function(val) { clsContent += val; });
         output.write(clsContent);
         console.log("Wrote class: " + qClsName);
+        stats.classes++;
     }
     
     output.on('finish', function () {
+        console.log("Wrote:");
+        console.log("  " + stats.typedefs.user + " user-specified typedefs");
+        console.log("  " + stats.ifaces + " user-specified interfaces");
+        console.log("  " + stats.typedefs.gen + " scanned typedefs");
+        console.log("  " + stats.classes + " scanned classes");
         console.log("Saved TypeScript definition file to: " + fileName);
     });
     output.end();
