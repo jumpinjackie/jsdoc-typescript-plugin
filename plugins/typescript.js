@@ -97,17 +97,7 @@ function getTypeReplacement(typeName) {
             //Warning: untyped array
             return "any[]";
         }
-        //Array - Array.<type>
-        if (typeName.match(/Array(.)\<.+\>/)) {
-            var aggregatedType = typeName.substring(typeName.indexOf("<") + 1, typeName.length - 1).trim();
-            return getTypeReplacement(aggregatedType) + "[]";
-        }
-        //Array - type[]
-        if (typeName.match(/.+\[\]$/)) {
-            var aggregatedType = typeName.substring(0, typeName.length - 2).trim();
-            return getTypeReplacement(aggregatedType) + "[]";
-        }
-        //Multi-type - typeA|typeB
+        //Union-type - typeA|typeB
         if (typeName.indexOf("|") >= 0) {
             var types = typeName.split("|");
             var replTypes = [];
@@ -116,13 +106,31 @@ function getTypeReplacement(typeName) {
             }
             return replTypes.join("|");
         }
+        //Array - Array.<type>
+        var rgxm = typeName.match(/(Array\.)\<(.+)>/); 
+        if (rgxm) {
+            return getTypeReplacement(rgxm[2].trim()) + "[]";
+        }
+        //Array - type[]
+        rgxm = typeName.match(/(.+)\[\]$/);
+        if (rgxm) {
+            return getTypeReplacement(rgxm[1].trim()) + "[]";
+        }
         //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
-        if (typeName.match(/Object\.\<.+\,.+\>/)) {
-            var keyType = getTypeReplacement(typeName.substring(typeName.indexOf("<") + 1, typeName.indexOf(",")).trim());
-            var valueType = getTypeReplacement(typeName.substring(typeName.indexOf(",") + 1, typeName.length - 1).trim());
+        rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
+        if (rgxm) {
+            var keyType = getTypeReplacement(rgxm[2].trim());
+            var valueType = getTypeReplacement(rgxm[3].trim());
             return "{ [key: " + keyType + "]: " + valueType + "; }";
         }
-        
+        //Some generic type - SomeGenericType.<AnotherType>
+        rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
+        if (rgxm) {
+            var genericType = getTypeReplacement(rgxm[1]);
+            var genericTypeArgs = rgxm[3].split(",").map(function(tn) { return getTypeReplacement(tn.trim()); });
+            return genericType + "<" + genericTypeArgs.join(",") + ">";
+        }
+        //No other replacement suggestions, return as is
         return typeName;
     }
 }
@@ -177,8 +185,8 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
             }
             content += arg.name;
             if (forceNullable || arg.nullable == true) {
-                // You can't have non-nullable arguments after a nullable argument. So by definition
-                // everything after the nullable argument has to be nullable as well
+                // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
+                // So by definition everything after the nullable argument has to be nullable as well
                 forceNullable = true;
                 content += "?: ";
             } else {
@@ -190,14 +198,15 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
                 if (arg.type.names.length > 0) {
                     for (var j = 0; j < arg.type.names.length; j++) {
                         var typeName = getTypeReplacement(arg.type.names[j]);
-                        //Is undefined a valid JS type? Either way, I don't know what the equivalent to use for TypeScript, so skip
-                        if (typeName == "undefined")
+                        //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
+                        if (typeName == "undefined" || typeName == "null")
                             continue;
                         utypes.push(typeName);
                     }
                 }
                 content += utypes.join("|");
             } else {
+                //Warning: No type annotation
                 //Fallback to any
                 content += "any";
             }
