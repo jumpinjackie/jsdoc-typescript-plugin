@@ -1,0 +1,28 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": [
+            "node_modules/cesium/Source"
+        ],
+        "exclude": [
+            "node_modules/cesium/Source/ThirdParty"
+        ]
+    },
+    "plugins": ["plugins/typescript"],
+    "typescript": {
+        "rootModuleName": "cesium",
+        "outDir": "./typings",
+        "fillUndocumentedDoclets": true
+    },
+    "templates": {
+        "default": {
+            "outputSourceFiles": true,
+            "outputSourceReference": true
+        }
+    },
+    "opts": {
+        "recurse": true,
+        "explain": false
+    }
+}

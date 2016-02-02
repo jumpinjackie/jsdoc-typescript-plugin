@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "example-doc": "jsdoc ./examples/jsdoc3-examples -r -c ./jsdoc.json -d ./docs/example",
-        "ol-doc": "jsdoc ./node_modules/openlayers/src -r -c ./jsdoc.json -d ./docs/ol",
-        "cesium-doc": "jsdoc ./node_modules/cesium/Source -r -c ./jsdoc.json -d ./docs/cesium",
+        "ol-doc": "jsdoc -c ./jsdoc.ol.json -d ./docs/ol",
+        "cesium-doc": "jsdoc -c ./jsdoc.cesium.json -d ./docs/cesium",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {

@@ -1,0 +1,33 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": [
+            "node_modules/openlayers/src",
+            "node_modules/openlayers/externs/oli.js",
+            "node_modules/openlayers/externs/olx.js"
+        ]
+    },
+    "plugins": [
+        "plugins/typescript",
+        "node_modules/openlayers/config/jsdoc/api/plugins/inheritdoc",
+        "node_modules/openlayers/config/jsdoc/api/plugins/typedefs",
+        "node_modules/openlayers/config/jsdoc/api/plugins/events",
+        "node_modules/openlayers/config/jsdoc/api/plugins/observable"
+    ],
+    "typescript": {
+        "rootModuleName": "openlayers",
+        "outDir": "./typings",
+        "fillUndocumentedDoclets": true
+    },
+    "templates": {
+        "default": {
+            "outputSourceFiles": true,
+            "outputSourceReference": true
+        }
+    },
+    "opts": {
+        "recurse": true,
+        "explain": false
+    }
+}
