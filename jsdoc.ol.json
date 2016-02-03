@@ -65,7 +65,8 @@
                 }
             }
         },
-        "publicAnnotation": "api"
+        "publicAnnotation": "api",
+        "defaultReturnType": "void"
     },
     "templates": {
         "default": {

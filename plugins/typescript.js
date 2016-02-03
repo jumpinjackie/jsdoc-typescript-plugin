@@ -12,6 +12,7 @@ var fs = require('fs');
 var env = require('jsdoc/env');
 var logger = require('jsdoc/util/logger');
 var config = env.conf.typescript || {};
+
 var moduleName = config.rootModuleName || "generated";
 var outDir = config.outDir || ".";
 var tsAliases = config.typeReplacements || {};
@@ -24,6 +25,8 @@ var globalInterfaces = (config.interfaces || {}).global || {};
 var moduleInterfaces = (config.interfaces || {}).module || {};
 var fileName = outDir + "/" + moduleName + ".d.ts";
 var publicAnnotation = config.publicAnnotation || null;
+var defaultReturnType = config.defaultReturnType || "any";
+
 var indentLevel = 0;
 
 /**
@@ -265,7 +268,8 @@ function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
         if (retType != null && retType != "") {
             content += ": " + retType;
         } else {
-            logger.warn("No return type specified on (" + docletRef.longname + "). In TypeScript, default return type will be 'any'");
+            logger.warn("No return type specified on (" + docletRef.longname + "). Falling back to default of '" + defaultReturnType + "'");
+            content += ": " + defaultReturnType;
         }
     }
     content += ";\n";
