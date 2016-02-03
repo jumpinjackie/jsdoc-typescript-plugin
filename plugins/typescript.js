@@ -156,7 +156,22 @@ function getTypeReplacement(typeName) {
     }
 }
 
-function outputSignature(name, desc, sig, genericTypes, scope) {
+function parseAndConvertTypes(typeAnno) {
+    var utypes = [];
+    if (typeAnno.names.length > 0) {
+        for (var j = 0; j < typeAnno.names.length; j++) {
+            var typeName = getTypeReplacement(typeAnno.names[j]);
+            //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
+            if (typeName == "undefined" || typeName == "null")
+                continue;
+            utypes.push(typeName);
+        }
+    }
+    return utypes;
+}
+
+function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
+    var retType = null;
     var content = "";
     content += indent() + "/**\n";
     if (desc != null) {
@@ -219,16 +234,7 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
             }
             if (arg.type != null) {
                 //Output as TS union type
-                var utypes = [];
-                if (arg.type.names.length > 0) {
-                    for (var j = 0; j < arg.type.names.length; j++) {
-                        var typeName = getTypeReplacement(arg.type.names[j]);
-                        //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
-                        if (typeName == "undefined" || typeName == "null")
-                            continue;
-                        utypes.push(typeName);
-                    }
-                }
+                var utypes = parseAndConvertTypes(arg.type);
                 content += utypes.join("|");
             } else {
                 //TODO: Include symbol context
@@ -238,7 +244,31 @@ function outputSignature(name, desc, sig, genericTypes, scope) {
             }
         }
     }
-    content += ");\n";
+    
+    //Determine return type
+    if (docletRef != null) {
+        var retTypes = [];
+        if (docletRef.returns != null) {
+            for (var i = 0; i < docletRef.returns.length; i++) {
+                var retDoc = docletRef.returns[i];
+                var rts = parseAndConvertTypes(retDoc.type);
+                for (var j = 0; j < rts.length; j++) {
+                    retTypes.push(rts[j]);
+                }
+            }
+        }
+        retType = retTypes.join("|"); //If multiple, return type is TS union
+    }
+    
+    content += ")";
+    if (name != "constructor") {
+        if (retType != null && retType != "") {
+            content += ": " + retType;
+        } else {
+            logger.warn("No return type specified on (" + docletRef.longname + "). In TypeScript, default return type will be 'any'");
+        }
+    }
+    content += ";\n";
     return content; 
 }
 
@@ -326,11 +356,11 @@ function outputClass(cls) {
     
     indentLevel++; //Start class members
     if (cls.ctor != null) {
-        content += outputSignature("constructor", (cls.ctor.description || defaultCtorDesc.replace(CLS_DESC_PLACEHOLDER, cls.name)), cls.ctor.signature);
+        content += outputSignature("constructor", (cls.ctor.description || defaultCtorDesc.replace(CLS_DESC_PLACEHOLDER, cls.name)), cls.ctor.signature, cls.ctor.docletRef);
     }
     for (var i = 0; i < cls.methods.length; i++) {
         var method = cls.methods[i];
-        content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope);
+        content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope, method.docletRef);
     }
     indentLevel--; //End class members
     
@@ -376,8 +406,11 @@ function extractGenericTypesFromDocletTags(tags, genericTypes) {
     var genericTypeTags = tags.filter(function(tag) { return tag.originalTitle == "template"; });
     if (genericTypeTags.length > 0) {
         for (var j = 0; j < genericTypeTags.length; j++) {
-            //No TS type replacement here as the value is the generic type placeholder
-            genericTypes.push(genericTypeTags[j].value);
+            var gts = genericTypeTags[j].value.split(",");
+            for (var k = 0; k < gts.length; k++) {
+                //No TS type replacement here as the value is the generic type placeholder
+                genericTypes.push(gts[k].trim());
+            }
         }
     }
 }
@@ -439,7 +472,8 @@ function process(doclets) {
             if (doclet.params) {
                 cls.ctor = {
                     description: null,
-                    signature: doclet.params
+                    signature: doclet.params,
+                    docletRef: doclet
                 };
             }
             if (doclet.tags) {
@@ -512,7 +546,8 @@ function process(doclets) {
     //Output user-injected type aliases
     //global
     for (var typeAlias in globalTypeAliases) {
-        var tdfContent = "export type " + typeAlias + " = " + globalTypeAliases[typeAlias] + ";\n";
+        //As these are global, the have no namespace, so declare instead of export
+        var tdfContent = "declare type " + typeAlias + " = " + globalTypeAliases[typeAlias] + ";\n";
         output.write(tdfContent);
         stats.typedefs.user++;
     }

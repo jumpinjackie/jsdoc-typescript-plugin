@@ -20,6 +20,13 @@
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
         "aliases": {
+            "global": {
+                "EsriJSONGeometry": "any",
+                "GeoJSONObject": "any",
+                "GeoJSONFeatureCollection": "any",
+                "GeoJSONGeometry": "any",
+                "GeoJSONGeometryCollection": "any"
+            },
             "module": {
                 "goog.events": {
                     "Event": "any",
@@ -31,7 +38,19 @@
                     "Number": "any"
                 },
                 "ol": {
-                    "BingMapsImageryMetadataResponse": "any"
+                    "MapEvent": "any",
+                    "MapBrowserEvent": "any"
+                },
+                "ol.render": {
+                    "Feature": "any"
+                },
+                "ol.source": {
+                    "ImageOptions": "any",
+                    "SourceOptions": "any",
+                    "TileOptions": "any"
+                },
+                "ol.style": {
+                    "ImageOptions": "any"
                 }
             }
         },
