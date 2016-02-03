@@ -184,7 +184,7 @@ function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
         }
     } else if (fillUndocumentedDoclets) {
         //TODO: Include symbol context
-        logger.warn("Method (" + name + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
+        logger.warn("Method (" + docletRef.longname + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
         content += indent() + " * TODO: This method has no description. Contact the library author if this method should be documented\n";
     }
     //If we have args, document them. Because TypeScript is ... typed, the {type}
@@ -268,7 +268,7 @@ function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
         if (retType != null && retType != "") {
             content += ": " + retType;
         } else {
-            logger.warn("No return type specified on (" + docletRef.longname + "). Falling back to default of '" + defaultReturnType + "'");
+            logger.warn("No return type specified on (" + docletRef.longname + "). Defaulting to '" + defaultReturnType + "'");
             content += ": " + defaultReturnType;
         }
     }
@@ -309,8 +309,13 @@ function outputTypedef(tdf) {
     }
     content += indent() + "export type " + tdf.name;
     
-    //Fallback
-    content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+    if (tdf.docletRef != null && tdf.docletRef.type != null) {
+        var types = parseAndConvertTypes(tdf.docletRef.type);
+        content += " = " + types.join("|") + ";\n";
+    } else {
+        //Fallback
+        content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+    }
     
     return content;
 }
