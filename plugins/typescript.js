@@ -22,6 +22,7 @@ var moduleTypeAliases = (config.aliases || {}).module || {};
 var globalInterfaces = (config.interfaces || {}).global || {};
 var moduleInterfaces = (config.interfaces || {}).module || {};
 var fileName = outDir + "/" + moduleName + ".d.ts";
+var publicAnnotation = config.publicAnnotation || null;
 var indentLevel = 0;
 
 /**
@@ -363,7 +364,7 @@ function endModuleDecl(cls, writeFunc) {
 function extractGenericTypesFromDocletTags(tags, genericTypes) {
     //@template is non-standard, but the presence of this annotation conveys
     //generic type information that we should capture
-    var genericTypeTags = tags.filter(function(tag) { return tag.originalTitle == "template"});
+    var genericTypeTags = tags.filter(function(tag) { return tag.originalTitle == "template"; });
     if (genericTypeTags.length > 0) {
         for (var j = 0; j < genericTypeTags.length; j++) {
             //No TS type replacement here as the value is the generic type placeholder
@@ -373,8 +374,17 @@ function extractGenericTypesFromDocletTags(tags, genericTypes) {
 }
 
 function isPrivateDoclet(doclet) {
+    //If the configuration defines a particular annotation as a public API marker and it
+    //exists in the doclet's tag list, the doclet is considered part of the public API
+    if (publicAnnotation) {
+        var found = (doclet.tags || []).filter(function(tag) { return tag.originalTitle == publicAnnotation; });
+        if (found.length == 0) //tag not found
+            return true;
+    }
+    
+    //TODO: Currently maintaining a "omit anything not public" stance. TypeScript allows extending from declared classes, so in such cases, knowledge of protected members is probably required
     return doclet.access == "private" || 
-           doclet.access == "protected"; //TODO: Currently maintaining a "omit anything not public" stance. TypeScript allows extending from declared classes, so in such cases, knowledge of protected members is probably required
+           doclet.access == "protected";
 }
 
 function process(doclets) {

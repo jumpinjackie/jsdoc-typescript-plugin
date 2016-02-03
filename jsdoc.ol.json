@@ -45,7 +45,8 @@
                     ]
                 }
             }
-        }
+        },
+        "publicAnnotation": "api"
     },
     "templates": {
         "default": {
