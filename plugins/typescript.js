@@ -13,19 +13,94 @@ var env = require('jsdoc/env');
 var logger = require('jsdoc/util/logger');
 var config = env.conf.typescript || {};
 
+/**
+ * The name of the TypeScript definition file
+ */
 var moduleName = config.rootModuleName || "generated";
+/**
+ * The directory where the TypeScript definition file will be saved to
+ */
 var outDir = config.outDir || ".";
+/**
+ * A list of key/value pairs indicating JSDoc types and their TypeScript replacements
+ */
 var tsAliases = config.typeReplacements || {};
+/**
+ * Default constructor description to generate for each emited class constructor when
+ * description does not exist. Include the %TYPENAME% special token to have it be replaced
+ * with the name of the emitted class
+ */
 var defaultCtorDesc = config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
+/**
+ * If set to true, emitted types that have no documentation will have TODO boilerplate
+ * documentation in their place, as a friendly reminder to the library author to probably
+ * document this particular API
+ */
 var fillUndocumentedDoclets = !!config.fillUndocumentedDoclets;
+/**
+ * If set to true, raw JSDoc doclets are emitted (in comments) along with each emitted type
+ * for debugging purposes.
+ */
 var outputDocletRefs = !!config.outputDocletRefs;
+/**
+ * A list of key/value pairs indicating global TypeScript type aliases. Key = Alias, Value = The
+ * underlying TypeScript type being aliased
+ */
 var globalTypeAliases = (config.aliases || {}).global || {};
+/**
+ * Module level type aliases. Structure is:
+ * 
+ * aliases: {
+ *     module: {
+ *         "moduleA": {
+ *             "AliasA": "TypeA"
+ *             "AliasB": "TypeB"
+ *             ...
+ *         },
+ *         "moduleB": {
+ *             "FuncAlias": "(a: string, b: number) => any"
+ *         }
+ *     }
+ * }
+ */
 var moduleTypeAliases = (config.aliases || {}).module || {};
+/**
+ * A list of key/value pairs indicating global TypeScript interface definitions.
+ * 
+ * Key = Interface name, Value = An array of strings, each string defining a member
+ * of this interface
+ */
 var globalInterfaces = (config.interfaces || {}).global || {};
+/**
+ * Module level interface definitions
+ */
 var moduleInterfaces = (config.interfaces || {}).module || {};
 var fileName = outDir + "/" + moduleName + ".d.ts";
+/**
+ * An annotation that if found in a parsed doclet, will consider said doclet to be
+ * part of the public API, and any resulting emitted type to be made public as well
+ * 
+ * Otherwise, a doclet is considered public if its access is not private
+ */
 var publicAnnotation = config.publicAnnotation || null;
+/**
+ * For methods where the return type is not specified, the configured value will be
+ * used instead. By default, methods without a return type will default to 'any'
+ */
 var defaultReturnType = config.defaultReturnType || "any";
+/**
+ * If you have provided custom interfaces and type aliases, the types may double
+ * up in the TSD file if public doclets for types of the same name are encountered.
+ * 
+ * You can avoid double-ups by specifying types to ignore in this list. Such doclets
+ * will be ignored, giving precedence to your user-defined aliases and interfaces.
+ */
+var ignoreJsDocTypes = (config.ignore || []);
+var ignoreTypes = {};
+for (var i = 0; i < ignoreJsDocTypes.length; i++) {
+    ignoreTypes[ignoreJsDocTypes[i]] = ignoreJsDocTypes[i];
+}
+var referencedTypes = {};
 
 var indentLevel = 0;
 
@@ -188,7 +263,7 @@ function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
         content += indent() + " * TODO: This method has no description. Contact the library author if this method should be documented\n";
     }
     //If we have args, document them. Because TypeScript is ... typed, the {type}
-    //annotation is not necessary
+    //annotation is not necessary in the documentation
     if (sig != null && sig.length > 0) {
         var forceNullable = false;
         for (var i = 0; i < sig.length; i++) {
@@ -307,16 +382,28 @@ function outputTypedef(tdf) {
         content += indent() + " * TODO: This typedef has no documentation. Contact the library author if this class should be documented\n";
         content += indent() + " */\n";
     }
-    content += indent() + "export type " + tdf.name;
     
-    if (tdf.docletRef != null && tdf.docletRef.type != null) {
-        var types = parseAndConvertTypes(tdf.docletRef.type);
-        content += " = " + types.join("|") + ";\n";
+    //If it has methods and/or properties, treat this typedef as an interface
+    if (tdf.methods.length > 0 || tdf.properties.length > 0) {
+        content += indent() + "export interface " + tdf.name + " {\n";
+        
+        indentLevel++; //Start members
+        for (var i = 0; i < tdf.methods.length; i++) {
+            var method = tdf.methods[i];
+            content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope, method.docletRef);
+        }
+        indentLevel--; //End members
+        
+        content += indent() + "}\n";
     } else {
-        //Fallback
-        content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+        content += indent() + "export type " + tdf.name;
+        if (tdf.docletRef != null && tdf.docletRef.type != null) {
+            var types = parseAndConvertTypes(tdf.docletRef.type);
+            content += " = " + types.join("|") + ";\n";
+        } else { //Fallback
+            content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+        }
     }
-    
     return content;
 }
 
@@ -456,6 +543,11 @@ function process(doclets) {
     //1st pass: Process classes and typedefs
     for (var i = 0; i < doclets.length; i++) {
         var doclet = doclets[i];
+        
+        //Is on ignore list
+        if (ignoreTypes[doclet.longname])
+            continue;
+        
         //TypeScript definition covers a module's *public* API surface, so
         //skip private classes
         if (isPrivateDoclet(doclet))
@@ -498,7 +590,10 @@ function process(doclets) {
                 fullname: doclet.longname,
                 description: doclet.description,
                 parentModule: doclet.memberof,
-                docletRef: doclet
+                docletRef: doclet,
+                genericTypes: [],
+                properties: [],
+                methods: []
             };
         }
     }
@@ -506,6 +601,10 @@ function process(doclets) {
     for (var i = 0; i < doclets.length; i++) {
         var doclet = doclets[i];
         if (!doclet.memberof)
+            continue;
+            
+        //Is on ignore list
+        if (ignoreTypes[doclet.longname])
             continue;
 
         //TypeScript definition covers a module's *public* API surface, so
@@ -517,7 +616,10 @@ function process(doclets) {
         //point to it
         var cls = ensureClassDef(classes, doclet.memberof);
         if (!cls) {
-            continue;
+            //Failing that it would've been registered as a typedef
+            cls = typedefs[doclet.memberof];
+            if (!cls)
+                continue;
         }
         
         if (doclet.kind == "value") {

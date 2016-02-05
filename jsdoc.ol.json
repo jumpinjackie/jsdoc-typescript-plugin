@@ -19,6 +19,9 @@
         "rootModuleName": "openlayers",
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
+        "ignore": [
+            "ol.TileUrlFunctionType"
+        ],
         "aliases": {
             "global": {
                 "EsriJSONGeometry": "any",
@@ -38,6 +41,7 @@
                     "Number": "any"
                 },
                 "ol": {
+                    "TileUrlFunctionType": "(coord: ol.TileCoord, pixelRatio: number, projection: ol.proj.Projection) => string",
                     "MapEvent": "any",
                     "MapBrowserEvent": "any"
                 },
