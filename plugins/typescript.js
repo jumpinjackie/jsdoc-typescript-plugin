@@ -1,759 +1,554 @@
-/// <reference path="../typings/tsd.d.ts" />
-/**
- * @overview Generates a TypeScript definition file from assembled JSDoc doclets
- * @module plugins/typescript
- * @author Jackie Ng <jumpinjackie@gmail.com>
- */
-'use strict';
-
-var CLS_DESC_PLACEHOLDER = "%TYPENAME%";
-
-var fs = require('fs');
-var env = require('jsdoc/env');
-var logger = require('jsdoc/util/logger');
-var config = env.conf.typescript || {};
-
-/**
- * The name of the TypeScript definition file
- */
-var moduleName = config.rootModuleName || "generated";
-/**
- * The directory where the TypeScript definition file will be saved to
- */
-var outDir = config.outDir || ".";
-/**
- * A list of key/value pairs indicating JSDoc types and their TypeScript replacements
- */
-var tsAliases = config.typeReplacements || {};
-/**
- * Default constructor description to generate for each emited class constructor when
- * description does not exist. Include the %TYPENAME% special token to have it be replaced
- * with the name of the emitted class
- */
-var defaultCtorDesc = config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER);
-/**
- * If set to true, emitted types that have no documentation will have TODO boilerplate
- * documentation in their place, as a friendly reminder to the library author to probably
- * document this particular API
- */
-var fillUndocumentedDoclets = !!config.fillUndocumentedDoclets;
-/**
- * If set to true, raw JSDoc doclets are emitted (in comments) along with each emitted type
- * for debugging purposes.
- */
-var outputDocletRefs = !!config.outputDocletRefs;
-/**
- * A list of key/value pairs indicating global TypeScript type aliases. Key = Alias, Value = The
- * underlying TypeScript type being aliased
- */
-var globalTypeAliases = (config.aliases || {}).global || {};
-/**
- * Module level type aliases. Structure is:
- * 
- * aliases: {
- *     module: {
- *         "moduleA": {
- *             "AliasA": "TypeA"
- *             "AliasB": "TypeB"
- *             ...
- *         },
- *         "moduleB": {
- *             "FuncAlias": "(a: string, b: number) => any"
- *         }
- *     }
- * }
- */
-var moduleTypeAliases = (config.aliases || {}).module || {};
-/**
- * A list of key/value pairs indicating global TypeScript interface definitions.
- * 
- * Key = Interface name, Value = An array of strings, each string defining a member
- * of this interface
- */
-var globalInterfaces = (config.interfaces || {}).global || {};
-/**
- * Module level interface definitions
- */
-var moduleInterfaces = (config.interfaces || {}).module || {};
-var fileName = outDir + "/" + moduleName + ".d.ts";
-/**
- * An annotation that if found in a parsed doclet, will consider said doclet to be
- * part of the public API, and any resulting emitted type to be made public as well
- * 
- * Otherwise, a doclet is considered public if its access is not private
- */
-var publicAnnotation = config.publicAnnotation || null;
-/**
- * For methods where the return type is not specified, the configured value will be
- * used instead. By default, methods without a return type will default to 'any'
- */
-var defaultReturnType = config.defaultReturnType || "any";
-/**
- * If you have provided custom interfaces and type aliases, the types may double
- * up in the TSD file if public doclets for types of the same name are encountered.
- * 
- * You can avoid double-ups by specifying types to ignore in this list. Such doclets
- * will be ignored, giving precedence to your user-defined aliases and interfaces.
- */
-var ignoreJsDocTypes = (config.ignore || []);
-var ignoreTypes = {};
-for (var i = 0; i < ignoreJsDocTypes.length; i++) {
-    ignoreTypes[ignoreJsDocTypes[i]] = ignoreJsDocTypes[i];
-}
-var referencedTypes = {};
-
-var indentLevel = 0;
-
-/**
- * JS -> TypeScript type aliases. Any such types encountered in the JSDoc
- * annotations will be replaced with the specified replacement here
- */
-var TS_ALIASES = {
-    "*": "any",
-    "?": "any",
-    "Object": "any",
-    "function": "Function"
-};
-
-/**
- * Filter function for JSON.stringify calls on doclet instances
- */
-function JsDocletStringifyFilter(key, value) { 
-    if (key === "comment") { 
-        return undefined; 
-    }
-    if (key == "meta") {
-        return undefined;
-    }
-    return value; 
-}
-
-function str_repeat(pattern, count) {
-    if (count < 1) return '';
-    var result = '';
-    while (count > 1) {
-        if (count & 1) result += pattern;
-        count >>= 1, pattern += pattern;
-    }
-    return result + pattern;
-}
-
-function indent() {
-    return str_repeat(" ", indentLevel * 4);
-}
-
-function ensureClassDef(classes, longname, bCreateIfNotExists) {
-    var clsDef = null;
-    if (!classes.hasOwnProperty(longname) && !!bCreateIfNotExists) {
-        clsDef = {
-            name: null,
-            fullname: longname,
-            ctor: null,
-            extends: null,
-            description: null,
-            methods: [],
-            properties: [],
-            docletRef: null,
-            parentModule: null,
-            genericTypes: []
-        };
-        classes[longname] = clsDef; 
-    } else {
-        clsDef = classes[longname];
-    }
-    return clsDef;
-}
-
-function getTypeReplacement(typeName) {
-    //Look in user configured overrides
-    if (tsAliases.hasOwnProperty(typeName)) {
-        return tsAliases[typeName];
-    }
-    //Then look at plugin configured overrides
-    if (TS_ALIASES.hasOwnProperty(typeName)) {
-        return TS_ALIASES[typeName];
-    } else {
-        //Before returning, see if the type annotation matches known patterns
-        //
-        //NOTE: Regex-based checks take precedence as we want to check for specific
-        //patterns first before trying to look for things like array or union type
-        //notation
-        
-        //Array - Array.<type>
-        var rgxm = typeName.match(/(Array\.)\<(.+)>/); 
-        if (rgxm) {
-            return getTypeReplacement(rgxm[2].trim()) + "[]";
+var TsdPlugin;
+(function (TsdPlugin) {
+    /**
+     * Constants for different kinds of doclets
+     */
+    var DocletKind = (function () {
+        function DocletKind() {
         }
-        //Array - type[]
-        rgxm = typeName.match(/(.+)\[\]$/);
-        if (rgxm) {
-            return getTypeReplacement(rgxm[1].trim()) + "[]";
-        }
-        //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
-        rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
-        if (rgxm) {
-            var keyType = getTypeReplacement(rgxm[2].trim());
-            var valueType = getTypeReplacement(rgxm[3].trim());
-            return "{ [key: " + keyType + "]: " + valueType + "; }";
-        }
-        //Some generic type - SomeGenericType.<AnotherType>
-        rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
-        if (rgxm) {
-            var genericType = getTypeReplacement(rgxm[1]);
-            var genericTypeArgs = rgxm[3].split(",").map(function(tn) { return getTypeReplacement(tn.trim()); });
-            return genericType + "<" + genericTypeArgs.join(",") + ">";
-        }
-        //Anonymous function
-        rgxm = typeName.match(/function\((.+)\)/);
-        if (rgxm) {
-            var typeArgs = rgxm[1].split(",")
-                                  .map(function(tn) { return getTypeReplacement(tn.trim()); });
-            var funcParams = [];
-            for (var i = 0; i < typeArgs.length; i++) {
-                funcParams.push("arg" + i + ": " + typeArgs[i]);
+        Object.defineProperty(DocletKind, "function", {
+            /**
+             * Doclet for a function
+             */
+            get: function () { return "function"; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DocletKind, "typedef", {
+            /**
+             * Doclet for a typedef
+             */
+            get: function () { return "typedef"; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DocletKind, "class", {
+            /**
+             * Doclet for a class
+             */
+            get: function () { return "class"; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DocletKind, "member", {
+            /**
+             * Doclet for a member
+             */
+            get: function () { return "member"; },
+            enumerable: true,
+            configurable: true
+        });
+        return DocletKind;
+    })();
+    TsdPlugin.DocletKind = DocletKind;
+})(TsdPlugin || (TsdPlugin = {}));
+/// <reference path="./doclettypes.ts" />
+var TsdPlugin;
+(function (TsdPlugin) {
+    var CLS_DESC_PLACEHOLDER = "%TYPENAME%";
+    /**
+     * The class that does all the grunt work
+     */
+    var TsdGenerator = (function () {
+        function TsdGenerator(config) {
+            this.config = {
+                rootModuleName: (config.rootModuleName || "generated"),
+                outDir: (config.outDir || "."),
+                typeReplacements: (config.typeReplacements || {}),
+                defaultCtorDesc: (config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER)),
+                fillUndocumentedDoclets: !!config.fillUndocumentedDoclets,
+                outputDocletDefs: !!config.outputDocletDefs,
+                publicAnnotation: (config.publicAnnotation || null),
+                defaultReturnType: (config.defaultReturnType || "any"),
+                aliases: {
+                    global: ((config.aliases || {}).global || {}),
+                    module: ((config.aliases || {}).module || {})
+                },
+                interfaces: {
+                    global: ((config.interfaces || {}).global || {}),
+                    module: ((config.interfaces || {}).module || {})
+                },
+                ignoreTypes: {}
+            };
+            var ignoreJsDocTypes = (config.ignore || []);
+            for (var i = 0; i < ignoreJsDocTypes.length; i++) {
+                this.config.ignoreTypes[ignoreJsDocTypes[i]] = ignoreJsDocTypes[i];
             }
-            return "(" + funcParams.join(", ") + ") => any";
-        }
-        //Array - untyped
-        if (typeName.toLowerCase() == "array") {
-            //TODO: Include symbol context
-            logger.warn("Encountered untyped array. Treating as 'any[]'");
-            return "any[]";
-        }
-        //Union-type - typeA|typeB
-        if (typeName.indexOf("|") >= 0) {
-            var types = typeName.split("|");
-            var replTypes = [];
-            for (var i = 0; i < types.length; i++) {
-                replTypes.push(getTypeReplacement(types[i].trim()));
-            }
-            return replTypes.join("|");
-        }
-        //No other replacement suggestions, return as is
-        return typeName;
-    }
-}
-
-function parseAndConvertTypes(typeAnno) {
-    var utypes = [];
-    if (typeAnno.names.length > 0) {
-        for (var j = 0; j < typeAnno.names.length; j++) {
-            var typeName = getTypeReplacement(typeAnno.names[j]);
-            //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
-            if (typeName == "undefined" || typeName == "null")
-                continue;
-            utypes.push(typeName);
-        }
-    }
-    return utypes;
-}
-
-function outputSignature(name, desc, sig, genericTypes, scope, docletRef) {
-    var retType = null;
-    var content = "";
-    content += indent() + "/**\n";
-    if (desc != null) {
-        var descParts = desc.split("\n");
-        for (var i = 0; i < descParts.length; i++) {
-            content += indent() + " * " + descParts[i] + "\n";
-        }
-    } else if (fillUndocumentedDoclets) {
-        //TODO: Include symbol context
-        logger.warn("Method (" + docletRef.longname + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
-        content += indent() + " * TODO: This method has no description. Contact the library author if this method should be documented\n";
-    }
-    //If we have args, document them. Because TypeScript is ... typed, the {type}
-    //annotation is not necessary in the documentation
-    if (sig != null && sig.length > 0) {
-        var forceNullable = false;
-        for (var i = 0; i < sig.length; i++) {
-            var arg = sig[i];
-            var req = "";
-            if (forceNullable || arg.nullable == true) {
-                // You can't have non-nullable arguments after a nullable argument. So by definition
-                // everything after the nullable argument has to be nullable as well
-                forceNullable = true;
-                req = " (Optional)";
-            } else {
-                req = " (Required)";
-            }
-            var argDesc = arg.description || "";
-            if (argDesc == "" && fillUndocumentedDoclets) {
-                //TODO: Include symbol context
-                logger.warn("Argument (" + arg.name + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
-                argDesc = "TODO: This parameter has no description. Contact this library author if this parameter should be documented\n";
-            }
-            content += indent() + " * @param " + arg.name + " " + req + " " + argDesc + "\n";
-        }
-    }
-    content += indent() + " */\n"
-    var sc = (scope == "static" ? "static " : "");
-    content += indent() + sc + name;
-    if (genericTypes && genericTypes.length > 0) {
-        content += "<" + genericTypes.join(", ") + ">";
-    }
-    content += "(";
-    //Output args
-    if (sig != null && sig.length > 0) {
-        var forceNullable = false;
-        for (var i = 0; i < sig.length; i++) {
-            var arg = sig[i];
-            if (i > 0) {
-                content += ", ";
-            }
-            content += arg.name;
-            if (forceNullable || arg.nullable == true) {
-                // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
-                // So by definition everything after the nullable argument has to be nullable as well
-                forceNullable = true;
-                content += "?: ";
-            } else {
-                content += ": ";
-            }
-            if (arg.type != null) {
-                //Output as TS union type
-                var utypes = parseAndConvertTypes(arg.type);
-                content += utypes.join("|");
-            } else {
-                //TODO: Include symbol context
-                logger.warn("Argument '" + arg.name + "' has no type annotation. Defaulting to 'any'");
-                //Fallback to any
-                content += "any";
-            }
-        }
-    }
-    
-    //Determine return type
-    if (docletRef != null) {
-        var retTypes = [];
-        if (docletRef.returns != null) {
-            for (var i = 0; i < docletRef.returns.length; i++) {
-                var retDoc = docletRef.returns[i];
-                var rts = parseAndConvertTypes(retDoc.type);
-                for (var j = 0; j < rts.length; j++) {
-                    retTypes.push(rts[j]);
-                }
-            }
-        }
-        retType = retTypes.join("|"); //If multiple, return type is TS union
-    }
-    
-    content += ")";
-    if (name != "constructor") {
-        if (retType != null && retType != "") {
-            content += ": " + retType;
-        } else {
-            logger.warn("No return type specified on (" + docletRef.longname + "). Defaulting to '" + defaultReturnType + "'");
-            content += ": " + defaultReturnType;
-        }
-    }
-    content += ";\n";
-    return content; 
-}
-
-function outputTypedef(tdf) {
-    if (tdf == null) {
-        //console.log("BOGUS: null typedef found");
-        return "";
-    }
-    if (tdf.name == null) {
-        //console.log("BOGUS: typedef has null name");
-        return "";
-    }
-
-    var content = "";
-    if (tdf.docletRef != null && outputDocletRefs) {
-        content += "/* doclet for typedef\n";
-        content += JSON.stringify(tdf.docletRef, JsDocletStringifyFilter, 4);
-        content += "\n */\n";
-    }
-    
-    //Description as class comments
-    if (tdf.description != null) {
-        content += indent() + "/**\n";
-        var descParts = tdf.description.split("\n");
-        for (var i = 0; i < descParts.length; i++) {
-            content += indent() + " * " + descParts[i] + "\n";
-        }
-        content += indent() + " */\n";
-    } else if (fillUndocumentedDoclets) {
-        logger.warn("typedef (" + tdf.name + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
-        content += indent() + "/**\n";
-        content += indent() + " * TODO: This typedef has no documentation. Contact the library author if this class should be documented\n";
-        content += indent() + " */\n";
-    }
-    
-    //If it has methods and/or properties, treat this typedef as an interface
-    if (tdf.methods.length > 0 || tdf.properties.length > 0) {
-        content += indent() + "export interface " + tdf.name + " {\n";
-        
-        indentLevel++; //Start members
-        for (var i = 0; i < tdf.methods.length; i++) {
-            var method = tdf.methods[i];
-            content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope, method.docletRef);
-        }
-        indentLevel--; //End members
-        
-        content += indent() + "}\n";
-    } else {
-        content += indent() + "export type " + tdf.name;
-        if (tdf.docletRef != null && tdf.docletRef.type != null) {
-            var types = parseAndConvertTypes(tdf.docletRef.type);
-            content += " = " + types.join("|") + ";\n";
-        } else { //Fallback
-            content += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
-        }
-    }
-    return content;
-}
-
-function outputClass(cls) {
-    if (cls == null)
-        return "";
-    if (cls.name == null)
-        return "";
-    
-    //Case not handled. Class with ':' in its name
-    if (cls.name.indexOf(":") >= 0)
-        return indent() + "//Skipped class (" + cls.name + "). Case not handled yet: ':' in class name\n";
-        
-    var content = ""; 
-    
-    if (cls.docletRef != null && outputDocletRefs) {
-        content += "/* doclet for class\n";
-        content += JSON.stringify(cls.docletRef, JsDocletStringifyFilter, 4);
-        content += "\n */\n";
-    }
-    
-    //Description as class comments
-    if (cls.description != null) {
-        content += indent() + "/**\n";
-        var descParts = cls.description.split("\n");
-        for (var i = 0; i < descParts.length; i++) {
-            content += indent() + " * " + descParts[i] + "\n";
-        }
-        content += indent() + " */\n";
-    } else if (fillUndocumentedDoclets) {
-        logger.warn("Class (" + cls.fullname + ") has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted");
-        content += indent() + "/**\n";
-        content += indent() + " * TODO: This class has no documentation. Contact the library author if this class should be documented\n";
-        content += indent() + " */\n";
-    }
-    content += indent() + "export class " + cls.name;
-    //Class generic parameters
-    if (cls.genericTypes.length > 0) {
-        content += "<" + cls.genericTypes.join(", ") + ">";
-    }
-    //Inheritance
-    if (cls.extends != null) {
-        content += " extends " + cls.extends.fullname;
-    }
-    content += " {\n";
-    
-    indentLevel++; //Start class members
-    if (cls.ctor != null) {
-        content += outputSignature("constructor", (cls.ctor.description || defaultCtorDesc.replace(CLS_DESC_PLACEHOLDER, cls.name)), cls.ctor.signature, cls.ctor.docletRef);
-    }
-    for (var i = 0; i < cls.methods.length; i++) {
-        var method = cls.methods[i];
-        content += outputSignature(method.name, method.description, method.signature, method.genericTypes, method.scope, method.docletRef);
-    }
-    indentLevel--; //End class members
-    
-    content += indent() + "}\n";
-    return content;
-}
-
-function moduleDecl(name) {
-    return "declare module \"" + name + "\"";
-}
-
-function beginModuleDecl(cls, writeFunc) {
-    if (!cls.parentModule) {
-        return;
-    }
-    
-    if (cls.parentModule.indexOf("/") >= 0) { //AMD-style
-        writeFunc("declare module \"" + cls.parentModule + "\" {\n");
-        indentLevel++;
-    } else {
-        writeFunc("declare module " + cls.parentModule + " {\n");
-        indentLevel++;
-    }
-}
-
-function endModuleDecl(cls, writeFunc) {
-    if (!cls.parentModule) {
-        return;
-    }
-    
-    if (cls.parentModule.indexOf("/") >= 0) { //AMD-style
-        writeFunc("}\n");
-        indentLevel--;
-    } else {
-        writeFunc("}\n");
-        indentLevel--;
-    }
-}
-
-function extractGenericTypesFromDocletTags(tags, genericTypes) {
-    //@template is non-standard, but the presence of this annotation conveys
-    //generic type information that we should capture
-    var genericTypeTags = tags.filter(function(tag) { return tag.originalTitle == "template"; });
-    if (genericTypeTags.length > 0) {
-        for (var j = 0; j < genericTypeTags.length; j++) {
-            var gts = genericTypeTags[j].value.split(",");
-            for (var k = 0; k < gts.length; k++) {
-                //No TS type replacement here as the value is the generic type placeholder
-                genericTypes.push(gts[k].trim());
-            }
-        }
-    }
-}
-
-function isPrivateDoclet(doclet) {
-    //If the configuration defines a particular annotation as a public API marker and it
-    //exists in the doclet's tag list, the doclet is considered part of the public API
-    if (publicAnnotation) {
-        var found = (doclet.tags || []).filter(function(tag) { return tag.originalTitle == publicAnnotation; });
-        if (found.length == 0) //tag not found
-            return true;
-    }
-    
-    //TODO: Currently maintaining a "omit anything not public" stance. TypeScript allows extending from declared classes, so in such cases, knowledge of protected members is probably required
-    return doclet.access == "private" || 
-           doclet.access == "protected";
-}
-
-function process(doclets) {
-    var classes = {};
-    var typedefs = {};
-    
-    var output = fs.createWriteStream(fileName);
-    
-    var content = "//";
-    content += "\n// " + fileName
-    content += "\n// ";
-    content += "\n// This file was automatically generated by the typescript JSDoc plugin";
-    content += "\n// Do not edit this file unless you know what you're doing";
-    content += "\n//\n";
-    
-    output.write(content);
-    
-    //1st pass: Process classes and typedefs
-    for (var i = 0; i < doclets.length; i++) {
-        var doclet = doclets[i];
-        
-        //Is on ignore list
-        if (ignoreTypes[doclet.longname])
-            continue;
-        
-        //TypeScript definition covers a module's *public* API surface, so
-        //skip private classes
-        if (isPrivateDoclet(doclet))
-            continue;
-        
-        if (doclet.kind == "class") {
-            var parentModName = null;
-            if (doclet.longname.indexOf("module:") >= 0) {
-                //Assuming that anything annotated "module:" will have a "." to denote end of module and start of class name
-                var modLen = "module:".length;
-                var dotIdx = doclet.longname.indexOf(".");
-                if (dotIdx < 0)
-                    dotIdx = doclet.longname.length;
-                parentModName = doclet.longname.substring(modLen, dotIdx);
-            } else if (doclet.memberof) {
-                parentModName = doclet.memberof;
-            }
-            
-            //Key class definition on longname
-            var cls = ensureClassDef(classes, doclet.longname, true);
-            cls.docletRef = doclet;
-            cls.name = doclet.name;
-            if (doclet.params) {
-                cls.ctor = {
-                    description: null,
-                    signature: doclet.params,
-                    docletRef: doclet
-                };
-            }
-            if (doclet.tags) {
-                extractGenericTypesFromDocletTags(doclet.tags, cls.genericTypes)
-            }
-            if (parentModName != null)
-                cls.parentModule = parentModName;
-            if (doclet.description || doclet.classdesc)
-                cls.description = doclet.description || doclet.classdesc;
-        } else if (doclet.kind == "typedef") {
-            typedefs[doclet.longname] = {
-                name: doclet.name,
-                fullname: doclet.longname,
-                description: doclet.description,
-                parentModule: doclet.memberof,
-                docletRef: doclet,
-                genericTypes: [],
-                properties: [],
-                methods: []
+            this.classes = {};
+            this.typedefs = {};
+            this.userInterfaces = [];
+            this.userTypeAliases = [];
+            this.stats = {
+                typedefs: {
+                    user: 0,
+                    gen: 0
+                },
+                ifaces: 0,
+                classes: 0
             };
         }
-    }
-    //2nd pass: Look for members
-    for (var i = 0; i < doclets.length; i++) {
-        var doclet = doclets[i];
-        if (!doclet.memberof)
-            continue;
-            
-        //Is on ignore list
-        if (ignoreTypes[doclet.longname])
-            continue;
-
-        //TypeScript definition covers a module's *public* API surface, so
-        //skip private members
-        if (isPrivateDoclet(doclet))
-            continue;
-        
-        //We've keyed class definition on longname, so memberof should
-        //point to it
-        var cls = ensureClassDef(classes, doclet.memberof);
-        if (!cls) {
-            //Failing that it would've been registered as a typedef
-            cls = typedefs[doclet.memberof];
-            if (!cls)
-                continue;
-        }
-        
-        if (doclet.kind == "value") {
-            cls.properties.push({
-                scope: doclet.scope,
-                name: doclet.name,
-                description: doclet.description,
-                docletRef: doclet
-            });
-        } else if (doclet.kind == "function") {
-            var genericTypeArgs = [];
-            if (doclet.tags) {
-                extractGenericTypesFromDocletTags(doclet.tags, genericTypeArgs);
+        TsdGenerator.prototype.ignoreThisType = function (fullname) {
+            if (this.config.ignoreTypes[fullname])
+                return true;
+            else
+                return false;
+        };
+        TsdGenerator.prototype.isPrivateDoclet = function (doclet) {
+            var _this = this;
+            //If the configuration defines a particular annotation as a public API marker and it
+            //exists in the doclet's tag list, the doclet is considered part of the public API
+            if (this.config.publicAnnotation) {
+                var found = (doclet.tags || []).filter(function (tag) { return tag.originalTitle == _this.config.publicAnnotation; });
+                if (found.length == 1)
+                    return false;
+                //In this mode, absence of the tag means not public
+                return true;
             }
-            cls.methods.push({
-                scope: doclet.scope,
-                name: doclet.name,
-                description: doclet.description,
-                signature: doclet.params,
-                docletRef: doclet,
-                genericTypes: genericTypeArgs
-            });
-        }
-    }
-    
-    var stats = {
-        typedefs: {
-            user: 0,
-            gen: 0
-        },
-        ifaces: 0,
-        classes: 0
-    };
-    
-    //Output user-injected type aliases
-    //global
-    for (var typeAlias in globalTypeAliases) {
-        //As these are global, the have no namespace, so declare instead of export
-        var tdfContent = "declare type " + typeAlias + " = " + globalTypeAliases[typeAlias] + ";\n";
-        output.write(tdfContent);
-        stats.typedefs.user++;
-    }
-    //module
-    for (var moduleName in moduleTypeAliases) {
-        var tdfContent = "";
-        beginModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
-        for (var typeAlias in moduleTypeAliases[moduleName]) {
-            tdfContent += indent() + "export type " + typeAlias + " = " + moduleTypeAliases[moduleName][typeAlias] + ";\n";
-        }
-        endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
-        output.write(tdfContent);
-        stats.typedefs.user++;
-    }
-    
-    //Output user-injected interfaces
-    for (var typeName in globalInterfaces) {
-        var iface = globalInterfaces[typeName];
-        var tdfContent = indent() + "export interface " + typeName + "{\n"; //BEGIN INTERFACE
-        indentLevel++;
-        for (var i = 0; i < iface.length; i++) {
-            tdfContent += indent() + iface[i] + ";\n";
-        }
-        indentLevel--;
-        tdfContent += indent() + "}\n"; //END INTERFACE
-        output.write(tdfContent);
-        stats.ifaces++;
-    }
-    //module
-    for (var moduleName in moduleInterfaces) {
-        var tdfContent = "";
-        beginModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
-        for (var typeName in moduleInterfaces[moduleName]) {
-            var iface = moduleInterfaces[moduleName][typeName];
-            tdfContent += indent() + "export interface " + typeName + " {\n"; //BEGIN INTERFACE
-            indentLevel++;
-            for (var i = 0; i < iface.length; i++) {
-                tdfContent += indent() + iface[i] + ";\n";
+            return doclet.access == "private" ||
+                doclet.undocumented == true;
+        };
+        TsdGenerator.prototype.ensureClassDef = function (name, factory) {
+            if (!this.classes[name]) {
+                if (factory != null)
+                    this.classes[name] = factory();
+                else
+                    return null;
             }
-            indentLevel--;
-            tdfContent += indent() + "}\n"; //END INTERFACE
+            else {
+                return this.classes[name];
+            }
+        };
+        TsdGenerator.prototype.ensureTypedef = function (name, factory) {
+            if (!this.typedefs[name]) {
+                if (factory != null)
+                    this.typedefs[name] = factory();
+            }
+            else {
+                return this.typedefs[name];
+            }
+        };
+        TsdGenerator.prototype.parseClassesAndTypedefs = function (doclets) {
+            for (var _i = 0; _i < doclets.length; _i++) {
+                var doclet = doclets[_i];
+                if (this.ignoreThisType(doclet.longname))
+                    continue;
+                //TypeScript definition covers a module's *public* API surface, so
+                //skip private classes
+                if (this.isPrivateDoclet(doclet))
+                    continue;
+                if (doclet.kind == "class") {
+                    var parentModName = null;
+                    if (doclet.longname.indexOf("module:") >= 0) {
+                        //Assuming that anything annotated "module:" will have a "." to denote end of module and start of class name
+                        var modLen = "module:".length;
+                        var dotIdx = doclet.longname.indexOf(".");
+                        if (dotIdx < 0)
+                            dotIdx = doclet.longname.length;
+                        parentModName = doclet.longname.substring(modLen, dotIdx);
+                    }
+                    else if (doclet.memberof) {
+                        parentModName = doclet.memberof;
+                    }
+                    //Key class definition on longname
+                    var cls = this.ensureClassDef(doclet.longname, function () { return new TsdPlugin.TSClass(doclet); });
+                    if (parentModName != null)
+                        cls.setParentModule(parentModName);
+                }
+                else if (doclet.kind == "typedef") {
+                    this.ensureTypedef(doclet.longname, function () { return new TsdPlugin.TSTypedef(doclet); });
+                }
+            }
+        };
+        TsdGenerator.prototype.processTypeMembers = function (doclets) {
+            for (var _i = 0; _i < doclets.length; _i++) {
+                var doclet = doclets[_i];
+                if (this.ignoreThisType(doclet.longname))
+                    continue;
+                //TypeScript definition covers a module's *public* API surface, so
+                //skip private classes
+                if (this.isPrivateDoclet(doclet))
+                    continue;
+                //We've keyed class definition on longname, so memberof should
+                //point to it
+                var cls = this.ensureClassDef(doclet.memberof);
+                if (!cls) {
+                    //Failing that it would've been registered as a typedef
+                    cls = this.ensureTypedef(doclet.memberof);
+                    if (!cls)
+                        continue;
+                }
+                if (doclet.kind == "value") {
+                    cls.members.push(new TsdPlugin.TSProperty(doclet));
+                }
+                else if (doclet.kind == "function") {
+                    cls.members.push(new TsdPlugin.TSMethod(doclet));
+                }
+            }
+        };
+        TsdGenerator.prototype.processUserDefinedTypes = function () {
+            //Output user-injected type aliases
+            //global
+            for (var typeAlias in this.config.aliases.global) {
+                this.userTypeAliases.push(new TsdPlugin.TSUserTypeAlias(null, typeAlias, this.config.aliases.global[typeAlias]));
+            }
+            //module
+            for (var moduleName in this.config.aliases.module) {
+                for (var typeAlias in this.config.aliases.module[moduleName]) {
+                    this.userTypeAliases.push(new TsdPlugin.TSUserTypeAlias(moduleName, typeAlias, this.config.aliases.module[moduleName][typeAlias]));
+                }
+            }
+            //Output user-injected interfaces
+            //global
+            for (var typeName in this.config.interfaces.global) {
+                var iface = this.config.interfaces.global[typeName];
+                this.userInterfaces.push(new TsdPlugin.TSUserInterface(null, typeName, iface));
+            }
+            //module
+            for (var moduleName in this.config.interfaces.module) {
+                for (var typeName in this.config.interfaces.module[moduleName]) {
+                    var iface = this.config.interfaces.module[moduleName][typeName];
+                    this.userInterfaces.push(new TsdPlugin.TSUserInterface(moduleName, typeName, iface));
+                }
+            }
+        };
+        TsdGenerator.ensureModuleTree = function (root, moduleNameParts) {
+            var tree = root;
+            for (var _i = 0; _i < moduleNameParts.length; _i++) {
+                var name = moduleNameParts[_i];
+                //Doesn't exist at this level, make it
+                if (!tree.children[name]) {
+                    tree.children[name] = {
+                        children: {},
+                        types: []
+                    };
+                }
+                tree = tree.children[name];
+            }
+            return tree;
+        };
+        TsdGenerator.putTypeInTree = function (type, moduleName, root) {
+            if (TsdPlugin.ModuleUtils.isAMD(moduleName)) {
+                //No nesting required for AMD modules
+                if (!root.children[moduleName]) {
+                    root.children[moduleName] = {
+                        children: {},
+                        types: []
+                    };
+                }
+                root.children[moduleName].types.push(type);
+            }
+            else {
+                //Explode this module name and see how many levels we need to go
+                var moduleNameParts = moduleName.split(".");
+                var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
+                tree.types.push(type);
+            }
+        };
+        /**
+         * This method groups all of our collected TS types according to their parent module
+         */
+        TsdGenerator.prototype.assembleModuleTree = function () {
+            var root = {
+                children: {},
+                types: []
+            };
+            for (var typeName in this.classes) {
+                var cls = this.classes[typeName];
+                var moduleName = cls.getParentModule();
+                TsdGenerator.putTypeInTree(cls, moduleName, root);
+            }
+            for (var typeName in this.typedefs) {
+                var tdf = this.typedefs[typeName];
+                var moduleName = tdf.getParentModule();
+                TsdGenerator.putTypeInTree(tdf, moduleName, root);
+            }
+            return root;
+        };
+        TsdGenerator.prototype.process = function (doclets, streamFactory) {
+            var _this = this;
+            var fileName = this.config.outDir + "/" + this.config.rootModuleName + ".d.ts";
+            var output = new TsdPlugin.IndentedOutputStream(streamFactory(fileName));
+            //1st pass
+            this.parseClassesAndTypedefs(doclets);
+            //2nd pass
+            this.processTypeMembers(doclets);
+            //Process user-defined types
+            this.processUserDefinedTypes();
+            var tree = this.assembleModuleTree();
+            TsdPlugin.ModuleUtils.outputTsd(tree, output);
+            output.close(function () {
+                console.log("Wrote:");
+                console.log("  " + _this.stats.typedefs.user + " user-specified typedefs");
+                console.log("  " + _this.stats.ifaces + " user-specified interfaces");
+                console.log("  " + _this.stats.typedefs.gen + " scanned typedefs");
+                console.log("  " + _this.stats.classes + " scanned classes");
+                console.log("Saved TypeScript definition file to: " + fileName);
+            });
+        };
+        return TsdGenerator;
+    })();
+    TsdPlugin.TsdGenerator = TsdGenerator;
+})(TsdPlugin || (TsdPlugin = {}));
+var TsdPlugin;
+(function (TsdPlugin) {
+    var IndentedOutputStream = (function () {
+        function IndentedOutputStream(output /* fs.WriteStream */) {
+            this.indentLevel = 0;
+            this.output;
         }
-        endModuleDecl({ parentModule: moduleName }, function(val) { tdfContent += val; });
-        output.write(tdfContent);
-        stats.ifaces++;
-    }
-    
-    //Output the typedefs
-    for (var qTypeName in typedefs) {
-        var tdfContent = "";
-        var tdf = typedefs[qTypeName];
-        console.log("Processing typedef: " + qTypeName);
-        beginModuleDecl(tdf, function(val) { tdfContent += val; });
-        tdfContent += outputTypedef(tdf);
-        endModuleDecl(tdf, function(val) { tdfContent += val; });
-        output.write(tdfContent);
-        stats.typedefs.gen++;
-    }
-    
-    //Output the classes
-    for (var qClsName in classes) {
-        var clsContent = "";
-        var cls = classes[qClsName];
-        console.log("Processing class: " + qClsName);
-        //Begin module
-        beginModuleDecl(cls, function(val) { clsContent += val; });
-        clsContent += outputClass(cls);
-        endModuleDecl(cls, function(val) { clsContent += val; });
-        output.write(clsContent);
-        stats.classes++;
-    }
-    
-    output.on('finish', function () {
-        console.log("Wrote:");
-        console.log("  " + stats.typedefs.user + " user-specified typedefs");
-        console.log("  " + stats.ifaces + " user-specified interfaces");
-        console.log("  " + stats.typedefs.gen + " scanned typedefs");
-        console.log("  " + stats.classes + " scanned classes");
-        console.log("Saved TypeScript definition file to: " + fileName);
-    });
-    output.end();
-}
-
-exports.handlers = {
-    processingComplete: function(e) {
-        process(e.doclets);
-        /*
-        var output = fs.createWriteStream(fileName);
-        for (var i = 0; i < e.doclets.length; i++) {
-            output.write(JSON.stringify(e.doclets[i], JsDocletStringifyFilter, 4));
+        IndentedOutputStream.prototype.indent = function () {
+            this.indentLevel++;
+        };
+        IndentedOutputStream.prototype.unindent = function () {
+            this.indentLevel--;
+        };
+        IndentedOutputStream.prototype.indentedText = function () {
+            var pattern = " ";
+            var count = this.indentLevel * 4;
+            if (count < 1)
+                return '';
+            var result = '';
+            while (count > 1) {
+                if (count & 1)
+                    result += pattern;
+                count >>= 1, pattern += pattern;
+            }
+            return result + pattern;
+        };
+        IndentedOutputStream.prototype.writeln = function (str) {
+            this.output.write("" + this.indentedText() + str);
+        };
+        IndentedOutputStream.prototype.close = function (callback) {
+            this.output.on("finish", callback);
+            this.output.end();
+        };
+        return IndentedOutputStream;
+    })();
+    TsdPlugin.IndentedOutputStream = IndentedOutputStream;
+})(TsdPlugin || (TsdPlugin = {}));
+var TsdPlugin;
+(function (TsdPlugin) {
+    /**
+     * Module helper utility
+     */
+    var ModuleUtils = (function () {
+        function ModuleUtils() {
         }
-        output.on('finish', function () {
-            console.log("Saved TypeScript definition file to: " + fileName);
-        });
-        output.end();
-        */
-    }
+        /**
+         * Gets whether this module name is an AMD one
+         */
+        ModuleUtils.isAMD = function (name) {
+            return name.indexOf("/") >= 0;
+        };
+        /**
+         * Writes the TS module tree out to the specified output stream
+         */
+        ModuleUtils.outputTsd = function (module, stream) {
+            for (var _i = 0, _a = module.types; _i < _a.length; _i++) {
+                var type = _a[_i];
+                type.output(stream);
+            }
+            for (var moduleName in module.children) {
+                //Write module decl
+                if (ModuleUtils.isAMD(moduleName)) {
+                    stream.writeln("module \"" + moduleName + "\" {");
+                }
+                else {
+                    stream.writeln("module " + moduleName + " {");
+                }
+                stream.indent();
+                var child = module.children[moduleName];
+                ModuleUtils.outputTsd(child, stream);
+                stream.unindent();
+                stream.writeln("}");
+            }
+        };
+        return ModuleUtils;
+    })();
+    TsdPlugin.ModuleUtils = ModuleUtils;
+})(TsdPlugin || (TsdPlugin = {}));
+/// <reference path="./doclet.ts" />
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="./doclet.ts" />
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var TsdPlugin;
+(function (TsdPlugin) {
+    var TSMember = (function () {
+        function TSMember(doclet) {
+            this.docletRef = doclet;
+        }
+        return TSMember;
+    })();
+    TsdPlugin.TSMember = TSMember;
+    var TSProperty = (function (_super) {
+        __extends(TSProperty, _super);
+        function TSProperty(doclet) {
+            _super.call(this, doclet);
+        }
+        TSProperty.prototype.output = function (stream) {
+        };
+        return TSProperty;
+    })(TSMember);
+    TsdPlugin.TSProperty = TSProperty;
+    var TSMethod = (function (_super) {
+        __extends(TSMethod, _super);
+        function TSMethod(doclet) {
+            _super.call(this, doclet);
+        }
+        TSMethod.prototype.output = function (stream) {
+        };
+        return TSMethod;
+    })(TSMember);
+    TsdPlugin.TSMethod = TSMethod;
+    var TSConstructor = (function (_super) {
+        __extends(TSConstructor, _super);
+        function TSConstructor(doclet) {
+            _super.call(this, doclet);
+        }
+        TSConstructor.prototype.output = function (stream) {
+        };
+        return TSConstructor;
+    })(TSMethod);
+    TsdPlugin.TSConstructor = TSConstructor;
+    /**
+     * Defines a TS type that resides within a module
+     */
+    var TSChildElement = (function () {
+        function TSChildElement() {
+        }
+        TSChildElement.prototype.setParentModule = function (module) {
+            this.parentModule = module;
+        };
+        TSChildElement.prototype.getParentModule = function () {
+            return this.parentModule;
+        };
+        return TSChildElement;
+    })();
+    TsdPlugin.TSChildElement = TSChildElement;
+    /**
+     * A TS type that resides within a module that can output its representation
+     */
+    var TSOutputtable = (function (_super) {
+        __extends(TSOutputtable, _super);
+        function TSOutputtable(doclet) {
+            _super.call(this);
+            this.doclet = doclet;
+        }
+        return TSOutputtable;
+    })(TSChildElement);
+    TsdPlugin.TSOutputtable = TSOutputtable;
+    /**
+     * A TS type that has child members
+     */
+    var TSComposable = (function (_super) {
+        __extends(TSComposable, _super);
+        function TSComposable(doclet) {
+            _super.call(this, doclet);
+            this.members = [];
+        }
+        return TSComposable;
+    })(TSOutputtable);
+    TsdPlugin.TSComposable = TSComposable;
+    /**
+     * A TS typedef. This could be a type alias or an interface
+     */
+    var TSTypedef = (function (_super) {
+        __extends(TSTypedef, _super);
+        function TSTypedef(doclet) {
+            _super.call(this, doclet);
+        }
+        TSTypedef.prototype.output = function (stream) {
+        };
+        return TSTypedef;
+    })(TSComposable);
+    TsdPlugin.TSTypedef = TSTypedef;
+    /**
+     * A TS class definition
+     */
+    var TSClass = (function (_super) {
+        __extends(TSClass, _super);
+        function TSClass(doclet) {
+            _super.call(this, doclet);
+        }
+        TSClass.prototype.output = function (stream) {
+        };
+        return TSClass;
+    })(TSComposable);
+    TsdPlugin.TSClass = TSClass;
+    /**
+     * A user-defined interface
+     */
+    var TSUserInterface = (function (_super) {
+        __extends(TSUserInterface, _super);
+        function TSUserInterface(moduleName, name, members) {
+            _super.call(this);
+            this.setParentModule(moduleName);
+            this.name = name;
+            this.members = members;
+        }
+        TSUserInterface.prototype.outputDecl = function (stream) {
+            stream.writeln("export interface " + this.name + " {");
+            stream.indent();
+            for (var _i = 0, _a = this.members; _i < _a.length; _i++) {
+                var member = _a[_i];
+                stream.writeln(member + ";");
+            }
+            stream.unindent();
+            stream.writeln("}");
+        };
+        TSUserInterface.prototype.output = function (stream) {
+            if (this.parentModule == null) {
+                this.outputDecl(stream);
+            }
+            else {
+                if (TsdPlugin.ModuleUtils.isAMD(this.parentModule))
+                    stream.writeln("declare module \"" + this.parentModule + "\" {");
+                else
+                    stream.writeln("declare module " + this.parentModule + " {");
+                stream.indent();
+                this.outputDecl(stream);
+                stream.unindent();
+                stream.writeln("}");
+            }
+        };
+        return TSUserInterface;
+    })(TSChildElement);
+    TsdPlugin.TSUserInterface = TSUserInterface;
+    /**
+     * A user-defined type alias
+     */
+    var TSUserTypeAlias = (function (_super) {
+        __extends(TSUserTypeAlias, _super);
+        function TSUserTypeAlias(moduleName, typeAlias, type) {
+            _super.call(this);
+            this.setParentModule(moduleName);
+            this.typeAlias = typeAlias;
+            this.type = type;
+        }
+        TSUserTypeAlias.prototype.outputDecl = function (stream) {
+            stream.writeln("declare type " + this.typeAlias + " = " + this.type + ";");
+        };
+        TSUserTypeAlias.prototype.output = function (stream) {
+            if (this.parentModule == null) {
+                this.outputDecl(stream);
+            }
+            else {
+                if (TsdPlugin.ModuleUtils.isAMD(this.parentModule))
+                    stream.writeln("declare module \"" + this.parentModule + "\" {");
+                else
+                    stream.writeln("declare module " + this.parentModule + " {");
+                stream.indent();
+                this.outputDecl(stream);
+                stream.unindent();
+                stream.writeln("}");
+            }
+        };
+        return TSUserTypeAlias;
+    })(TSChildElement);
+    TsdPlugin.TSUserTypeAlias = TSUserTypeAlias;
+})(TsdPlugin || (TsdPlugin = {}));
+//# sourceMappingURL=typescript.js.map
