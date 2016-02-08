@@ -136,7 +136,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //TypeScript definition covers a module's *public* API surface, so
-                //skip private classes
+                //skip private members
                 if (TypeUtil.isPrivateDoclet(doclet, this.config))
                     continue;
 
@@ -154,6 +154,8 @@ module TsdPlugin {
                     cls.members.push(new TSProperty(doclet));
                 } else if (doclet.kind == "function") {
                     cls.members.push(new TSMethod(doclet));
+                } else if (doclet.kind == "member" && doclet.params == null) {
+                    cls.members.push(new TSProperty(doclet));
                 }
             }
         }

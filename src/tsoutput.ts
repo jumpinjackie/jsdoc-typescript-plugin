@@ -215,10 +215,23 @@ module TsdPlugin {
             super(doclet);
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            stream.writeln(`//TODO: Output property ${this.doclet.longname}`);
+            this.writeDescription("property", stream, conf, logger);
+            var propDecl = `${this.doclet.name}: `;
+            if (this.doclet.type != null) {
+                var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                propDecl += types.join("|") + ";";
+            } else {
+                logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has not return type defined. Defaulting to "any"`);
+                propDecl += "any;";
+            }
+            stream.writeln(propDecl);
         }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void { }
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            if (this.doclet.type != null) {
+                TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
+            }
+        }
     }
 
     export class TSMethod extends TSMember {
