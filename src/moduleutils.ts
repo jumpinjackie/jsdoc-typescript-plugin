@@ -18,14 +18,16 @@ module TsdPlugin {
                 type.output(stream);
             }
             for (var moduleName in module.children) {
+                var child = module.children[moduleName];
+                //Root modules have to be declared
+                var decl = ((child.isRoot === true) ? "declare " : "");
                 //Write module decl
                 if (ModuleUtils.isAMD(moduleName)) {
-                    stream.writeln(`module "${moduleName}" {`)
+                    stream.writeln(`${decl}module "${moduleName}" {`)
                 } else {
-                    stream.writeln(`module ${moduleName} {`);
+                    stream.writeln(`${decl}module ${moduleName} {`);
                 }
                 stream.indent();
-                var child = module.children[moduleName];
                 ModuleUtils.outputTsd(child, stream);
                 stream.unindent();
                 stream.writeln("}");

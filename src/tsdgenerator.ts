@@ -16,8 +16,8 @@ module TsdPlugin {
     export class TsdGenerator {
         private classes: Dictionary<TSClass>;
         private typedefs: Dictionary<TSTypedef>;
-        private userTypeAliases: IOutputtableChildElement[];
-        private userInterfaces: IOutputtableChildElement[];
+        private userTypeAliases: TSUserTypeAlias[];
+        private userInterfaces: TSUserInterface[];
         
         private config: ITypeScriptPluginConfiguration;
         private stats: IGeneratorStats;
@@ -81,18 +81,26 @@ module TsdPlugin {
         }
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
             if (!this.classes[name]) {
-                if (factory != null)
-                    this.classes[name] = factory();
-                else
+                if (factory != null) {
+                    var cls = factory();
+                    this.classes[name] = cls;
+                    return cls;
+                } else {
                     return null;
+                }
             } else {
                 return this.classes[name];
             }
         }
         private ensureTypedef(name: string, factory?: () => TSTypedef): TSTypedef {
             if (!this.typedefs[name]) {
-                if (factory != null)
-                    this.typedefs[name] = factory();
+                if (factory != null) {
+                    var tdf = factory();
+                    this.typedefs[name] = tdf;
+                    return tdf;
+                } else {
+                    return null;
+                }
             } else {
                 return this.typedefs[name];
             }
@@ -105,29 +113,30 @@ module TsdPlugin {
                 //skip private classes
                 if (this.isPrivateDoclet(doclet))
                     continue;
+                
+                var parentModName = null;
+                if (doclet.longname.indexOf("module:") >= 0) {
+                    //Assuming that anything annotated "module:" will have a "." to denote end of module and start of class name
+                    var modLen = "module:".length;
+                    var dotIdx = doclet.longname.indexOf(".");
+                    if (dotIdx < 0)
+                        dotIdx = doclet.longname.length;
+                    parentModName = doclet.longname.substring(modLen, dotIdx);
+                } else if (doclet.memberof) {
+                    parentModName = doclet.memberof;
+                }
                 if (doclet.kind == "class") {
-                    var parentModName = null;
-                    if (doclet.longname.indexOf("module:") >= 0) {
-                        //Assuming that anything annotated "module:" will have a "." to denote end of module and start of class name
-                        var modLen = "module:".length;
-                        var dotIdx = doclet.longname.indexOf(".");
-                        if (dotIdx < 0)
-                            dotIdx = doclet.longname.length;
-                        parentModName = doclet.longname.substring(modLen, dotIdx);
-                    } else if (doclet.memberof) {
-                        parentModName = doclet.memberof;
-                    }
-                    
                     //Key class definition on longname
                     var cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
                     if (parentModName != null)
                         cls.setParentModule(parentModName);
                 } else if (doclet.kind == "typedef") {
-                    this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                    var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                    if (parentModName != null)
+                        tdf.setParentModule(parentModName);
                 }
             }
         }
-        
         private processTypeMembers(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 if (this.ignoreThisType(doclet.longname))
@@ -154,7 +163,6 @@ module TsdPlugin {
                 }
             }
         }
-        
         private processUserDefinedTypes(): void {
             //Output user-injected type aliases
             //global
@@ -183,33 +191,44 @@ module TsdPlugin {
         }
         private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
             var tree: ITSModule = root;
+            var i = 0;
             for (var name of moduleNameParts) {
                 //Doesn't exist at this level, make it
                 if (!tree.children[name]) {
                     tree.children[name] = {
+                        isRoot: (i == 0),
                         children: {},
                         types: []
                     }
                 }
                 tree = tree.children[name];
+                i++;
             }
             return tree;
         }
-        private static putTypeInTree(type: IOutputtable, moduleName: string, root: ITSModule): void {
-            if (ModuleUtils.isAMD(moduleName)) {
-                //No nesting required for AMD modules
-                if (!root.children[moduleName]) {
-                    root.children[moduleName] = {
-                        children: {},
-                        types: []
-                    }
-                }
-                root.children[moduleName].types.push(type);
+        private static putTypeInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
+            if (moduleName == null) {
+                root.types.push(type);
+                return true;
             } else {
-                //Explode this module name and see how many levels we need to go
-                var moduleNameParts = moduleName.split(".");
-                var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
-                tree.types.push(type);
+                if (ModuleUtils.isAMD(moduleName)) {
+                    //No nesting required for AMD modules
+                    if (!root.children[moduleName]) {
+                        root.children[moduleName] = {
+                            isRoot: true,
+                            children: {},
+                            types: []
+                        }
+                    }
+                    root.children[moduleName].types.push(type);
+                    return true;
+                } else {
+                    //Explode this module name and see how many levels we need to go
+                    var moduleNameParts = moduleName.split(".");
+                    var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
+                    tree.types.push(type);
+                    return true;
+                }
             }
         }
         /**
@@ -217,18 +236,33 @@ module TsdPlugin {
          */
         private assembleModuleTree(): ITSModule {
             var root: ITSModule = {
+                isRoot: null,
                 children: {},
                 types: []
             };
+            for (var typedef of this.userTypeAliases) {
+                var moduleName = typedef.getParentModule();
+                if (TsdGenerator.putTypeInTree(typedef, moduleName, root) === true)
+                    this.stats.typedefs.user++;
+            }
+            for (var iface of this.userInterfaces) {
+                var moduleName = iface.getParentModule();
+                if (TsdGenerator.putTypeInTree(iface, moduleName, root) === true)
+                    this.stats.ifaces++;
+            }
             for (var typeName in this.classes) {
+                console.log(`Processing class: ${typeName}`);
                 var cls = this.classes[typeName];
                 var moduleName = cls.getParentModule();
-                TsdGenerator.putTypeInTree(cls, moduleName, root);
+                if (TsdGenerator.putTypeInTree(cls, moduleName, root) === true)
+                    this.stats.classes++;
             }
             for (var typeName in this.typedefs) {
+                console.log(`Processing typedef: ${typeName}`);
                 var tdf = this.typedefs[typeName];
                 var moduleName = tdf.getParentModule();
-                TsdGenerator.putTypeInTree(tdf, moduleName, root);
+                if (TsdGenerator.putTypeInTree(tdf, moduleName, root) === true)
+                    this.stats.typedefs.gen++;
             }
             return root;
         }

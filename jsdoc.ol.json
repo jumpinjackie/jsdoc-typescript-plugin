@@ -3,8 +3,6 @@
         "includePattern": ".+\\.js(doc)?$",
         "excludePattern": "(^|\\/|\\\\)_",
         "include": [
-            "node_modules/openlayers/src",
-            "node_modules/openlayers/externs/oli.js",
             "node_modules/openlayers/externs/olx.js"
         ]
     },

@@ -4,7 +4,7 @@ module TsdPlugin {
         private output: any;
         constructor(output: any /* fs.WriteStream */) {
             this.indentLevel = 0;
-            this.output;
+            this.output = output;
         }
         indent(): void {
             this.indentLevel++;
@@ -24,7 +24,7 @@ module TsdPlugin {
             return result + pattern;
         }
         writeln(str: string) {
-            this.output.write(`${this.indentedText()}${str}`);
+            this.output.write(`${this.indentedText()}${str}\n`);
         }
         close(callback: () => void) {
             this.output.on("finish", callback);

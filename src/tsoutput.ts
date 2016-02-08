@@ -134,18 +134,7 @@ module TsdPlugin {
             stream.writeln("}");
         }
         public output(stream: IndentedOutputStream): void {
-            if (this.parentModule == null) {
-                this.outputDecl(stream);
-            } else {
-                if (ModuleUtils.isAMD(this.parentModule))
-                    stream.writeln(`declare module "${this.parentModule}" {`);
-                else
-                    stream.writeln(`declare module ${this.parentModule} {`);
-                stream.indent();
-                this.outputDecl(stream);
-                stream.unindent();
-                stream.writeln("}");
-            }
+            this.outputDecl(stream);
         }
     }
 
@@ -162,21 +151,13 @@ module TsdPlugin {
             this.type = type;
         }
         private outputDecl(stream: IndentedOutputStream): void {
-            stream.writeln(`declare type ${this.typeAlias} = ${this.type};`);
+            if (this.getParentModule() == null)
+                stream.writeln(`declare type ${this.typeAlias} = ${this.type};`);
+            else
+                stream.writeln(`type ${this.typeAlias} = ${this.type};`);
         }
         public output(stream: IndentedOutputStream): void {
-            if (this.parentModule == null) {
-                this.outputDecl(stream);
-            } else {
-                if (ModuleUtils.isAMD(this.parentModule))
-                    stream.writeln(`declare module "${this.parentModule}" {`);
-                else
-                    stream.writeln(`declare module ${this.parentModule} {`);
-                stream.indent();
-                this.outputDecl(stream);
-                stream.unindent();
-                stream.writeln("}");
-            }
+            this.outputDecl(stream);
         }
     }
 
@@ -184,6 +165,10 @@ module TsdPlugin {
      * A TypeScript module definition that is ready for output
      */
     export interface ITSModule {
+        /**
+         * Indicates if this is the root module (true = root, false = child, unspecified = global)
+         */
+        isRoot?: boolean;
         /**
          * Child modules
          */
