@@ -28,8 +28,6 @@
     "cesium": "^1.17.0",
     "jsdoc": "^3.4.0",
     "openlayers": "^3.13.0",
-    "ts-loader": "^0.8.0",
-    "typescript": "^1.7.5",
-    "webpack": "^1.12.13"
+    "typescript": "^1.7.5"
   }
 }
