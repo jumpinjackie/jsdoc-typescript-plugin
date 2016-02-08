@@ -16,6 +16,22 @@ module TsdPlugin {
         return value; 
     }
     
+    export class TypeVisibilityContext {
+        private types: Dictionary<string>;
+        constructor() {
+            this.types = {};
+        }
+        public addType(typeName: string) {
+            this.addTypes([ typeName ]);
+        }
+        public addTypes(typeNames: string[]) {
+            for (var type of typeNames) {
+                this.types[type] = type;
+            }
+        }
+        public getTypes(): string[] { return Object.keys(this.types); }
+    }
+    
     export class TypeUtil {
         
         public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration): boolean {
@@ -119,7 +135,7 @@ module TsdPlugin {
             var genericTypes = [];
             //@template is non-standard, but the presence of this annotation conveys
             //generic type information that we should capture
-            var genericTypeTags = tags.filter(tag => tag.originalTitle == "template");
+            var genericTypeTags = (tags || []).filter(tag => tag.originalTitle == "template");
             if (genericTypeTags.length > 0) {
                 for (var genericTypeTag of genericTypeTags) {
                     var gts = genericTypeTag.value.split(",");
@@ -135,6 +151,7 @@ module TsdPlugin {
     
     export interface IOutputtable {
         output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
     export abstract class TSMember implements IOutputtable {
@@ -159,7 +176,7 @@ module TsdPlugin {
                     stream.writeln(" * " + descParts[i]);
                 }
             } else if (conf.fillUndocumentedDoclets) {
-                logger.warn(`The ${kind} (${this.doclet.name}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
+                //logger.warn(`The ${kind} (${this.doclet.name}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                 stream.writeln(` * TODO: This ${kind} has no documentation. Contact the library author if this ${kind} should be documented`);
             }
             this.writeExtraDescriptionParts(kind, stream, conf, logger);
@@ -167,6 +184,8 @@ module TsdPlugin {
         }
         
         public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        
+        public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
     export class TSProperty extends TSMember {
@@ -176,6 +195,8 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             stream.writeln(`//TODO: Output property ${this.doclet.longname}`);
         }
+        
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void { }
     }
 
     export class TSMethod extends TSMember {
@@ -204,8 +225,7 @@ module TsdPlugin {
                     }
                     var argDesc = arg.description || "";
                     if (argDesc == "" && conf.fillUndocumentedDoclets) {
-                        //TODO: Include symbol context
-                        logger.warn(`Argument (${arg.name}) of ${kind} (${this.doclet.longname}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
+                        //logger.warn(`Argument (${arg.name}) of ${kind} (${this.doclet.longname}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                         argDesc = "TODO: This parameter has no description. Contact this library author if this parameter should be documented\n";
                     }
                     stream.writeln(` * @param ${arg.name} ${req} ${argDesc}`);
@@ -216,6 +236,29 @@ module TsdPlugin {
         protected outputScope(): boolean { return true; }
         
         protected outputGenericTypes(): boolean { return true; }
+        
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            if (this.doclet.params != null && this.doclet.params.length > 0) {
+                for (var arg of this.doclet.params) {
+                    if (arg.type != null) {
+                        var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
+                        context.addTypes(utypes);
+                    }
+                }
+            }
+            if (this.outputReturnType()) {
+                var retTypes = [];
+                if (this.doclet.returns != null) {
+                    for (var retDoc of this.doclet.returns) {
+                        var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
+                        for (var r of rts) {
+                            retTypes.push(r);
+                        }
+                    }
+                }
+                context.addTypes(retTypes);
+            }
+        }
         
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             this.writeDescription("method", stream, conf, logger);
@@ -249,7 +292,7 @@ module TsdPlugin {
                         var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
                         argStr += utypes.join("|");
                     } else {
-                        logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
+                        //logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
                         //Fallback to any
                         argStr += "any";
                     }
@@ -274,7 +317,7 @@ module TsdPlugin {
                 if (retType != null && retType != "") {
                     methodDecl += ": " + retType;
                 } else {
-                    logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
+                    //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
                     methodDecl += ": " + conf.defaultReturnType;
                 }
             }
@@ -301,6 +344,10 @@ module TsdPlugin {
         
         protected getMethodName(): string { return "constructor"; }
         
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void { 
+            super.visit(context, conf, logger);
+        }
+        
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             super.output(stream, conf, logger);
         }
@@ -320,6 +367,7 @@ module TsdPlugin {
         public getParentModule(): string {
             return this.parentModule;
         }
+        public abstract getQualifiedName(): string;
     }
 
     /**
@@ -345,7 +393,7 @@ module TsdPlugin {
                 }
                 stream.writeln(" */");
             } else if (conf.fillUndocumentedDoclets) {
-                logger.warn(`The ${kind} (${this.doclet.name}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
+                //logger.warn(`The ${kind} (${this.doclet.name}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                 stream.writeln("/**");
                 stream.writeln(` * TODO: This ${kind} has no documentation. Contact the library author if this ${kind} should be documented`);
                 stream.writeln(" */");
@@ -353,6 +401,8 @@ module TsdPlugin {
         }
         
         public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        
+        public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
     /**
@@ -360,9 +410,17 @@ module TsdPlugin {
      */
     export abstract class TSComposable extends TSOutputtable {
         public members: TSMember[];
+        protected isPublic: boolean;
         constructor(doclet: IDoclet) {
             super(doclet);
             this.members = [];
+            this.isPublic = false;
+        }
+        public setIsPublic(isPublic: boolean): void {
+            this.isPublic = isPublic;
+        }
+        public getIsPublic(): boolean {
+            return this.isPublic;
         }
     }
 
@@ -372,6 +430,16 @@ module TsdPlugin {
     export class TSTypedef extends TSComposable {
         constructor(doclet: IDoclet) {
             super(doclet);
+        }
+        public getQualifiedName(): string {
+            var mod = this.getParentModule();
+            if (mod == null)
+                return this.doclet.name;
+            else
+                return `${mod}.${this.doclet.name}`;
+        }
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            context.addType(this.getQualifiedName());
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             if (conf.outputDocletDefs) {
@@ -414,6 +482,20 @@ module TsdPlugin {
         }
         
         protected getDescription(): string { return this.doclet.classdesc || this.doclet.description; }
+        
+        public getQualifiedName(): string {
+            var mod = this.getParentModule();
+            if (mod == null)
+                return this.doclet.name;
+            else
+                return `${mod}.${this.doclet.name}`;
+        }
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            context.addType(this.getQualifiedName());
+            if (this.doclet.augments != null) {
+                context.addTypes(this.doclet.augments);
+            }
+        }
         
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             if (conf.outputDocletDefs) {
@@ -479,6 +561,16 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             this.outputDecl(stream);
         }
+        public getQualifiedName(): string {
+            var mod = this.getParentModule();
+            if (mod == null)
+                return this.name;
+            else
+                return `${mod}.${this.name}`;
+        }
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            context.addType(this.getQualifiedName());
+        }
     }
 
     /**
@@ -501,6 +593,16 @@ module TsdPlugin {
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             this.outputDecl(stream);
+        }
+        public getQualifiedName(): string {
+            var mod = this.getParentModule();
+            if (mod == null)
+                return this.typeAlias;
+            else
+                return `${mod}.${this.typeAlias}`;
+        }
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            context.addType(this.getQualifiedName());
         }
     }
 

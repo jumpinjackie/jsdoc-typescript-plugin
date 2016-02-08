@@ -19,9 +19,7 @@
         "rootModuleName": "openlayers",
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
-        "ignore": [
-            "ol.TileUrlFunctionType"
-        ],
+        "ignore": [],
         "aliases": {
             "global": {
                 "EsriJSONGeometry": "any",
@@ -40,22 +38,6 @@
                 },
                 "goog.vec.Mat4": {
                     "Number": "any"
-                },
-                "ol": {
-                    "TileUrlFunctionType": "(coord: ol.TileCoord, pixelRatio: number, projection: ol.proj.Projection) => string",
-                    "MapEvent": "any",
-                    "MapBrowserEvent": "any"
-                },
-                "ol.render": {
-                    "Feature": "any"
-                },
-                "ol.source": {
-                    "ImageOptions": "any",
-                    "SourceOptions": "any",
-                    "TileOptions": "any"
-                },
-                "ol.style": {
-                    "ImageOptions": "any"
                 }
             }
         },

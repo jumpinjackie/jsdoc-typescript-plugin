@@ -102,8 +102,7 @@ module TsdPlugin {
                     continue;
                 //TypeScript definition covers a module's *public* API surface, so
                 //skip private classes
-                if (TypeUtil.isPrivateDoclet(doclet, this.config))
-                    continue;
+                var isPublic = !(TypeUtil.isPrivateDoclet(doclet, this.config));
                 
                 var parentModName = null;
                 if (doclet.longname.indexOf("module:") >= 0) {
@@ -119,12 +118,14 @@ module TsdPlugin {
                 if (doclet.kind == "class") {
                     //Key class definition on longname
                     var cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
+                    cls.setIsPublic(isPublic);
                     if (parentModName != null)
                         cls.setParentModule(parentModName);
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
                 } else if (doclet.kind == "typedef") {
                     var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                    tdf.setIsPublic(isPublic);
                     if (parentModName != null)
                         tdf.setParentModule(parentModName);
                 }
@@ -179,6 +180,59 @@ module TsdPlugin {
                 for (var typeName in this.config.interfaces.module[moduleName]) {
                     var iface = this.config.interfaces.module[moduleName][typeName];
                     this.userInterfaces.push(new TSUserInterface(moduleName, typeName, iface));
+                }
+            }
+        }
+        private hoistPubliclyReferencedTypesToPublic(logger: ILogger): void {
+            var context = new TypeVisibilityContext();
+            
+            //First, visit all known public types and collect referenced types
+            for (let typedef of this.userTypeAliases) {
+                typedef.visit(context, this.config, logger);
+            }
+            for (let iface of this.userInterfaces) {
+                iface.visit(context, this.config, logger);
+            }
+            for (let typeName in this.classes) {
+                let cls = this.classes[typeName];
+                if (cls.getIsPublic())
+                    cls.visit(context, this.config, logger);
+            }
+            for (let typeName in this.typedefs) {
+                let tdf = this.typedefs[typeName];
+                if (tdf.getIsPublic())
+                    tdf.visit(context, this.config, logger);
+            }
+            
+            var userTypes = {};
+            for (let typedef of this.userTypeAliases) {
+                userTypes[typedef.getQualifiedName()] = typedef;
+            }
+            for (let iface of this.userInterfaces) {
+                userTypes[iface.getQualifiedName()] = iface;
+            }
+            
+            //Now that we've collected all referenced types, see what isn't public and
+            //make them public
+            var allTypes = context.getTypes();
+            for (let typeName of allTypes) {
+                //console.log(`Checking type: ${typeName}`);
+                if (this.classes[typeName]) {
+                    let cls = this.classes[typeName];
+                    if (!cls.getIsPublic()) {
+                        logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                        cls.setIsPublic(true);
+                    }
+                } else if (this.typedefs[typeName]) {
+                    let tdf = this.typedefs[typeName];
+                    if (!tdf.getIsPublic()) {
+                        logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                        tdf.setIsPublic(true);
+                    }
+                } else if (userTypes[typeName]) {
+                    //User-defined ones will always be public. Nothing to do here.
+                } else {
+                    logger.warn(`Type (${typeName}) is referenced in one or more public APIs, but no definition for this type found`);
                 }
             }
         }
@@ -246,6 +300,8 @@ module TsdPlugin {
             for (var typeName in this.classes) {
                 console.log(`Processing class: ${typeName}`);
                 var cls = this.classes[typeName];
+                if (!cls.getIsPublic())
+                    continue;
                 var moduleName = cls.getParentModule();
                 if (TsdGenerator.putTypeInTree(cls, moduleName, root) === true)
                     this.stats.classes++;
@@ -253,6 +309,8 @@ module TsdPlugin {
             for (var typeName in this.typedefs) {
                 console.log(`Processing typedef: ${typeName}`);
                 var tdf = this.typedefs[typeName];
+                if (!tdf.getIsPublic())
+                    continue;
                 var moduleName = tdf.getParentModule();
                 if (TsdGenerator.putTypeInTree(tdf, moduleName, root) === true)
                     this.stats.typedefs.gen++;
@@ -266,13 +324,12 @@ module TsdPlugin {
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
-            
-            console.log(`Parsed ${Object.keys(this.classes)} classes`);
-            
             //2nd pass
             this.processTypeMembers(doclets);
             //Process user-defined types
             this.processUserDefinedTypes();
+            //Raise any non-public types referenced from public types to public
+            this.hoistPubliclyReferencedTypesToPublic(logger);
             
             var tree = this.assembleModuleTree();
             ModuleUtils.outputTsd(tree, output, this.config, logger);
