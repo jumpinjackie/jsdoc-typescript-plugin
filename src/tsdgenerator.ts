@@ -57,6 +57,11 @@ module TsdPlugin {
                 ifaces: 0,
                 classes: 0
             };
+            //Register standard TS type replacements
+            this.config.typeReplacements["*"] = "any";
+            this.config.typeReplacements["?"] = "any";
+            this.config.typeReplacements["Object"] = "any";
+            this.config.typeReplacements["function"] = "Function";
         }
         private ignoreThisType(fullname: string): boolean {
             if (this.config.ignoreTypes[fullname])
@@ -267,19 +272,22 @@ module TsdPlugin {
             return root;
         }
         
-        public process(doclets: IDoclet[], streamFactory: (fileName: string) => any): void {
+        public process(doclets: IDoclet[], streamFactory: (fileName: string) => any, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
             var output = new IndentedOutputStream(streamFactory(fileName));
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
+            
+            console.log(`Parsed ${Object.keys(this.classes)} classes`);
+            
             //2nd pass
             this.processTypeMembers(doclets);
             //Process user-defined types
             this.processUserDefinedTypes();
             
             var tree = this.assembleModuleTree();
-            ModuleUtils.outputTsd(tree, output);
+            ModuleUtils.outputTsd(tree, output, this.config, logger);
             
             output.close(() => {
                 console.log("Wrote:");

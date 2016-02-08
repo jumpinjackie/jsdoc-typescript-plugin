@@ -10,9 +10,10 @@
 /// <reference path="tsoutput.ts" />
 var fs = require("fs");
 var env = require("jsdoc/env");
+var logger = require("jsdoc/util/logger");
 exports.handlers = {
     processingComplete(e: TsdPlugin.IJsDocProcessingCompleteEvent): void {
         var proc = new TsdPlugin.TsdGenerator(env.conf.typescript || {});
-        proc.process(e.doclets, (fileName) => fs.createWriteStream(fileName));
+        proc.process(e.doclets, (fileName) => fs.createWriteStream(fileName), logger);
     }
 };

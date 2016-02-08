@@ -1,4 +1,10 @@
 module TsdPlugin {
+    export interface ILogger {
+        warn(msg: string): void;
+        error(msg: string): void;
+        fatal(msg: string): void;
+    }
+    
     export class IndentedOutputStream {
         private indentLevel: number;
         private output: any;

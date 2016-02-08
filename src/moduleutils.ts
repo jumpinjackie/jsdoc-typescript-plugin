@@ -13,9 +13,9 @@ module TsdPlugin {
         /**
          * Writes the TS module tree out to the specified output stream
          */
-        public static outputTsd(module: ITSModule, stream: IndentedOutputStream): void {
+        public static outputTsd(module: ITSModule, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             for (var type of module.types) {
-                type.output(stream);
+                type.output(stream, conf, logger);
             }
             for (var moduleName in module.children) {
                 var child = module.children[moduleName];
@@ -28,7 +28,7 @@ module TsdPlugin {
                     stream.writeln(`${decl}module ${moduleName} {`);
                 }
                 stream.indent();
-                ModuleUtils.outputTsd(child, stream);
+                ModuleUtils.outputTsd(child, stream, conf, logger);
                 stream.unindent();
                 stream.writeln("}");
             }

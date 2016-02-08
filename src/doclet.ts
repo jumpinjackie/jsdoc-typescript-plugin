@@ -17,5 +17,7 @@ module TsdPlugin {
         memberof: string;
         scope: string;
         undocumented?: boolean;
+        type?: IDocletType;
+        augments?: string[];
     }
 }

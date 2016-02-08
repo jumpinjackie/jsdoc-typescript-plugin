@@ -41,6 +41,7 @@ module TsdPlugin {
      */
     export interface IDocletParameter extends IDocletTypeInfo {
         name: string;
+        nullable?: boolean;
     }
 
     /**
