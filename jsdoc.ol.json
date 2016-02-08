@@ -35,7 +35,8 @@
                     "Event": "any",
                     "EventLike": "any",
                     "Key": "any",
-                    "BrowserEvent": "any"
+                    "BrowserEvent": "any",
+                    "EventTarget": "any"
                 },
                 "goog.vec.Mat4": {
                     "Number": "any"

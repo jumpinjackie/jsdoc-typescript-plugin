@@ -16,7 +16,24 @@ module TsdPlugin {
         return value; 
     }
     
-    class TypeUtil {
+    export class TypeUtil {
+        
+        public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration): boolean {
+            //If the configuration defines a particular annotation as a public API marker and it
+            //exists in the doclet's tag list, the doclet is considered part of the public API
+            if (conf.publicAnnotation) {
+                var found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
+                if (found.length == 1) //tag found
+                    return false;
+                
+                //In this mode, absence of the tag means not public
+                return true;
+            }
+            
+            return doclet.access == "private" ||
+                   doclet.undocumented == true;
+        }
+        
         public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger): string {
             //Look in user configured overrides
             if (conf.typeReplacements.hasOwnProperty(typeName)) {
@@ -165,6 +182,8 @@ module TsdPlugin {
         
         protected outputReturnType(): boolean { return true; }
         
+        protected getMethodName(): string { return this.doclet.name; }
+        
         protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             //If we have args, document them. Because TypeScript is ... typed, the {type}
             //annotation is not necessary in the documentation
@@ -194,7 +213,7 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             this.writeDescription("method", stream, conf, logger);
             var methodDecl = (this.doclet.scope == "static" ? "static " : "");
-            methodDecl += this.doclet.name;
+            methodDecl += this.getMethodName();
             var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
             if (genericTypes && genericTypes.length > 0) {
                 methodDecl += "<" + genericTypes.join(", ") + ">";
@@ -258,6 +277,11 @@ module TsdPlugin {
         constructor(doclet: IDoclet) {
             super(doclet);
         }
+        
+        protected outputReturnType(): boolean { return false; }
+        
+        protected getMethodName(): string { return "constructor"; }
+        
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             super.output(stream, conf, logger);
         }

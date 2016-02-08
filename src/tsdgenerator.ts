@@ -69,21 +69,7 @@ module TsdPlugin {
             else
                 return false;
         }
-        private isPrivateDoclet(doclet: IDoclet): boolean {
-            //If the configuration defines a particular annotation as a public API marker and it
-            //exists in the doclet's tag list, the doclet is considered part of the public API
-            if (this.config.publicAnnotation) {
-                var found = (doclet.tags || []).filter(tag => tag.originalTitle == this.config.publicAnnotation);
-                if (found.length == 1) //tag found
-                    return false;
-                
-                //In this mode, absence of the tag means not public
-                return true;
-            }
-            
-            return doclet.access == "private" ||
-                doclet.undocumented == true;
-        }
+        
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
             if (!this.classes[name]) {
                 if (factory != null) {
@@ -116,7 +102,7 @@ module TsdPlugin {
                     continue;
                 //TypeScript definition covers a module's *public* API surface, so
                 //skip private classes
-                if (this.isPrivateDoclet(doclet))
+                if (TypeUtil.isPrivateDoclet(doclet, this.config))
                     continue;
                 
                 var parentModName = null;
@@ -148,7 +134,7 @@ module TsdPlugin {
                     continue;
                 //TypeScript definition covers a module's *public* API surface, so
                 //skip private classes
-                if (this.isPrivateDoclet(doclet))
+                if (TypeUtil.isPrivateDoclet(doclet, this.config))
                     continue;
 
                 //We've keyed class definition on longname, so memberof should
