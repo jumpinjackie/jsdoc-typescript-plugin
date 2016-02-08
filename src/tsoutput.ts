@@ -21,10 +21,13 @@ module TsdPlugin {
         constructor() {
             this.types = {};
         }
-        public addType(typeName: string) {
-            this.addTypes([ typeName ]);
+        public hasType(typeName: string): boolean {
+            return this.types[typeName] != null;
         }
-        public addTypes(typeNames: string[]) {
+        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {
+            this.addTypes([ typeName ], conf, logger);
+        }
+        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {
             for (var type of typeNames) {
                 this.types[type] = type;
             }
@@ -50,7 +53,7 @@ module TsdPlugin {
                    doclet.undocumented == true;
         }
         
-        public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger): string {
+        public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string {
             //Look in user configured overrides
             if (conf.typeReplacements.hasOwnProperty(typeName)) {
                 return conf.typeReplacements[typeName];
@@ -64,33 +67,33 @@ module TsdPlugin {
                 //Array - Array.<type>
                 var rgxm = typeName.match(/(Array\.)\<(.+)>/); 
                 if (rgxm) {
-                    return TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger) + "[]";
+                    return TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context) + "[]";
                 }
                 //Array - type[]
                 rgxm = typeName.match(/(.+)\[\]$/);
                 if (rgxm) {
-                    return TypeUtil.getTypeReplacement(rgxm[1].trim(), conf, logger) + "[]";
+                    return TypeUtil.getTypeReplacement(rgxm[1].trim(), conf, logger, context) + "[]";
                 }
                 //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
                 rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
                 if (rgxm) {
-                    var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger);
-                    var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger);
+                    var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context);
+                    var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger, context);
                     return "{ [key: " + keyType + "]: " + valueType + "; }";
                 }
                 //Some generic type - SomeGenericType.<AnotherType>
                 rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
                 if (rgxm) {
-                    var genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger);
+                    var genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
                     var genericTypeArgs = rgxm[3].split(",")
-                                                 .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger));
+                                                 .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
                     return genericType + "<" + genericTypeArgs.join(",") + ">";
                 }
                 //Anonymous function
                 rgxm = typeName.match(/function\((.+)\)/);
                 if (rgxm) {
                     var typeArgs = rgxm[1].split(",")
-                                          .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger));
+                                          .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
                     var funcParams = [];
                     for (var i = 0; i < typeArgs.length; i++) {
                         funcParams.push("arg" + i + ": " + typeArgs[i]);
@@ -108,20 +111,25 @@ module TsdPlugin {
                     var types = typeName.split("|");
                     var replTypes = [];
                     for (var i = 0; i < types.length; i++) {
-                        replTypes.push(TypeUtil.getTypeReplacement(types[i].trim(), conf, logger));
+                        replTypes.push(TypeUtil.getTypeReplacement(types[i].trim(), conf, logger, context));
                     }
                     return replTypes.join("|");
                 }
+                
+                if (context != null) {
+                    context.addType(typeName, conf, logger);
+                }
+                
                 //No other replacement suggestions, return as is
                 return typeName;
             }
         }
         
-        public static parseAndConvertTypes(typeAnno: IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger): string[] {
+        public static parseAndConvertTypes(typeAnno: IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
             var utypes = [];
             if (typeAnno.names.length > 0) {
-                for (var j = 0; j < typeAnno.names.length; j++) {
-                    var typeName = TypeUtil.getTypeReplacement(typeAnno.names[j], conf, logger);
+                for (var anno of typeAnno.names) {
+                    var typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
                     //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
                     if (typeName == "undefined" || typeName == "null")
                         continue;
@@ -241,22 +249,16 @@ module TsdPlugin {
             if (this.doclet.params != null && this.doclet.params.length > 0) {
                 for (var arg of this.doclet.params) {
                     if (arg.type != null) {
-                        var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
-                        context.addTypes(utypes);
+                        TypeUtil.parseAndConvertTypes(arg.type, conf, logger, context);
                     }
                 }
             }
             if (this.outputReturnType()) {
-                var retTypes = [];
                 if (this.doclet.returns != null) {
                     for (var retDoc of this.doclet.returns) {
-                        var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
-                        for (var r of rts) {
-                            retTypes.push(r);
-                        }
+                        TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
                     }
                 }
-                context.addTypes(retTypes);
             }
         }
         
@@ -439,7 +441,10 @@ module TsdPlugin {
                 return `${mod}.${this.doclet.name}`;
         }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            context.addType(this.getQualifiedName());
+            TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
+            for (var member of this.members) {
+                member.visit(context, conf, logger);
+            }
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             if (conf.outputDocletDefs) {
@@ -491,9 +496,16 @@ module TsdPlugin {
                 return `${mod}.${this.doclet.name}`;
         }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            context.addType(this.getQualifiedName());
+            TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
             if (this.doclet.augments != null) {
-                context.addTypes(this.doclet.augments);
+                for (let t of this.doclet.augments) {
+                    TypeUtil.getTypeReplacement(t, conf, logger, context);
+                }
+            }
+            if (this.ctor != null)
+                this.ctor.visit(context, conf, logger);
+            for (var member of this.members) {
+                member.visit(context, conf, logger);
             }
         }
         
@@ -569,7 +581,7 @@ module TsdPlugin {
                 return `${mod}.${this.name}`;
         }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            context.addType(this.getQualifiedName());
+            TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
         }
     }
 
@@ -602,7 +614,7 @@ module TsdPlugin {
                 return `${mod}.${this.typeAlias}`;
         }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            context.addType(this.getQualifiedName());
+            TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
         }
     }
 
