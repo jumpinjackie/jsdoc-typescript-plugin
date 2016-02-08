@@ -16,6 +16,7 @@ module TsdPlugin {
         return value; 
     }
     
+    //TODO: Generic placeholder parameters are being added, which may trip up the type hoisting afterwards
     export class TypeVisibilityContext {
         private types: Dictionary<string>;
         private ignore: Dictionary<string>;
@@ -24,13 +25,10 @@ module TsdPlugin {
             this.ignore = {
                 "number": "number",
                 "undefined": "undefined",
+                "null": "null",
                 "string": "string",
-                "boolean": "boolean",
-                "Element": "Element",
-                "ArrayBuffer": "ArrayBuffer",
-                "Document": "Document",
-                "Node": "Node"
-            }
+                "boolean": "boolean"
+            };
         }
         public hasType(typeName: string): boolean {
             return this.types[typeName] != null;
@@ -362,7 +360,10 @@ module TsdPlugin {
         
         protected getMethodName(): string { return "constructor"; }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void { 
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            if (this.doclet.name == "UrlTile") {
+                console.log(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+            }
             super.visit(context, conf, logger);
         }
         

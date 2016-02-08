@@ -214,6 +214,9 @@ module TsdPlugin {
             
             //Now that we've collected all referenced types, see what isn't public and
             //make them public
+            //
+            //TODO/FIXME: This is incomplete, as types that we make public may itself reference
+            //types that are not public
             var allTypes = context.getTypes();
             for (let typeName of allTypes) {
                 //console.log(`Checking type: ${typeName}`);
@@ -232,6 +235,8 @@ module TsdPlugin {
                 } else if (userTypes[typeName]) {
                     //User-defined ones will always be public. Nothing to do here.
                 } else {
+                    //TODO: Generate "any" type alias
+                    //TODO: But only if it is not a built-in type (eg. A DOM class)
                     logger.warn(`Type (${typeName}) is referenced in one or more public APIs, but no definition for this type found`);
                 }
             }
