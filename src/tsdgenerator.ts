@@ -298,19 +298,19 @@ module TsdPlugin {
                     this.stats.ifaces++;
             }
             for (var typeName in this.classes) {
-                console.log(`Processing class: ${typeName}`);
                 var cls = this.classes[typeName];
                 if (!cls.getIsPublic())
                     continue;
+                console.log(`Processing class: ${typeName}`);
                 var moduleName = cls.getParentModule();
                 if (TsdGenerator.putTypeInTree(cls, moduleName, root) === true)
                     this.stats.classes++;
             }
             for (var typeName in this.typedefs) {
-                console.log(`Processing typedef: ${typeName}`);
                 var tdf = this.typedefs[typeName];
                 if (!tdf.getIsPublic())
                     continue;
+                console.log(`Processing typedef: ${typeName}`);
                 var moduleName = tdf.getParentModule();
                 if (TsdGenerator.putTypeInTree(tdf, moduleName, root) === true)
                     this.stats.typedefs.gen++;

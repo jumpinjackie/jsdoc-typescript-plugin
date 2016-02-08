@@ -18,8 +18,19 @@ module TsdPlugin {
     
     export class TypeVisibilityContext {
         private types: Dictionary<string>;
+        private ignore: Dictionary<string>;
         constructor() {
             this.types = {};
+            this.ignore = {
+                "number": "number",
+                "undefined": "undefined",
+                "string": "string",
+                "boolean": "boolean",
+                "Element": "Element",
+                "ArrayBuffer": "ArrayBuffer",
+                "Document": "Document",
+                "Node": "Node"
+            }
         }
         public hasType(typeName: string): boolean {
             return this.types[typeName] != null;
@@ -27,9 +38,14 @@ module TsdPlugin {
         public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {
             this.addTypes([ typeName ], conf, logger);
         }
+        private ignoreType(typeName: string): boolean {
+            return this.ignore[typeName] != null;
+        }
         public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {
             for (var type of typeNames) {
-                this.types[type] = type;
+                if (!this.ignoreType(type)) {
+                    this.types[type] = type;
+                }
             }
         }
         public getTypes(): string[] { return Object.keys(this.types); }
