@@ -121,6 +121,8 @@ module TsdPlugin {
                     var cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
                     if (parentModName != null)
                         cls.setParentModule(parentModName);
+                    if (doclet.params != null)
+                        cls.ctor = new TSConstructor(doclet);
                 } else if (doclet.kind == "typedef") {
                     var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
                     if (parentModName != null)

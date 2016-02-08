@@ -8,6 +8,7 @@ module TsdPlugin {
     export interface IDoclet {
         access?: string;
         description: string;
+        classdesc?: string;
         params?: IDocletParameter[];
         returns?: IDocletTypeInfo[];
         tags?: IDocletTag[];

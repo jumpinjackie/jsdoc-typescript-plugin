@@ -147,11 +147,14 @@ module TsdPlugin {
             
         }
         
+        protected getDescription(): string { return this.doclet.description; }
+        
         protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             //Description as comments
             stream.writeln("/**");
-            if (this.doclet.description != null) {
-                var descParts = this.doclet.description.split("\n");
+            var desc = this.getDescription();
+            if (desc != null) {
+                var descParts = desc.split("\n");
                 for (var i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
@@ -210,13 +213,21 @@ module TsdPlugin {
             }
         }
         
+        protected outputScope(): boolean { return true; }
+        
+        protected outputGenericTypes(): boolean { return true; }
+        
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             this.writeDescription("method", stream, conf, logger);
-            var methodDecl = (this.doclet.scope == "static" ? "static " : "");
+            var methodDecl = "";
+            if (this.outputScope())
+                methodDecl += (this.doclet.scope == "static" ? "static " : "");
             methodDecl += this.getMethodName();
-            var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
-            if (genericTypes && genericTypes.length > 0) {
-                methodDecl += "<" + genericTypes.join(", ") + ">";
+            if (this.outputGenericTypes()) {
+                var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
+                if (genericTypes && genericTypes.length > 0) {
+                    methodDecl += "<" + genericTypes.join(", ") + ">";
+                }
             }
             methodDecl += "(";
             //Output args
@@ -278,6 +289,14 @@ module TsdPlugin {
             super(doclet);
         }
         
+        // We're re-using the class doclet here, so any generic types would've
+        // already been written out
+        protected outputGenericTypes(): boolean { return false; }
+        
+        // There is no need to specify scope of constructors
+        protected outputScope(): boolean { return false; }
+        
+        // Constructors need not specify a return type
         protected outputReturnType(): boolean { return false; }
         
         protected getMethodName(): string { return "constructor"; }
@@ -313,11 +332,14 @@ module TsdPlugin {
             this.doclet = doclet;
         }
         
+        protected getDescription(): string { return this.doclet.description; }
+        
         protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             //Description as comments
-            if (this.doclet.description != null) {
+            var desc = this.getDescription();
+            if (desc != null) {
                 stream.writeln("/**");
-                var descParts = this.doclet.description.split("\n");
+                var descParts = desc.split("\n");
                 for (var i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
@@ -390,6 +412,9 @@ module TsdPlugin {
         constructor(doclet: IDoclet) {
             super(doclet);
         }
+        
+        protected getDescription(): string { return this.doclet.classdesc || this.doclet.description; }
+        
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
