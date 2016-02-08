@@ -110,7 +110,15 @@ module TsdPlugin {
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
                     var funcParams = [];
                     for (var i = 0; i < typeArgs.length; i++) {
-                        funcParams.push("arg" + i + ": " + typeArgs[i]);
+                        var typeArg = typeArgs[i];
+                        //Check if it's of the form: "param:value"
+                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        if (rgxp && rgxp.length == 3) {
+                            //TODO: We can keep the param if we can be sure if it is not a reserved keyword
+                            funcParams.push("arg" + i + ": " + rgxp[2]);
+                        } else {
+                            funcParams.push("arg" + i + ": " + typeArgs[i]);
+                        }
                     }
                     return "(" + funcParams.join(", ") + ") => any";
                 }

@@ -50,6 +50,9 @@
                 ]
             }
         },
+        "typeReplacements": {
+            "Image": "HTMLImageElement"
+        },
         "publicAnnotation": "api",
         "defaultReturnType": "void"
     },
