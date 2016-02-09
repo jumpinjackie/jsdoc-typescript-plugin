@@ -217,30 +217,48 @@ module TsdPlugin {
             //Now that we've collected all referenced types, see what isn't public and
             //make them public
             //
-            //TODO/FIXME: This is incomplete, as types that we make public may itself reference
-            //types that are not public
-            var allTypes = context.getTypes();
-            for (let typeName of allTypes) {
-                //console.log(`Checking type: ${typeName}`);
-                if (this.classes[typeName]) {
-                    let cls = this.classes[typeName];
-                    if (!cls.getIsPublic()) {
-                        logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
-                        cls.setIsPublic(true);
+            //Each type that is encountered is checked if it is public, if it is not
+            //public then the type is "promoted" to public and its referenced types are
+            //added to the context. At the same time, each type that has been checked
+            //is removed from the context
+            //
+            //We repeat this process until the context is empty
+            var pass = 1;
+            while (!context.isEmpty()) {
+                //NOTE: This is an array copy. Any new types added in this
+                //pass should not affect the iterated array
+                var allTypes = context.getTypes();
+                //console.log(`Pass ${pass}: ${allTypes.length} types remaining to check`);
+                for (let typeName of allTypes) {
+                    //console.log(`Checking type: ${typeName}`);
+                    if (this.classes[typeName]) {
+                        let cls = this.classes[typeName];
+                        if (!cls.getIsPublic()) {
+                            logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                            cls.setIsPublic(true);
+                            //Have to visit to we know what extra types to check for
+                            cls.visit(context, this.config, logger);
+                        }
+                    } else if (this.typedefs[typeName]) {
+                        let tdf = this.typedefs[typeName];
+                        if (!tdf.getIsPublic()) {
+                            logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                            tdf.setIsPublic(true);
+                            //Have to visit so we know what extra types to check for
+                            tdf.visit(context, this.config, logger);
+                        }
+                    } else if (userTypes[typeName]) {
+                        //If the user defines a type, it means they want said type on
+                        //the public API surface already. Nothing to do here.
+                    } else {
+                        //TODO: Generate "any" type alias
+                        //TODO: But only if it is not a built-in type (eg. A DOM class)
+                        logger.warn(`Type (${typeName}) is referenced in one or more public APIs, but no definition for this type found`);
                     }
-                } else if (this.typedefs[typeName]) {
-                    let tdf = this.typedefs[typeName];
-                    if (!tdf.getIsPublic()) {
-                        logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
-                        tdf.setIsPublic(true);
-                    }
-                } else if (userTypes[typeName]) {
-                    //User-defined ones will always be public. Nothing to do here.
-                } else {
-                    //TODO: Generate "any" type alias
-                    //TODO: But only if it is not a built-in type (eg. A DOM class)
-                    logger.warn(`Type (${typeName}) is referenced in one or more public APIs, but no definition for this type found`);
+                    //Type has been checked, remove from context
+                    context.removeType(typeName);
                 }
+                pass++;
             }
         }
         private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {

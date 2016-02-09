@@ -30,6 +30,11 @@ module TsdPlugin {
                 "boolean": "boolean"
             };
         }
+        public removeType(typeName: string): void {
+            if (this.hasType(typeName)) {
+                delete this.types[typeName];
+            }
+        }
         public hasType(typeName: string): boolean {
             return this.types[typeName] != null;
         }
@@ -46,6 +51,7 @@ module TsdPlugin {
                 }
             }
         }
+        public isEmpty(): boolean { return Object.keys(this.types).length == 0; }
         public getTypes(): string[] { return Object.keys(this.types); }
     }
     
