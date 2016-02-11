@@ -39,11 +39,14 @@ module TsdPlugin {
                     global: ((config.interfaces || {}).global || {}),
                     module: ((config.interfaces || {}).module || {})
                 },
-                ignoreTypes: {}
+                ignoreTypes: {},
+                headerFile: config.headerFile,
+                footerFile: config.footerFile,
+                memberReplacements: (config.memberReplacements || {})
             }
             var ignoreJsDocTypes = (config.ignore || []);
-            for (var i = 0; i < ignoreJsDocTypes.length; i++) {
-                this.config.ignoreTypes[ignoreJsDocTypes[i]] = ignoreJsDocTypes[i];
+            for (let ignoreType of ignoreJsDocTypes) {
+                this.config.ignoreTypes[ignoreType] = ignoreType;
             }
             this.classes = {};
             this.typedefs = {};
@@ -343,9 +346,9 @@ module TsdPlugin {
             return root;
         }
         
-        public process(doclets: IDoclet[], streamFactory: (fileName: string) => any, logger: ILogger): void {
+        public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
-            var output = new IndentedOutputStream(streamFactory(fileName));
+            var output = new IndentedOutputStream(streamFactory.createStream(fileName));
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
@@ -356,8 +359,21 @@ module TsdPlugin {
             //Raise any non-public types referenced from public types to public
             this.hoistPubliclyReferencedTypesToPublic(logger);
             
+            //Write custom header if specified
+            if (this.config.headerFile != null) {
+                var header = streamFactory.readText(this.config.headerFile);
+                output.writeln(header);
+            }
+            
+            //Write the main d.ts body
             var tree = this.assembleModuleTree();
             ModuleUtils.outputTsd(tree, output, this.config, logger);
+            
+            //Write custom footer if specified
+            if (this.config.headerFile != null) {
+                var footer = streamFactory.readText(this.config.footerFile);
+                output.writeln(footer);
+            }
             
             output.close(() => {
                 console.log("Wrote:");

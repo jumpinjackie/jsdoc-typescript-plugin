@@ -30,11 +30,9 @@
             },
             "module": {
                 "goog.events": {
-                    "Event": "any",
                     "EventLike": "any",
                     "Key": "any",
-                    "BrowserEvent": "any",
-                    "EventTarget": "any"
+                    "BrowserEvent": "any"
                 },
                 "goog.vec.Mat4": {
                     "Number": "any"
@@ -54,7 +52,19 @@
             "Image": "HTMLImageElement"
         },
         "publicAnnotation": "api",
-        "defaultReturnType": "void"
+        "defaultReturnType": "void",
+        "headerFile": "./content/ol_header.ts",
+        "footerFile": "./content/ol_footer.ts",
+        "memberReplacements": {
+            "ol.layer.VectorTile#getSource": {
+                "description": "Return the associated source of the layer (NOTE: TypeScript currently prevents us from returning the intended type of ol.source.VectorTile, you will have to manually cast the returned value to this type)",
+                "declaration": "getSource(): any;"
+            },
+            "olx.control.OverviewMapOptions#layers": {
+                "description": "Layers for the overview map. If not set, then all maps layers are used instead",
+                "declaration": "layers: ol.layer.Layer[]|ol.Collection<ol.layer.Layer>"
+            }
+        }
     },
     "templates": {
         "default": {

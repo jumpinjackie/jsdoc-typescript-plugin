@@ -5,6 +5,11 @@ module TsdPlugin {
         fatal(msg: string): void;
     }
     
+    export interface IFileStreamFactory {
+        createStream(fileName: string): any; /* fs.WriteStream */
+        readText(fileName: string): string;
+    }
+    
     export class IndentedOutputStream {
         private indentLevel: number;
         private output: any;

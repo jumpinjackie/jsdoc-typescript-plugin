@@ -24,6 +24,17 @@ module TsdPlugin {
          */
         module: Dictionary<Dictionary<TConf>>;
     }
+    
+    export interface IMemberDeclaration {
+        /**
+         * Documentation to attach to the declaration
+         */
+        description?: string;
+        /**
+         * The actual declaration
+         */
+        declaration: string;
+    }
 
     /**
      * Defines the root plugin configuration section of the JSDoc configuration
@@ -86,5 +97,18 @@ module TsdPlugin {
          * will be ignored, giving precedence to your user-defined aliases and interfaces.
          */
         ignoreTypes: Dictionary<string>;
+        /**
+         * Path to custom header content file to add to the top of the generated TypeScript definition file
+         */
+        headerFile: string;
+        /**
+         * Path to custom footer content file to add to the bottom of the generated TypeScript definition file
+         */
+        footerFile: string;
+        /**
+         * Member overrides to replace any generated members. Key is the JsDoc longname (ie. qualifiedClassName#memberName)
+         * Value is the replacement for it
+         */
+        memberReplacements: Dictionary<IMemberDeclaration>;
     }
 }

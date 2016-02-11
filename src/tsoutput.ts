@@ -229,16 +229,27 @@ module TsdPlugin {
             super(doclet);
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            this.writeDescription("property", stream, conf, logger);
-            var propDecl = `${this.doclet.name}: `;
-            if (this.doclet.type != null) {
-                var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
-                propDecl += types.join("|") + ";";
+            //If member override exists, it takes precedence
+            if (conf.memberReplacements[this.doclet.longname] != null) {
+                let memberOv = conf.memberReplacements[this.doclet.longname];
+                if (memberOv.description != null) {
+                    stream.writeln("/**");
+                    stream.writeln(` * ${memberOv.description}`);
+                    stream.writeln(" */");
+                }
+                stream.writeln(memberOv.declaration);
             } else {
-                logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has not return type defined. Defaulting to "any"`);
-                propDecl += "any;";
+                this.writeDescription("property", stream, conf, logger);
+                var propDecl = `${this.doclet.name}: `;
+                if (this.doclet.type != null) {
+                    var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                    propDecl += types.join("|") + ";";
+                } else {
+                    logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has not return type defined. Defaulting to "any"`);
+                    propDecl += "any;";
+                }
+                stream.writeln(propDecl);
             }
-            stream.writeln(propDecl);
         }
         
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
@@ -304,69 +315,80 @@ module TsdPlugin {
         }
         
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            this.writeDescription("method", stream, conf, logger);
-            var methodDecl = "";
-            if (this.outputScope())
-                methodDecl += (this.doclet.scope == "static" ? "static " : "");
-            methodDecl += this.getMethodName();
-            if (this.outputGenericTypes()) {
-                var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
-                if (genericTypes && genericTypes.length > 0) {
-                    methodDecl += "<" + genericTypes.join(", ") + ">";
+            //If member override exists, it takes precedence
+            if (conf.memberReplacements[this.doclet.longname] != null) {
+                let memberOv = conf.memberReplacements[this.doclet.longname];
+                if (memberOv.description != null) {
+                    stream.writeln("/**");
+                    stream.writeln(` * ${memberOv.description}`);
+                    stream.writeln(" */");
                 }
-            }
-            methodDecl += "(";
-            //Output args
-            var argVals = [];
-            if (this.doclet.params != null && this.doclet.params.length > 0) {
-                var forceNullable = false;
-                for (var arg of this.doclet.params) {
-                    var argStr = arg.name;
-                    if (forceNullable || arg.nullable == true) {
-                        // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
-                        // So by definition everything after the nullable argument has to be nullable as well
-                        forceNullable = true;
-                        argStr += "?: ";
+                stream.writeln(memberOv.declaration);
+            } else {
+                this.writeDescription("method", stream, conf, logger);
+                var methodDecl = "";
+                if (this.outputScope())
+                    methodDecl += (this.doclet.scope == "static" ? "static " : "");
+                methodDecl += this.getMethodName();
+                if (this.outputGenericTypes()) {
+                    var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
+                    if (genericTypes && genericTypes.length > 0) {
+                        methodDecl += "<" + genericTypes.join(", ") + ">";
+                    }
+                }
+                methodDecl += "(";
+                //Output args
+                var argVals = [];
+                if (this.doclet.params != null && this.doclet.params.length > 0) {
+                    var forceNullable = false;
+                    for (var arg of this.doclet.params) {
+                        var argStr = arg.name;
+                        if (forceNullable || arg.nullable == true) {
+                            // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
+                            // So by definition everything after the nullable argument has to be nullable as well
+                            forceNullable = true;
+                            argStr += "?: ";
+                        } else {
+                            argStr += ": ";
+                        }
+                        if (arg.type != null) {
+                            //Output as TS union type
+                            var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
+                            argStr += utypes.join("|");
+                        } else {
+                            //logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
+                            //Fallback to any
+                            argStr += "any";
+                        }
+                        argVals.push(argStr);
+                    }
+                }
+                methodDecl += argVals.join(", ") + ")";
+                
+                //Determine return type
+                var retTypes = [];
+                if (this.doclet.returns != null) {
+                    for (var retDoc of this.doclet.returns) {
+                        var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
+                        for (var r of rts) {
+                            retTypes.push(r);
+                        }
+                    }
+                }
+                var retType = retTypes.join("|"); //If multiple, return type is TS union
+                
+                if (this.outputReturnType()) {
+                    if (retType != null && retType != "") {
+                        methodDecl += ": " + retType;
                     } else {
-                        argStr += ": ";
-                    }
-                    if (arg.type != null) {
-                        //Output as TS union type
-                        var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
-                        argStr += utypes.join("|");
-                    } else {
-                        //logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
-                        //Fallback to any
-                        argStr += "any";
-                    }
-                    argVals.push(argStr);
-                }
-            }
-            methodDecl += argVals.join(", ") + ")";
-            
-            //Determine return type
-            var retTypes = [];
-            if (this.doclet.returns != null) {
-                for (var retDoc of this.doclet.returns) {
-                    var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
-                    for (var r of rts) {
-                        retTypes.push(r);
+                        //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
+                        methodDecl += ": " + conf.defaultReturnType;
                     }
                 }
+                
+                methodDecl += ";";
+                stream.writeln(methodDecl);
             }
-            var retType = retTypes.join("|"); //If multiple, return type is TS union
-            
-            if (this.outputReturnType()) {
-                if (retType != null && retType != "") {
-                    methodDecl += ": " + retType;
-                } else {
-                    //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
-                    methodDecl += ": " + conf.defaultReturnType;
-                }
-            }
-            
-            methodDecl += ";";
-            stream.writeln(methodDecl);
         }
     }
 
