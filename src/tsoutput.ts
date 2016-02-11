@@ -336,7 +336,9 @@ module TsdPlugin {
             if (this.outputReturnType()) {
                 if (this.doclet.returns != null) {
                     for (var retDoc of this.doclet.returns) {
-                        TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                        if (retDoc.type != null) {
+                            TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                        }
                     }
                 }
             }
@@ -401,9 +403,11 @@ module TsdPlugin {
                 var retTypes = [];
                 if (this.doclet.returns != null) {
                     for (var retDoc of this.doclet.returns) {
-                        var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
-                        for (var r of rts) {
-                            retTypes.push(r);
+                        if (retDoc.type != null) {
+                            var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
+                            for (var r of rts) {
+                                retTypes.push(r);
+                            }
                         }
                     }
                 }
