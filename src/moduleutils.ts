@@ -17,6 +17,9 @@ module TsdPlugin {
             for (var type of module.types) {
                 type.output(stream, conf, logger);
             }
+            for (var member of module.members) {
+                member.output(stream, conf, logger);
+            }
             for (var moduleName in module.children) {
                 var child = module.children[moduleName];
                 //Root modules have to be declared

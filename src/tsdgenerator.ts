@@ -6,6 +6,7 @@ module TsdPlugin {
             user: number;
             gen: number;
         },
+        moduleMembers: number;
         ifaces: number;
         classes: number;
     }
@@ -14,6 +15,8 @@ module TsdPlugin {
      * The class that does all the grunt work
      */
     export class TsdGenerator {
+        private moduleMembers: Dictionary<TSMember[]>;
+        private globalMembers: TSMember[];
         private classes: Dictionary<TSClass>;
         private typedefs: Dictionary<TSTypedef>;
         private userTypeAliases: TSUserTypeAlias[];
@@ -50,6 +53,8 @@ module TsdPlugin {
             }
             this.classes = {};
             this.typedefs = {};
+            this.moduleMembers = {};
+            this.globalMembers = [];
             this.userInterfaces = [];
             this.userTypeAliases = [];
             this.stats = {
@@ -57,6 +62,7 @@ module TsdPlugin {
                     user: 0,
                     gen: 0
                 },
+                moduleMembers: 0,
                 ifaces: 0,
                 classes: 0
             };
@@ -118,7 +124,7 @@ module TsdPlugin {
                 } else if (doclet.memberof) {
                     parentModName = doclet.memberof;
                 }
-                if (doclet.kind == "class") {
+                if (doclet.kind == DocletKind.Class) {
                     //Key class definition on longname
                     var cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
                     cls.setIsPublic(isPublic);
@@ -126,7 +132,7 @@ module TsdPlugin {
                         cls.setParentModule(parentModName);
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
-                } else if (doclet.kind == "typedef") {
+                } else if (doclet.kind == DocletKind.Typedef) {
                     var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
                     tdf.setIsPublic(isPublic);
                     if (parentModName != null)
@@ -146,19 +152,37 @@ module TsdPlugin {
                 //We've keyed class definition on longname, so memberof should
                 //point to it
                 var cls: TSComposable = this.ensureClassDef(doclet.memberof);
+                var isTypedef = false;
                 if (!cls) {
                     //Failing that it would've been registered as a typedef
                     cls = this.ensureTypedef(doclet.memberof);
-                    if (!cls)
+                    if (!cls) {
+                        //Before we bail, let's assume this is a module level member and
+                        //see if it's the right doclet kind
+                        let parentModule = doclet.memberof;
+                        if (doclet.kind == DocletKind.Function) {
+                            if (this.moduleMembers[parentModule] == null)
+                                this.moduleMembers[parentModule] = [];
+                            let method = new TSMethod(doclet)
+                            method.setIsModule(true);
+                            this.moduleMembers[parentModule].push(method);
+                        } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
+                            if (this.moduleMembers[parentModule] == null)
+                                this.moduleMembers[parentModule] = [];
+                            let prop = new TSProperty(doclet, false);
+                            prop.setIsModule(true);
+                            this.moduleMembers[parentModule].push(prop);
+                        }
                         continue;
+                    } else {
+                        isTypedef = true;
+                    }
                 }
                 
-                if (doclet.kind == "value") {
-                    cls.members.push(new TSProperty(doclet));
-                } else if (doclet.kind == "function") {
+                if (doclet.kind == DocletKind.Function) {
                     cls.members.push(new TSMethod(doclet));
-                } else if (doclet.kind == "member" && doclet.params == null) {
-                    cls.members.push(new TSProperty(doclet));
+                } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
+                    cls.members.push(new TSProperty(doclet, isTypedef));
                 }
             }
         }
@@ -197,6 +221,12 @@ module TsdPlugin {
             }
             for (let iface of this.userInterfaces) {
                 iface.visit(context, this.config, logger);
+            }
+            for (let moduleName in this.moduleMembers) {
+                let members = this.moduleMembers[moduleName];
+                for (let member of members) {
+                    member.visit(context, this.config, logger);
+                }
             }
             for (let typeName in this.classes) {
                 let cls = this.classes[typeName];
@@ -273,7 +303,8 @@ module TsdPlugin {
                     tree.children[name] = {
                         isRoot: (i == 0),
                         children: {},
-                        types: []
+                        types: [],
+                        members: []
                     }
                 }
                 tree = tree.children[name];
@@ -292,7 +323,8 @@ module TsdPlugin {
                         root.children[moduleName] = {
                             isRoot: true,
                             children: {},
-                            types: []
+                            types: [],
+                            members: []
                         }
                     }
                     root.children[moduleName].types.push(type);
@@ -313,7 +345,8 @@ module TsdPlugin {
             var root: ITSModule = {
                 isRoot: null,
                 children: {},
-                types: []
+                types: [],
+                members: []
             };
             for (var typedef of this.userTypeAliases) {
                 var moduleName = typedef.getParentModule();
@@ -324,6 +357,13 @@ module TsdPlugin {
                 var moduleName = iface.getParentModule();
                 if (TsdGenerator.putTypeInTree(iface, moduleName, root) === true)
                     this.stats.ifaces++;
+            }
+            for (var modName in this.moduleMembers) {
+                var members = this.moduleMembers[modName];
+                for (var member of members) {
+                    if (TsdGenerator.putTypeInTree(member, modName, root) === true)
+                        this.stats.moduleMembers++;
+                }
             }
             for (var typeName in this.classes) {
                 var cls = this.classes[typeName];
@@ -379,6 +419,7 @@ module TsdPlugin {
                 console.log("Wrote:");
                 console.log(`  ${this.stats.typedefs.user} user-specified typedefs`);
                 console.log(`  ${this.stats.ifaces} user-specified interfaces`);
+                console.log(`  ${this.stats.moduleMembers} module members`);
                 console.log(`  ${this.stats.typedefs.gen} scanned typedefs`);
                 console.log(`  ${this.stats.classes} scanned classes`);
                 console.log(`Saved TypeScript definition file to: ${fileName}`);

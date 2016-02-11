@@ -225,8 +225,20 @@ module TsdPlugin {
     }
 
     export class TSProperty extends TSMember {
-        constructor(doclet: IDoclet) {
+        private isModule: boolean;
+        private allowOptional: boolean;
+        constructor(doclet: IDoclet, allowOptional: boolean) {
             super(doclet);
+            this.isModule = false;
+            this.allowOptional = allowOptional;
+        }
+        public setIsModule(value: boolean): void {
+            this.isModule = value;
+        }
+        private isOptional(): boolean {
+            return this.allowOptional &&
+                  (this.doclet.type.names.indexOf("undefined") >= 0 ||
+                   this.doclet.nullable == true);
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             //If member override exists, it takes precedence
@@ -240,12 +252,22 @@ module TsdPlugin {
                 stream.writeln(memberOv.declaration);
             } else {
                 this.writeDescription("property", stream, conf, logger);
-                var propDecl = `${this.doclet.name}: `;
+                var propDecl = "";
+                if (this.isModule) {
+                    propDecl += "var ";
+                }
+                propDecl += this.doclet.name;
+                if (this.doclet.type != null && this.isOptional()) {
+                    //The presence of undefined is a hint that this property is optional
+                    propDecl += "?: ";
+                } else {
+                    propDecl += ": ";
+                }
                 if (this.doclet.type != null) {
                     var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
                     propDecl += types.join("|") + ";";
                 } else {
-                    logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has not return type defined. Defaulting to "any"`);
+                    logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has no return type defined. Defaulting to "any"`);
                     propDecl += "any;";
                 }
                 stream.writeln(propDecl);
@@ -260,8 +282,14 @@ module TsdPlugin {
     }
 
     export class TSMethod extends TSMember {
+        private isModule: boolean;
         constructor(doclet: IDoclet) {
             super(doclet);
+            this.isModule = false;
+        }
+        
+        public setIsModule(value: boolean): void {
+            this.isModule = value;
         }
         
         protected outputReturnType(): boolean { return true; }
@@ -275,7 +303,7 @@ module TsdPlugin {
                 var forceNullable = false;
                 for (var arg of this.doclet.params) {
                     var req = "";
-                    if (forceNullable || arg.nullable == true) {
+                    if (forceNullable || arg.nullable == true || arg.optional == true) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
                         // everything after the nullable argument has to be nullable as well
                         forceNullable = true;
@@ -327,8 +355,12 @@ module TsdPlugin {
             } else {
                 this.writeDescription("method", stream, conf, logger);
                 var methodDecl = "";
-                if (this.outputScope())
-                    methodDecl += (this.doclet.scope == "static" ? "static " : "");
+                if (this.isModule) {
+                    methodDecl += "function ";
+                } else {
+                    if (this.outputScope())
+                        methodDecl += (this.doclet.scope == "static" ? "static " : "");
+                }
                 methodDecl += this.getMethodName();
                 if (this.outputGenericTypes()) {
                     var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
@@ -343,7 +375,7 @@ module TsdPlugin {
                     var forceNullable = false;
                     for (var arg of this.doclet.params) {
                         var argStr = arg.name;
-                        if (forceNullable || arg.nullable == true) {
+                        if (forceNullable || arg.nullable == true || arg.optional == true) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
                             forceNullable = true;
@@ -519,7 +551,7 @@ module TsdPlugin {
                 stream.writeln(" */");
             }
             
-            this.writeDescription(DocletKind.typedef, stream, conf, logger);
+            this.writeDescription(DocletKind.Typedef, stream, conf, logger);
             
             //If it has methods and/or properties, treat this typedef as an interface
             if (this.members.length > 0) {
@@ -582,7 +614,7 @@ module TsdPlugin {
                 stream.writeln(" */");
             }
             
-            this.writeDescription(DocletKind.class, stream, conf, logger);
+            this.writeDescription(DocletKind.Class, stream, conf, logger);
             
             var clsDecl = "class " + this.doclet.name;
             var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
@@ -700,5 +732,9 @@ module TsdPlugin {
          * Types defined at this level
          */
         types: IOutputtable[];
+        /**
+         * Vars, Functions and other assorted members at this module level 
+         */
+        members: TSMember[];
     }
 }

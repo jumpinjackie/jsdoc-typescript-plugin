@@ -20,5 +20,6 @@ module TsdPlugin {
         undocumented?: boolean;
         type?: IDocletType;
         augments?: string[];
+        nullable?: boolean;
     }
 }

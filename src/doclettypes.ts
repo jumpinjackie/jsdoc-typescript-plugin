@@ -6,19 +6,23 @@ module TsdPlugin {
         /**
          * Doclet for a function
          */
-        public static get function(): string { return "function"; }
+        public static get Function(): string { return "function"; }
         /**
          * Doclet for a typedef
          */
-        public static get typedef(): string { return "typedef"; }
+        public static get Typedef(): string { return "typedef"; }
         /**
          * Doclet for a class
          */
-        public static get class(): string { return "class"; }
+        public static get Class(): string { return "class"; }
         /**
          * Doclet for a member
          */
-        public static get member(): string { return "member"; }
+        public static get Member(): string { return "member"; }
+        /**
+         * Doclet for a property
+         */
+        public static get Value(): string { return "value"; }
     }
 
     /**
@@ -42,6 +46,7 @@ module TsdPlugin {
     export interface IDocletParameter extends IDocletTypeInfo {
         name: string;
         nullable?: boolean;
+        optional?: boolean;
     }
 
     /**
