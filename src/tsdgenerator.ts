@@ -133,12 +133,31 @@ module TsdPlugin {
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
                 } else if (doclet.kind == DocletKind.Typedef) {
-                    var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
-                    tdf.setIsPublic(isPublic);
-                    if (parentModName != null)
-                        tdf.setParentModule(parentModName);
+                    if (TsdGenerator.isCallbackType(doclet)) {
+                        let parentModule = doclet.memberof;
+                        if (this.moduleMembers[parentModule] == null)
+                            this.moduleMembers[parentModule] = [];
+                        let method = new TSMethod(doclet)
+                        method.setIsModule(true);
+                        method.setIsTypedef(true);
+                        this.moduleMembers[parentModule].push(method);
+                    } else {
+                        var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                        tdf.setIsPublic(isPublic);
+                        if (parentModName != null)
+                            tdf.setParentModule(parentModName);
+                    }
                 }
             }
+        }
+        private static isCallbackType(doclet: IDoclet): boolean {
+            return doclet.kind == DocletKind.Typedef && 
+                   doclet.type != null &&
+                   doclet.type.names != null &&
+                   doclet.type.names.indexOf("function") >= 0 &&
+                   //This is to check that the function type was documented using @callback instead of @typedef
+                   doclet.params != null &&
+                   (doclet.comment || "").indexOf("@callback") >= 0;
         }
         private processTypeMembers(doclets: IDoclet[]): void {
             for (var doclet of doclets) {

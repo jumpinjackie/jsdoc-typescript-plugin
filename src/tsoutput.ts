@@ -283,13 +283,19 @@ module TsdPlugin {
 
     export class TSMethod extends TSMember {
         private isModule: boolean;
+        private isTypedef: boolean;
         constructor(doclet: IDoclet) {
             super(doclet);
             this.isModule = false;
+            this.isTypedef = false;
         }
         
         public setIsModule(value: boolean): void {
             this.isModule = value;
+        }
+        
+        public setIsTypedef(value: boolean): void {
+            this.isTypedef = value;
         }
         
         protected outputReturnType(): boolean { return true; }
@@ -355,10 +361,13 @@ module TsdPlugin {
                 }
                 stream.writeln(memberOv.declaration);
             } else {
-                this.writeDescription("method", stream, conf, logger);
+                this.writeDescription(((this.isModule && this.isTypedef) ? "function typedef" : "method"), stream, conf, logger);
                 var methodDecl = "";
                 if (this.isModule) {
-                    methodDecl += "function ";
+                    if (this.isTypedef)
+                        methodDecl += "type ";
+                    else
+                        methodDecl += "function ";
                 } else {
                     if (this.outputScope())
                         methodDecl += (this.doclet.scope == "static" ? "static " : "");
@@ -369,6 +378,9 @@ module TsdPlugin {
                     if (genericTypes && genericTypes.length > 0) {
                         methodDecl += "<" + genericTypes.join(", ") + ">";
                     }
+                }
+                if (this.isTypedef) {
+                    methodDecl += " = ";
                 }
                 methodDecl += "(";
                 //Output args
@@ -413,12 +425,17 @@ module TsdPlugin {
                 }
                 var retType = retTypes.join("|"); //If multiple, return type is TS union
                 
+                var retToken = ": ";
+                if (this.isTypedef) {
+                    retToken = " => ";
+                }
+                
                 if (this.outputReturnType()) {
                     if (retType != null && retType != "") {
-                        methodDecl += ": " + retType;
+                        methodDecl += retToken + retType;
                     } else {
                         //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
-                        methodDecl += ": " + conf.defaultReturnType;
+                        methodDecl += retToken + conf.defaultReturnType;
                     }
                 }
                 
@@ -446,9 +463,6 @@ module TsdPlugin {
         protected getMethodName(): string { return "constructor"; }
         
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            if (this.doclet.name == "UrlTile") {
-                console.log(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
-            }
             super.visit(context, conf, logger);
         }
         
@@ -547,6 +561,9 @@ module TsdPlugin {
             for (var member of this.members) {
                 member.visit(context, conf, logger);
             }
+            if (this.doclet.type != null) {
+                TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
+            }
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             if (conf.outputDocletDefs) {
@@ -570,6 +587,10 @@ module TsdPlugin {
                 var typeDecl = `type ${this.doclet.name}`;
                 if (this.doclet != null && this.doclet.type != null) {
                     var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                    //If we find 'Function' in here, send the hint that they should use @callback to document function types
+                    if (types.indexOf("Function") >= 0) {
+                        logger.warn(`Type ${this.doclet.name} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
+                    }
                     typeDecl += " = " + types.join("|") + ";\n";
                 } else { //Fallback
                     typeDecl += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";

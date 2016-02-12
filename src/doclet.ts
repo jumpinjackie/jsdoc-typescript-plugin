@@ -6,6 +6,7 @@ module TsdPlugin {
      * or member
      */
     export interface IDoclet {
+        comment?: string;
         access?: string;
         description: string;
         classdesc?: string;

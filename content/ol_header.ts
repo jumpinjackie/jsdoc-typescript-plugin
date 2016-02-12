@@ -8,6 +8,9 @@
 //
 
 declare module goog {
+    class Disposable {
+        
+    }
     module events {
         class Event {
             
