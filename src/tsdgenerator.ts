@@ -156,7 +156,6 @@ module TsdPlugin {
                    doclet.type.names != null &&
                    doclet.type.names.indexOf("function") >= 0 &&
                    //This is to check that the function type was documented using @callback instead of @typedef
-                   doclet.params != null &&
                    (doclet.comment || "").indexOf("@callback") >= 0;
         }
         private processTypeMembers(doclets: IDoclet[]): void {
