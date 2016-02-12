@@ -14,9 +14,11 @@ var logger = require("jsdoc/util/logger");
 exports.handlers = {
     processingComplete(e: TsdPlugin.IJsDocProcessingCompleteEvent): void {
         var proc = new TsdPlugin.TsdGenerator(env.conf.typescript || {});
-        proc.process(e.doclets, {
+        var sf = {
             createStream: (fileName) => fs.createWriteStream(fileName),
             readText: (fileName) => fs.readFileSync(fileName, "utf8")
-        }, logger);
+        };
+        proc.process(e.doclets, sf, logger);
+        //proc.dumpDoclets(e.doclets, sf);
     }
 };

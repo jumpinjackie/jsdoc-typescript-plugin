@@ -386,6 +386,19 @@ module TsdPlugin {
             return root;
         }
         
+        public dumpDoclets(doclets: IDoclet[], streamFactory: IFileStreamFactory) {
+            var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
+            var output = new IndentedOutputStream(streamFactory.createStream(fileName));
+            
+            for (var doc of doclets) {
+                output.writeln(JSON.stringify(doc, null /*JsDocletStringifyFilter*/, 4));
+            }
+            
+            output.close(() => {
+                console.log(`Saved dumped doclets to: ${fileName}`);
+            });
+        }
+        
         public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
             var output = new IndentedOutputStream(streamFactory.createStream(fileName));

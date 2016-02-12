@@ -6,7 +6,7 @@ module TsdPlugin {
     /**
      * The default filter function for any JSON.stringify calls
      */
-    function JsDocletStringifyFilter(key: string, value: any): any { 
+    export function JsDocletStringifyFilter(key: string, value: any): any { 
         if (key === "comment") { 
             return undefined; 
         }

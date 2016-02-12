@@ -3,12 +3,11 @@
   "version": "0.0.1",
   "description": "A JSDoc plugin to generate a TypeScript definition file (.d.ts) from annotated JSDoc sources",
   "scripts": {
-    "build": "webpack",
     "tsc": "tsc",
     "example-doc": "jsdoc ./examples/jsdoc3-examples -r -c ./jsdoc.json -d ./docs/example",
     "ol-doc": "jsdoc -c ./jsdoc.ol.json -d ./docs/ol",
     "cesium-doc": "jsdoc -c ./jsdoc.cesium.json -d ./docs/cesium",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsc ./typings/openlayers.d.ts && tsc ./typings/cesium.d.ts"
   },
   "repository": {
     "type": "git",
