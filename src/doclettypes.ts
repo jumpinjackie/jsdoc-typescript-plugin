@@ -37,7 +37,7 @@ module TsdPlugin {
      */
     export interface IDocletTypeInfo {
         type: IDocletType;
-        description: string;
+        description?: string;
     }
 
     /**

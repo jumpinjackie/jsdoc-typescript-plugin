@@ -305,7 +305,7 @@ module TsdPlugin {
         protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             //If we have args, document them. Because TypeScript is ... typed, the {type}
             //annotation is not necessary in the documentation
-            if (this.doclet.params != null && this.doclet.params.length > 0) {
+            if (this.doclet.params != null && this.doclet.params.length > 0 && !this.isTypedef) {
                 var forceNullable = false;
                 for (var arg of this.doclet.params) {
                     var req = "";

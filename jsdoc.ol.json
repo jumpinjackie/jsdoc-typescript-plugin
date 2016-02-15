@@ -19,31 +19,9 @@
         "rootModuleName": "openlayers",
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
-        "ignore": [
-            "ol.CanvasFunctionType",
-            "ol.CoordinateFormatType",
-            "ol.FeatureLoader",
-            "ol.FeatureStyleFunction",
-            "ol.FeatureUrlFunction",
-            "ol.ImageLoadFunctionType",
-            "ol.LoadingStrategy",
-            "ol.PreRenderFunction",
-            "ol.TransformFunction",
-            "ol.TileUrlFunctionType",
-            "ol.TileLoadFunctionType",
-            "ol.TileVectorLoadFunctionType",
-            "ol.events.ConditionType",
-            "ol.style.StyleFunction",
-            "ol.style.GeometryFunction",
-            "ol.raster.Operation",
-            "ol.interaction.DragBoxEndConditionType",
-            "ol.interaction.DrawGeometryFunctionType",
-            "ol.interaction.SelectFilterFunction"
-        ],
-        "makePublic": [
-            "ol.Image",
-            "ol.Tile"
-        ],
+        "rewriteFunctionTypedefs": true,
+        "ignore": [],
+        "makePublic": [],
         "aliases": {
             "global": {
                 "proj4": "any",
