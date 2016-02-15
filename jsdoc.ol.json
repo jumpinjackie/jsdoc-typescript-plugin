@@ -40,6 +40,10 @@
             "ol.interaction.DrawGeometryFunctionType",
             "ol.interaction.SelectFilterFunction"
         ],
+        "makePublic": [
+            "ol.Image",
+            "ol.Tile"
+        ],
         "aliases": {
             "global": {
                 "proj4": "any",

@@ -43,6 +43,7 @@ module TsdPlugin {
                     module: ((config.interfaces || {}).module || {})
                 },
                 ignoreTypes: {},
+                makePublic: (config.makePublic || []),
                 headerFile: config.headerFile,
                 footerFile: config.footerFile,
                 memberReplacements: (config.memberReplacements || {})
@@ -274,6 +275,31 @@ module TsdPlugin {
             //is removed from the context
             //
             //We repeat this process until the context is empty
+            //
+            //But before we start, auto-hoist any type in the "makePublic" list 
+            for (var typeName of this.config.makePublic) {
+                console.log(`Checking if (${typeName}) needs to be hoisted`);
+                if (this.classes[typeName]) {
+                    let cls = this.classes[typeName];
+                    if (!cls.getIsPublic()) {
+                        //logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                        cls.setIsPublic(true);
+                        console.log(`Hoisting (${typeName}) to public API`);
+                        //Have to visit to we know what extra types to check for
+                        cls.visit(context, this.config, logger);
+                    }
+                } else if (this.typedefs[typeName]) {
+                    let tdf = this.typedefs[typeName];
+                    if (!tdf.getIsPublic()) {
+                        //logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
+                        tdf.setIsPublic(true);
+                        console.log(`Hoisting (${typeName}) to public API`);
+                        //Have to visit so we know what extra types to check for
+                        tdf.visit(context, this.config, logger);
+                    }
+                }
+            }
+            
             var pass = 1;
             while (!context.isEmpty()) {
                 //NOTE: This is an array copy. Any new types added in this

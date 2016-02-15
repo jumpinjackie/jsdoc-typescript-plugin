@@ -98,6 +98,12 @@ module TsdPlugin {
          */
         ignoreTypes: Dictionary<string>;
         /**
+         * A list of types to always make public. Add types here if you are manually defining types in a
+         * custom header or footer and those types reference types that may not be public when the 
+         * source is processed by the plugin
+         */
+        makePublic: string[]
+        /**
          * Path to custom header content file to add to the top of the generated TypeScript definition file
          */
         headerFile: string;
