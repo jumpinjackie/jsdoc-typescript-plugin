@@ -425,25 +425,33 @@ module TsdPlugin {
         
         protected getMethodName(): string { return this.doclet.name; }
         
-        private isArgNullable(arg: IDocletParameter, publicTypes: Dictionary<IOutputtable>): boolean {
+        private isArgOptional(arg: IDocletParameter, publicTypes: Dictionary<IOutputtable>): boolean {
             //If the argument is a typedef, it will (and should) be the only argument type
-            if (arg.type != null && arg.type.names.length == 1) {
-                var outputtable = publicTypes[arg.type.names[0]];
-                if (outputtable != null) {
-                    var kind = outputtable.getKind();
-                    if (TSOutputtableKind.Typedef == kind) {
-                        var tdf = <TSTypedef>outputtable;
-                        if (tdf.isOptional())
-                            return true;
+            if (arg.type != null && arg.type.names.length > 0) {
+                if (arg.type.names.length == 1) {
+                    var outputtable = publicTypes[arg.type.names[0]];
+                    if (outputtable != null) {
+                        var kind = outputtable.getKind();
+                        if (TSOutputtableKind.Typedef == kind) {
+                            var tdf = <TSTypedef>outputtable;
+                            if (tdf.isOptional())
+                                return true;
+                        }
+                        if (TSOutputtableKind.UserTypeAlias == kind) {
+                            var utdf = <TSUserTypeAlias>outputtable;
+                            if (utdf.isOptional())
+                                return true;
+                        }
                     }
-                    if (TSOutputtableKind.UserTypeAlias == kind) {
-                        var utdf = <TSUserTypeAlias>outputtable;
-                        if (utdf.isOptional())
-                            return true;
+                } else {
+                    //Any type ending with '=' or starting with '?' denotes optionality to the whole
+                    var matches1 = arg.type.names.filter(t => t.indexOf("=") == t.length - 1);
+                    var matches2 = arg.type.names.filter(t => t.indexOf("?") == 0);
+                    if (matches1.length > 0 || matches2.length > 0) {
+                        return true;
                     }
                 }
             }
-            
             return arg.nullable == true || 
                    arg.optional == true ||
                    arg.type.names.indexOf("undefined") >= 0;
@@ -456,7 +464,7 @@ module TsdPlugin {
                 var forceNullable = false;
                 for (var arg of this.doclet.params) {
                     var req = "";
-                    if (forceNullable || this.isArgNullable(arg, publicTypes)) {
+                    if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
                         // everything after the nullable argument has to be nullable as well
                         forceNullable = true;
@@ -537,7 +545,7 @@ module TsdPlugin {
                     var forceNullable = false;
                     for (var arg of this.doclet.params) {
                         var argStr = arg.name;
-                        if (forceNullable || this.isArgNullable(arg, publicTypes)) {
+                        if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
                             forceNullable = true;
