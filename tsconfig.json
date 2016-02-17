@@ -13,6 +13,7 @@
         "content",
         "examples",
         "plugins",
+        "test",
         "typings",
         "node_modules",
         "content/ol_footer.ts",
