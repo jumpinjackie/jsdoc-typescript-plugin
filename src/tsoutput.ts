@@ -206,17 +206,25 @@ module TsdPlugin {
 
     export abstract class TSMember implements IOutputtable {
         protected doclet: IDoclet;
+        protected isPublic: boolean;
         constructor(doclet: IDoclet) {
             this.doclet = doclet;
+            this.isPublic = true;
         }
+        
+        public getDoclet(): IDoclet { return this.doclet; }
+        
+        public inheritsDoc(): boolean { return this.doclet.inheritdoc === true; }
+        
+        public setIsPublic(value: boolean): void { this.isPublic = value; }
+        
+        public getIsPublic(): boolean { return this.isPublic; }
         
         public getFullName(): string { return this.doclet.longname; }
         
         public abstract getKind(): TSOutputtableKind;
         
-        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
-            
-        }
+        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void { }
         
         protected getDescription(): string { return this.doclet.description; }
         
@@ -562,6 +570,8 @@ module TsdPlugin {
             this.doclet = doclet;
         }
         
+        public getDoclet(): IDoclet { return this.doclet; }
+        
         public getFullName(): string { return this.doclet.longname; }
         
         public abstract getKind(): TSOutputtableKind;
@@ -591,6 +601,11 @@ module TsdPlugin {
         public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
+    interface TSMemberResult {
+        member: TSMember;
+        isPublic: boolean;
+    } 
+
     /**
      * A TS type that has child members
      */
@@ -601,6 +616,46 @@ module TsdPlugin {
             super(doclet);
             this.members = [];
             this.isPublic = false;
+        }
+        public findMember(name: string, kind: string): TSMember {
+            var matches = this.members.filter(m => {
+                var doclet = m.getDoclet();
+                return doclet.name == name && doclet.kind == kind;
+            });
+            if (matches.length == 1)
+                return matches[0];
+            else
+                return null;
+        }
+        public getParentTypeNames(): string[] { return this.doclet.augments; }
+        /**
+         * Finds a matching member from any of the current member's types inheritance hierarchy that doesn't inherit documentation
+         */
+        public getInheritedMember(memberDoclet: IDoclet, parents: string[], publicTypes: Dictionary<IOutputtable>): TSMemberResult {
+            for (var parentTypeName of parents) {
+                var type = publicTypes[parentTypeName];
+                //Parent type is a known TSComposable
+                if (type != null && (type.getKind() == TSOutputtableKind.Class || type.getKind() == TSOutputtableKind.Typedef)) {
+                    var comp = <TSComposable>type;
+                    //console.log(`Checking if ${comp.getFullName()} has member ${memberDoclet.name} (${memberDoclet.kind})`);
+                    var member = comp.findMember(memberDoclet.name, memberDoclet.kind);
+                    var parentTypeNames = comp.getParentTypeNames() || [];
+                    //Found a member
+                    if (member != null) {
+                        //console.log(`   found member`);
+                        //it's public doesn't pass the buck up to another parent
+                        if (!member.inheritsDoc())
+                            return { member: member, isPublic: member.getIsPublic() };
+                        else if (parentTypeNames.length > 0) //Pass the buck up to its parents
+                            return comp.getInheritedMember(memberDoclet, parentTypeNames, publicTypes);
+                    } else {
+                        //console.log(`   member not found`);
+                        if (parentTypeNames.length > 0)
+                            return comp.getInheritedMember(memberDoclet, parentTypeNames, publicTypes);
+                    }
+                }
+            }
+            return null;
         }
         public setIsPublic(isPublic: boolean): void {
             this.isPublic = isPublic;
@@ -634,7 +689,8 @@ module TsdPlugin {
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
             for (var member of this.members) {
-                member.visit(context, conf, logger);
+                if (member.getIsPublic()) // || member.inheritsDoc())
+                    member.visit(context, conf, logger);
             }
             if (this.doclet.type != null) {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
@@ -705,10 +761,10 @@ module TsdPlugin {
             if (this.ctor != null)
                 this.ctor.visit(context, conf, logger);
             for (var member of this.members) {
-                member.visit(context, conf, logger);
+                if (member.getIsPublic() || member.inheritsDoc())
+                    member.visit(context, conf, logger);
             }
         }
-        
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
@@ -737,7 +793,28 @@ module TsdPlugin {
                 this.ctor.output(stream, conf, logger, publicTypes);
             }
             for (var member of this.members) {
-                member.output(stream, conf, logger, publicTypes);
+                //NOTE: inheritsDoc() is tested first before public visibility as it may inherit off of something that
+                //has public visibility
+                if (member.inheritsDoc()) {
+                    var inheritedQuery = this.getInheritedMember(member.getDoclet(), this.doclet.augments, publicTypes);
+                    if (inheritedQuery != null) {
+                        //As long as this member or the inherited member is public, it needs to be output
+                        if (member.getIsPublic() || inheritedQuery.isPublic) {
+                            //console.log(`Outputting inherited member: ${inheritedQuery.member.getDoclet().longname}`);
+                            inheritedQuery.member.output(stream, conf, logger, publicTypes);
+                        } else {
+                            //console.log(`Skipping non-public inherited member: ${inheritedQuery.member.getDoclet().longname}`);
+                        }
+                    } else {
+                        if (member.getIsPublic()) //This is a bug in documentation
+                            logger.warn(`Member ${member.getFullName()} has @inheritdoc annotation, but no inherited member could be found`);
+                    }
+                } else if (member.getIsPublic()) {
+                    //console.log(`Outputting member: ${member.getDoclet().longname}`);
+                    member.output(stream, conf, logger, publicTypes);
+                } else {
+                    //console.log(`Skipping non-public member: ${member.getDoclet().longname}`);
+                }
             }
             stream.unindent(); //End class members
             stream.writeln("}");

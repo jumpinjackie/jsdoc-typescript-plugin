@@ -163,19 +163,23 @@ module TsdPlugin {
             for (var doclet of doclets) {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
-                //TypeScript definition covers a module's *public* API surface, so
-                //skip private members
-                if (TypeUtil.isPrivateDoclet(doclet, this.config))
-                    continue;
+                    
+                var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
                 //point to it
                 var cls: TSComposable = this.ensureClassDef(doclet.memberof);
                 var isTypedef = false;
+                var isClass = true;
                 if (!cls) {
+                    isClass = false;
                     //Failing that it would've been registered as a typedef
                     cls = this.ensureTypedef(doclet.memberof);
                     if (!cls) {
+                        //Bail on this iteration here if not public
+                        if (!isPublic)
+                            continue;
+                        
                         //Before we bail, let's assume this is a module level member and
                         //see if it's the right doclet kind
                         let parentModule = doclet.memberof;
@@ -199,9 +203,13 @@ module TsdPlugin {
                 }
                 
                 if (doclet.kind == DocletKind.Function) {
-                    cls.members.push(new TSMethod(doclet));
+                    var method = new TSMethod(doclet);
+                    method.setIsPublic(isPublic);
+                    cls.members.push(method);
                 } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                    cls.members.push(new TSProperty(doclet, isTypedef));
+                    var prop = new TSProperty(doclet, isTypedef);
+                    prop.setIsPublic(isPublic);
+                    cls.members.push(prop);
                 }
             }
         }

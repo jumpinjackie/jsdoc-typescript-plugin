@@ -22,5 +22,6 @@ module TsdPlugin {
         type?: IDocletType;
         augments?: string[];
         nullable?: boolean;
+        inheritdoc?: boolean;
     }
 }
