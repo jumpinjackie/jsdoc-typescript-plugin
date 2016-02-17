@@ -90,7 +90,7 @@ module TsdPlugin {
                             }
                         }
                     ]
-                    console.log(`Rewrote ${doclet.longname} as callback`);
+                    console.log(`Rewrote doclet for (${doclet.longname}) with extra callback metadata`);
                     //Inject the @callback annotation into the comments (as the main processor checks for the presence)
                     //of this annotation
                     doclet.comment = doclet.comment.replace("/**", `/**\n * @callback ${doclet.longname}\n *`);
@@ -129,7 +129,7 @@ module TsdPlugin {
                         argNo++;
                     }
                     doclet.params = params;
-                    console.log(`Rewrote ${doclet.longname} as callback`);
+                    console.log(`Rewrote doclet for (${doclet.longname}) with extra callback metadata`);
                     //Inject the @callback annotation into the comments (as the main processor checks for the presence)
                     //of this annotation
                     doclet.comment = doclet.comment.replace("/**", `/**\n * @callback ${doclet.longname}\n *`);

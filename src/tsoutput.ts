@@ -109,34 +109,30 @@ module TsdPlugin {
                 //patterns first before trying to look for things like array or union type
                 //notation
                 
-                //Array - Array.<type>
-                var rgxm = typeName.match(/(Array\.)\<(.+)>/); 
+                //Anonymous function with return type
+                var rgxm = typeName.match(/function\((.+)\):\s+(.+)/);
                 if (rgxm) {
-                    return TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context) + "[]";
+                    //console.log("is anon function with return type");
+                    var typeArgs = rgxm[1].split(",")
+                                          .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
+                    var funcParams = [];
+                    for (var i = 0; i < typeArgs.length; i++) {
+                        var typeArg = typeArgs[i];
+                        //Check if it's of the form: "param:value"
+                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        if (rgxp && rgxp.length == 3) {
+                            //TODO: We can keep the param if we can be sure if it is not a reserved keyword
+                            funcParams.push("arg" + i + ": " + rgxp[2]);
+                        } else {
+                            funcParams.push("arg" + i + ": " + typeArgs[i]);
+                        }
+                    }
+                    return "(" + funcParams.join(", ") + ") => " + TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context).trim();
                 }
-                //Array - type[]
-                rgxm = typeName.match(/(.+)\[\]$/);
-                if (rgxm) {
-                    return TypeUtil.getTypeReplacement(rgxm[1].trim(), conf, logger, context) + "[]";
-                }
-                //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
-                rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
-                if (rgxm) {
-                    var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context);
-                    var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger, context);
-                    return "{ [key: " + keyType + "]: " + valueType + "; }";
-                }
-                //Some generic type - SomeGenericType.<AnotherType>
-                rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
-                if (rgxm) {
-                    var genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
-                    var genericTypeArgs = rgxm[3].split(",")
-                                                 .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
-                    return genericType + "<" + genericTypeArgs.join(",") + ">";
-                }
-                //Anonymous function
+                //Anonymous function with no return type
                 rgxm = typeName.match(/function\((.+)\)/);
                 if (rgxm) {
+                    //console.log("is anon function with no return type");
                     var typeArgs = rgxm[1].split(",")
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
                     var funcParams = [];
@@ -153,14 +149,45 @@ module TsdPlugin {
                     }
                     return "(" + funcParams.join(", ") + ") => any";
                 }
+                //Array - Array.<type>
+                rgxm = typeName.match(/(Array\.)\<(.+)>/); 
+                if (rgxm) {
+                    //console.log("is array");
+                    return TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context) + "[]";
+                }
+                //Array - type[]
+                rgxm = typeName.match(/(.+)\[\]$/);
+                if (rgxm) {
+                    //console.log("is array");
+                    return TypeUtil.getTypeReplacement(rgxm[1].trim(), conf, logger, context) + "[]";
+                }
+                //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
+                rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
+                if (rgxm) {
+                    //console.log("is kvp");
+                    var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context);
+                    var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger, context);
+                    return "{ [key: " + keyType + "]: " + valueType + "; }";
+                }
+                //Some generic type - SomeGenericType.<AnotherType>
+                rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
+                if (rgxm) {
+                    //console.log("is generic type");
+                    var genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
+                    var genericTypeArgs = rgxm[3].split(",")
+                                                 .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
+                    return genericType + "<" + genericTypeArgs.join(",") + ">";
+                }
                 //Array - untyped
                 if (typeName.toLowerCase() == "array") {
+                    //console.log("is untyped array");
                     //TODO: Include symbol context
                     logger.warn("Encountered untyped array. Treating as 'any[]'");
                     return "any[]";
                 }
                 //Union-type - typeA|typeB
                 if (typeName.indexOf("|") >= 0) {
+                    //console.log("union type");
                     var types = typeName.split("|");
                     var replTypes = [];
                     for (var i = 0; i < types.length; i++) {
@@ -178,12 +205,31 @@ module TsdPlugin {
             }
         }
         
+        public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: IDoclet, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): void {
+            for (let i = 0; i < parsedReturnTypes.length; i++) {
+                if (parsedReturnTypes[i] == "Function") {
+                    //console.log(`Parsing function return type for ${doclet.longname} from @return in comments`);
+                    //Try to parse return type from comment
+                    var matches = (doclet.comment || "").match(/@return \{(.*)\}/);
+                    if (matches && matches.length == 2) {
+                        //console.log(`    attempting replacement of ${matches[1]}`);
+                        parsedReturnTypes[i] = TypeUtil.getTypeReplacement(matches[1], conf, logger, context);
+                        //console.log(`     => ${parsedReturnTypes[i]}`);
+                        //Warn if after replacement, the type is still "function"
+                        if (parsedReturnTypes[i] == "Function" && context == null) {
+                            logger.warn(`Function return type of ${doclet.longname} is still "Function" after type replacement. This may be a documentation error`);
+                        }
+                    }
+                }
+            }
+        }
+        
         public static parseAndConvertTypes(typeAnno: IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
             var utypes = [];
             if (typeAnno.names.length > 0) {
                 for (var anno of typeAnno.names) {
                     var typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
-                    //Is this a valid JSDoc annotated type? Either way, I don't know what the equivalent to use for TypeScript, so skip
+                    //This is an optionality hint for TypeScript but in terms of signature, it should not be emitted
                     if (typeName == "undefined" || typeName == "null")
                         continue;
                     utypes.push(typeName);
@@ -339,6 +385,7 @@ module TsdPlugin {
                 if (this.doclet.type != null) {
                     var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
                     TypeUtil.fixStringEnumTypes(types, publicTypes);
+                    TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
                     propDecl += types.join("|") + ";";
                 } else {
                     logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has no return type defined. Defaulting to "any"`);
@@ -443,7 +490,8 @@ module TsdPlugin {
                 if (this.doclet.returns != null) {
                     for (var retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                            var parsedTypes = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                            TypeUtil.replaceFunctionTypes(parsedTypes, this.doclet, conf, logger, context);
                         }
                     }
                 }
@@ -526,6 +574,7 @@ module TsdPlugin {
                 }
                 
                 TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
+                TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
                 var retType = retTypes.join("|"); //If multiple, return type is TS union
                 
                 var retToken = ": ";
