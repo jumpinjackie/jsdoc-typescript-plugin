@@ -231,7 +231,8 @@ module TsdPlugin {
                 }
             }
         }
-        private hoistPubliclyReferencedTypesToPublic(logger: ILogger): void {
+        private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Dictionary<IOutputtable> {
+            var publicTypes: Dictionary<IOutputtable> = {}; 
             var context = new TypeVisibilityContext();
             
             //First, visit all known public types and collect referenced types
@@ -315,6 +316,8 @@ module TsdPlugin {
                             cls.setIsPublic(true);
                             //Have to visit to we know what extra types to check for
                             cls.visit(context, this.config, logger);
+                        } else {
+                            publicTypes[cls.getFullName()] = cls;
                         }
                     } else if (this.typedefs[typeName]) {
                         let tdf = this.typedefs[typeName];
@@ -323,10 +326,13 @@ module TsdPlugin {
                             tdf.setIsPublic(true);
                             //Have to visit so we know what extra types to check for
                             tdf.visit(context, this.config, logger);
+                        } else {
+                            publicTypes[tdf.getFullName()] = tdf;
                         }
                     } else if (userTypes[typeName]) {
                         //If the user defines a type, it means they want said type on
                         //the public API surface already. Nothing to do here.
+                        publicTypes[userTypes[typeName]] = userTypes[typeName];
                     } else {
                         //TODO: Generate "any" type alias
                         //TODO: But only if it is not a built-in type (eg. A DOM class)
@@ -337,6 +343,8 @@ module TsdPlugin {
                 }
                 pass++;
             }
+            
+            return publicTypes;
         }
         private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
             var tree: ITSModule = root;
@@ -454,7 +462,7 @@ module TsdPlugin {
             //Process user-defined types
             this.processUserDefinedTypes();
             //Raise any non-public types referenced from public types to public
-            this.hoistPubliclyReferencedTypesToPublic(logger);
+            var publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
             
             //Write custom header if specified
             if (this.config.headerFile != null) {
@@ -464,7 +472,7 @@ module TsdPlugin {
             
             //Write the main d.ts body
             var tree = this.assembleModuleTree();
-            ModuleUtils.outputTsd(tree, output, this.config, logger);
+            ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes);
             
             //Write custom footer if specified
             if (this.config.headerFile != null) {

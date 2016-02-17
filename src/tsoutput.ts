@@ -4,6 +4,18 @@
 
 module TsdPlugin {
     /**
+     * Defines the type of TypeScript element
+     */
+    export enum TSOutputtableKind {
+        Typedef,
+        Class,
+        Method,
+        Property,
+        UserInterface,
+        UserTypeAlias
+    }
+    
+    /**
      * The default filter function for any JSON.stringify calls
      */
     export function JsDocletStringifyFilter(key: string, value: any): any { 
@@ -186,7 +198,9 @@ module TsdPlugin {
     }
     
     export interface IOutputtable {
-        output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        getFullName(): string;
+        getKind(): TSOutputtableKind;
+        output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void;
         visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
@@ -196,13 +210,17 @@ module TsdPlugin {
             this.doclet = doclet;
         }
         
-        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public getFullName(): string { return this.doclet.longname; }
+        
+        public abstract getKind(): TSOutputtableKind;
+        
+        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             
         }
         
         protected getDescription(): string { return this.doclet.description; }
         
-        protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             //Description as comments
             stream.writeln("/**");
             var desc = this.getDescription();
@@ -215,11 +233,11 @@ module TsdPlugin {
                 //logger.warn(`The ${kind} (${this.doclet.name}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                 stream.writeln(` * TODO: This ${kind} has no documentation. Contact the library author if this ${kind} should be documented`);
             }
-            this.writeExtraDescriptionParts(kind, stream, conf, logger);
+            this.writeExtraDescriptionParts(kind, stream, conf, logger, publicTypes);
             stream.writeln(" */");
         }
         
-        public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void;
         
         public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
@@ -232,15 +250,35 @@ module TsdPlugin {
             this.isModule = false;
             this.allowOptional = allowOptional;
         }
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.Property; }
         public setIsModule(value: boolean): void {
             this.isModule = value;
         }
-        private isOptional(): boolean {
-            return this.allowOptional &&
-                  (this.doclet.type.names.indexOf("undefined") >= 0 ||
-                   this.doclet.nullable == true);
+        private isOptional(publicTypes: Dictionary<IOutputtable>): boolean {
+            if (this.allowOptional) {
+                //If the argument is a typedef, it will (and should) be the only argument type
+                if (this.doclet.type.names.length == 1) {
+                    var outputtable = publicTypes[this.doclet.type.names[0]];
+                    if (outputtable != null) {
+                        var kind = outputtable.getKind();
+                        if (TSOutputtableKind.Typedef == kind) {
+                            var tdf = <TSTypedef>outputtable;
+                            if (tdf.isOptional())
+                                return true;
+                        }
+                        if (TSOutputtableKind.UserTypeAlias == kind) {
+                            var utdf = <TSUserTypeAlias>outputtable;
+                            if (utdf.isOptional())
+                                return true;
+                        }
+                    }
+                }
+                return (this.doclet.type.names.indexOf("undefined") >= 0 ||
+                        this.doclet.nullable == true);
+            }
+            return false;
         }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -251,13 +289,13 @@ module TsdPlugin {
                 }
                 stream.writeln(memberOv.declaration);
             } else {
-                this.writeDescription("property", stream, conf, logger);
+                this.writeDescription("property", stream, conf, logger, publicTypes);
                 var propDecl = "";
                 if (this.isModule) {
                     propDecl += "var ";
                 }
                 propDecl += this.doclet.name;
-                if (this.doclet.type != null && this.isOptional()) {
+                if (this.doclet.type != null && this.isOptional(publicTypes)) {
                     //The presence of undefined is a hint that this property is optional
                     propDecl += "?: ";
                 } else {
@@ -290,6 +328,8 @@ module TsdPlugin {
             this.isTypedef = false;
         }
         
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.Method; }
+        
         public setIsModule(value: boolean): void {
             this.isModule = value;
         }
@@ -302,14 +342,38 @@ module TsdPlugin {
         
         protected getMethodName(): string { return this.doclet.name; }
         
-        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        private isArgNullable(arg: IDocletParameter, publicTypes: Dictionary<IOutputtable>): boolean {
+            //If the argument is a typedef, it will (and should) be the only argument type
+            if (arg.type != null && arg.type.names.length == 1) {
+                var outputtable = publicTypes[arg.type.names[0]];
+                if (outputtable != null) {
+                    var kind = outputtable.getKind();
+                    if (TSOutputtableKind.Typedef == kind) {
+                        var tdf = <TSTypedef>outputtable;
+                        if (tdf.isOptional())
+                            return true;
+                    }
+                    if (TSOutputtableKind.UserTypeAlias == kind) {
+                        var utdf = <TSUserTypeAlias>outputtable;
+                        if (utdf.isOptional())
+                            return true;
+                    }
+                }
+            }
+            
+            return arg.nullable == true || 
+                   arg.optional == true ||
+                   arg.type.names.indexOf("undefined") >= 0;
+        }
+        
+        protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             //If we have args, document them. Because TypeScript is ... typed, the {type}
             //annotation is not necessary in the documentation
             if (this.doclet.params != null && this.doclet.params.length > 0 && !this.isTypedef) {
                 var forceNullable = false;
                 for (var arg of this.doclet.params) {
                     var req = "";
-                    if (forceNullable || arg.nullable == true || arg.optional == true) {
+                    if (forceNullable || this.isArgNullable(arg, publicTypes)) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
                         // everything after the nullable argument has to be nullable as well
                         forceNullable = true;
@@ -350,7 +414,7 @@ module TsdPlugin {
             }
         }
         
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -361,7 +425,7 @@ module TsdPlugin {
                 }
                 stream.writeln(memberOv.declaration);
             } else {
-                this.writeDescription(((this.isModule && this.isTypedef) ? "function typedef" : "method"), stream, conf, logger);
+                this.writeDescription(((this.isModule && this.isTypedef) ? "function typedef" : "method"), stream, conf, logger, publicTypes);
                 var methodDecl = "";
                 if (this.isModule) {
                     if (this.isTypedef)
@@ -389,7 +453,7 @@ module TsdPlugin {
                     var forceNullable = false;
                     for (var arg of this.doclet.params) {
                         var argStr = arg.name;
-                        if (forceNullable || arg.nullable == true || arg.optional == true) {
+                        if (forceNullable || this.isArgNullable(arg, publicTypes)) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
                             forceNullable = true;
@@ -466,8 +530,8 @@ module TsdPlugin {
             super.visit(context, conf, logger);
         }
         
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            super.output(stream, conf, logger);
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
+            super.output(stream, conf, logger, publicTypes);
         }
     }
 
@@ -498,6 +562,10 @@ module TsdPlugin {
             this.doclet = doclet;
         }
         
+        public getFullName(): string { return this.doclet.longname; }
+        
+        public abstract getKind(): TSOutputtableKind;
+        
         protected getDescription(): string { return this.doclet.description; }
         
         protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
@@ -518,7 +586,7 @@ module TsdPlugin {
             }
         }
         
-        public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void;
         
         public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
@@ -549,6 +617,13 @@ module TsdPlugin {
         constructor(doclet: IDoclet) {
             super(doclet);
         }
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.Typedef; }
+        public isOptional(): boolean {
+            return this.members.length == 0 //Must be a type-alias typedef
+                && this.doclet.type != null
+                && this.doclet.type.names != null
+                && this.doclet.type.names.indexOf("undefined") >= 0;
+        }
         public getQualifiedName(): string {
             var mod = this.getParentModule();
             if (mod == null)
@@ -565,7 +640,7 @@ module TsdPlugin {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
                 stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
@@ -579,7 +654,7 @@ module TsdPlugin {
                 stream.writeln(`interface ${this.doclet.name} {`);
                 stream.indent();
                 for (var member of this.members) {
-                    member.output(stream, conf, logger);
+                    member.output(stream, conf, logger, publicTypes);
                 }
                 stream.unindent();
                 stream.writeln("}");
@@ -609,6 +684,8 @@ module TsdPlugin {
             super(doclet);
         }
         
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.Class; }
+        
         protected getDescription(): string { return this.doclet.classdesc || this.doclet.description; }
         
         public getQualifiedName(): string {
@@ -632,7 +709,7 @@ module TsdPlugin {
             }
         }
         
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
                 stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
@@ -657,10 +734,10 @@ module TsdPlugin {
             stream.writeln(clsDecl);
             stream.indent(); //Start class members
             if (this.ctor != null) {
-                this.ctor.output(stream, conf, logger);
+                this.ctor.output(stream, conf, logger, publicTypes);
             }
             for (var member of this.members) {
-                member.output(stream, conf, logger);
+                member.output(stream, conf, logger, publicTypes);
             }
             stream.unindent(); //End class members
             stream.writeln("}");
@@ -684,6 +761,8 @@ module TsdPlugin {
             this.name = name;
             this.members = members;
         }
+        public getFullName(): string { return this.getQualifiedName(); }
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.UserInterface; }
         private outputDecl(stream: IndentedOutputStream): void {
             stream.writeln(`interface ${this.name} {`);
             stream.indent();
@@ -720,6 +799,12 @@ module TsdPlugin {
             this.typeAlias = typeAlias;
             this.type = type;
         }
+        public isOptional(): boolean {
+            var types = this.type.split("|").map(t => t.trim());
+            return types.indexOf("undefined") >= 0;
+        }
+        public getFullName(): string { return this.getQualifiedName(); }
+        public getKind(): TSOutputtableKind { return TSOutputtableKind.UserTypeAlias; }
         private outputDecl(stream: IndentedOutputStream): void {
             if (this.getParentModule() == null)
                 stream.writeln(`declare type ${this.typeAlias} = ${this.type};`);

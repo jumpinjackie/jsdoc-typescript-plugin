@@ -13,12 +13,12 @@ module TsdPlugin {
         /**
          * Writes the TS module tree out to the specified output stream
          */
-        public static outputTsd(module: ITSModule, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public static outputTsd(module: ITSModule, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             for (var type of module.types) {
-                type.output(stream, conf, logger);
+                type.output(stream, conf, logger, publicTypes);
             }
             for (var member of module.members) {
-                member.output(stream, conf, logger);
+                member.output(stream, conf, logger, publicTypes);
             }
             for (var moduleName in module.children) {
                 var child = module.children[moduleName];
@@ -31,7 +31,7 @@ module TsdPlugin {
                     stream.writeln(`${decl}module ${moduleName} {`);
                 }
                 stream.indent();
-                ModuleUtils.outputTsd(child, stream, conf, logger);
+                ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes);
                 stream.unindent();
                 stream.writeln("}");
             }
