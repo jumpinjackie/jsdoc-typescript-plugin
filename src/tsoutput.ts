@@ -69,6 +69,19 @@ module TsdPlugin {
     
     export class TypeUtil {
         
+        public static fixStringEnumTypes(typeNames: string[], publicTypes: Dictionary<IOutputtable>): void {
+            //If we encounter any string enum typedefs, replace type with 'string'
+            for (let i = 0; i < typeNames.length; i++) {
+                let ot = publicTypes[typeNames[i]];
+                if (ot != null && ot.getKind() == TSOutputtableKind.Typedef) {
+                    let tdf = <TSTypedef>ot;
+                    if (tdf.getEnumType() == TSEnumType.String) {
+                        typeNames[i] = "string";
+                    }
+                }
+            }
+        }
+        
         public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration): boolean {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
@@ -250,6 +263,12 @@ module TsdPlugin {
         public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
 
+    export enum TSEnumType {
+        String,
+        Number,
+        Invalid
+    }
+
     export class TSProperty extends TSMember {
         private isModule: boolean;
         private allowOptional: boolean;
@@ -261,6 +280,14 @@ module TsdPlugin {
         public getKind(): TSOutputtableKind { return TSOutputtableKind.Property; }
         public setIsModule(value: boolean): void {
             this.isModule = value;
+        }
+        public tryGetEnumValue(): any {
+            if (this.doclet.meta && 
+                this.doclet.meta.code &&
+                this.doclet.meta.code.type == "Literal") {
+                return this.doclet.meta.code.value;
+            }
+            return null;
         }
         private isOptional(publicTypes: Dictionary<IOutputtable>): boolean {
             if (this.allowOptional) {
@@ -311,6 +338,7 @@ module TsdPlugin {
                 }
                 if (this.doclet.type != null) {
                     var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                    TypeUtil.fixStringEnumTypes(types, publicTypes);
                     propDecl += types.join("|") + ";";
                 } else {
                     logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has no return type defined. Defaulting to "any"`);
@@ -471,7 +499,8 @@ module TsdPlugin {
                         }
                         if (arg.type != null) {
                             //Output as TS union type
-                            var utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
+                            let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
+                            TypeUtil.fixStringEnumTypes(utypes, publicTypes);
                             argStr += utypes.join("|");
                         } else {
                             //logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
@@ -495,6 +524,8 @@ module TsdPlugin {
                         }
                     }
                 }
+                
+                TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
                 var retType = retTypes.join("|"); //If multiple, return type is TS union
                 
                 var retToken = ": ";
@@ -669,9 +700,24 @@ module TsdPlugin {
      * A TS typedef. This could be a type alias or an interface
      */
     export class TSTypedef extends TSComposable {
+        private enumType: TSEnumType;
         constructor(doclet: IDoclet) {
             super(doclet);
+            this.enumType = this.determineEnumType();
         }
+        private determineEnumType(): TSEnumType {
+            var eType = TSEnumType.Invalid;
+            var matches = (this.doclet.comment || "").match(/@enum \{(.*)\}/);
+            if (matches && matches.length == 2) {
+                var typeName = matches[1].toLowerCase();
+                if (typeName == "string")
+                    eType = TSEnumType.String;
+                else if (typeName == "number")
+                    eType = TSEnumType.Number;
+            }
+            return eType;
+        }
+        public getEnumType(): TSEnumType { return this.enumType; }
         public getKind(): TSOutputtableKind { return TSOutputtableKind.Typedef; }
         public isOptional(): boolean {
             return this.members.length == 0 //Must be a type-alias typedef
@@ -704,29 +750,85 @@ module TsdPlugin {
             }
             
             this.writeDescription(DocletKind.Typedef, stream, conf, logger);
+            var hasMembers = this.members.length > 0;
             
-            //If it has methods and/or properties, treat this typedef as an interface
-            if (this.members.length > 0) {
-                stream.writeln(`interface ${this.doclet.name} {`);
+            if (this.enumType == TSEnumType.Number && hasMembers) {
+                stream.writeln(`enum ${this.doclet.name} {`);
                 stream.indent();
-                for (var member of this.members) {
-                    member.output(stream, conf, logger, publicTypes);
+                var props: TSProperty[] = [];
+                for (let member of this.members) {
+                    if (member instanceof TSProperty) {
+                        props.push(member);
+                    } else { //This is a documentation error
+                        logger.error(`Found non-property member ${member.getDoclet().name} in declared enum type ${this.getFullName()}`);
+                    }
+                }
+                for (let i = 0; i < props.length; i++) {
+                    let prop = props[i];
+                    let eValue = prop.tryGetEnumValue();
+                    stream.writeln(`${prop.getDoclet().name} = ${eValue}${(i < props.length - 1) ? "," : ""}`);
                 }
                 stream.unindent();
                 stream.writeln("}");
-            } else {
-                var typeDecl = `type ${this.doclet.name}`;
-                if (this.doclet != null && this.doclet.type != null) {
-                    var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
-                    //If we find 'Function' in here, send the hint that they should use @callback to document function types
-                    if (types.indexOf("Function") >= 0) {
-                        logger.warn(`Type ${this.doclet.name} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
+            } else if (this.enumType == TSEnumType.String && hasMembers) {
+                //TODO: TypeScript 1.8 will introduce union string literals, which will let us
+                //emit something like this:
+                //
+                //type StringEnum = "Foo" | "Bar";
+                //
+                //Instead of what we currently do which is:
+                //
+                //class StringEnum {
+                //    public static get Foo(): string = "Foo";
+                //    public static get Bar(): string = "Bar";
+                //}
+                //
+                //When TS 1.8 drops, we should allow both string enum forms to be generated
+                //depending on plugin configuration
+                
+                //Write as a class with static string members
+                //NOTE: If this is referenced in a parameter or return type, must make 
+                //sure to rewrite that type as 'string'. If generating union string literals
+                //this is not required
+                stream.writeln(`class ${this.doclet.name} {`);
+                stream.indent();
+                for (var member of this.members) {
+                    if (member instanceof TSProperty) {
+                        var eValue = member.tryGetEnumValue();
+                        stream.writeln("/**");
+                        stream.writeln(` * "${eValue}"`);
+                        stream.writeln(" */");
+                        stream.writeln(`public static ${member.getDoclet().name}: string;`);
+                    } else { //This is a documentation error
+                        logger.error(`Found non-property member ${member.getDoclet().name} in declared enum type ${this.getFullName()}`);
                     }
-                    typeDecl += " = " + types.join("|") + ";\n";
-                } else { //Fallback
-                    typeDecl += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
                 }
-                stream.writeln(typeDecl);
+                stream.unindent();
+                stream.writeln("}");
+            } else { //Not an enum
+                //If it has methods and/or properties, treat this typedef as an interface
+                if (hasMembers) {
+                    stream.writeln(`interface ${this.doclet.name} {`);
+                    stream.indent();
+                    for (var member of this.members) {
+                        member.output(stream, conf, logger, publicTypes);
+                    }
+                    stream.unindent();
+                    stream.writeln("}");
+                } else {
+                    var typeDecl = `type ${this.doclet.name}`;
+                    if (this.doclet != null && this.doclet.type != null) {
+                        var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                        //If we find 'Function' in here, send the hint that they should use @callback to document function types
+                        if (types.indexOf("Function") >= 0) {
+                            logger.warn(`Type ${this.doclet.name} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
+                        }
+                        typeDecl += " = " + types.join("|") + ";\n";
+                    } else { //Fallback
+                        typeDecl += " = any; //TODO: Could not determine underlying type for this typedef. Falling back to 'any'\n";
+                    }
+                    stream.writeln(typeDecl);
+                }
             }
         }
     }
