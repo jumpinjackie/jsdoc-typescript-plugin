@@ -7,6 +7,7 @@
     "example-doc": "jsdoc ./examples/jsdoc3-examples -r -c ./jsdoc.json -d ./docs/example",
     "ol-doc": "jsdoc -c ./jsdoc.ol.json -d ./docs/ol",
     "cesium-doc": "jsdoc -c ./jsdoc.cesium.json -d ./docs/cesium",
+    "test-doc": "jsdoc -c ./jsdoc.test.json -d ./docs/test",
     "test": "tsc ./typings/openlayers.d.ts && tsc ./typings/cesium.d.ts"
   },
   "repository": {
