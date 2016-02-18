@@ -51,7 +51,7 @@ module TsdPlugin {
         /**
          * A list of key/value pairs indicating JSDoc types and their TypeScript replacements
          */
-        typeReplacements: { [key: string]: string; };
+        typeReplacements: Dictionary<string>;
         /**
          * Default constructor description to generate for each emited class constructor when
          * description does not exist. Include the %TYPENAME% special token to have it be replaced
@@ -102,7 +102,7 @@ module TsdPlugin {
          * custom header or footer and those types reference types that may not be public when the 
          * source is processed by the plugin
          */
-        makePublic: string[]
+        makePublic: string[];
         /**
          * Path to custom header content file to add to the top of the generated TypeScript definition file
          */
