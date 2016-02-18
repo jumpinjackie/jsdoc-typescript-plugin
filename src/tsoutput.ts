@@ -407,6 +407,8 @@ module TsdPlugin {
             }
         }
     }
+    
+    interface IDocletParameterContainer { members: IDocletParameter[], param: IDocletParameter }
 
     export class TSMethod extends TSMember {
         private isModule: boolean;
@@ -466,9 +468,10 @@ module TsdPlugin {
         protected writeExtraDescriptionParts(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             //If we have args, document them. Because TypeScript is ... typed, the {type}
             //annotation is not necessary in the documentation
-            if (this.doclet.params != null && this.doclet.params.length > 0 && !this.isTypedef) {
+            let params = this.studyParameters(null, conf, logger);
+            if (params.length > 0 && !this.isTypedef) {
                 var forceNullable = false;
-                for (var arg of this.doclet.params) {
+                for (var arg of params) {
                     var req = "";
                     if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
@@ -492,14 +495,56 @@ module TsdPlugin {
         
         protected outputGenericTypes(): boolean { return true; }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            if (this.doclet.params != null && this.doclet.params.length > 0) {
-                for (var arg of this.doclet.params) {
+        private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): IDocletParameter[] {
+            let params: IDocletParameter[] = [];
+            let paramMap: Dictionary<IDocletParameterContainer> = {};
+            
+            let methodParams = this.doclet.params || [];
+            
+            if (methodParams.length > 0) {
+                for (let arg of methodParams) {
                     if (arg.type != null) {
                         TypeUtil.parseAndConvertTypes(arg.type, conf, logger, context);
+                        if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
+                            let parts = arg.name.split(".");
+                            let parm = paramMap[parts[0]];
+                            //If we get 'foo.bar', we should have already processed argument 'foo'
+                            if (parm == null) {
+                                logger.error(`In method ${this.doclet.longname}: Argument (${arg.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                            } else {
+                                parm.members.push(arg);
+                            }
+                        } else {
+                            paramMap[arg.name] = {
+                                members: [],
+                                param: arg
+                            };
+                        }
                     }
                 }
             }
+            
+            //Since there is no guarantee of object keys being insertion order 
+            //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
+            //we'll loop the original doclet params and pick up the keyed parameter along the way 
+            for (let arg of methodParams) {
+                if (arg.type != null) {
+                    var p = paramMap[arg.name];
+                    if (p != null) {
+                        params.push(p.param);
+                        if (p.members.length > 0 && context != null) {
+                            //TODO: Define a new options interface and register it
+                            //with the context
+                        }
+                    }
+                }
+            }
+            
+            return params;
+        }
+        
+        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+            this.studyParameters(context, conf, logger);
             if (this.outputReturnType()) {
                 if (this.doclet.returns != null) {
                     for (var retDoc of this.doclet.returns) {
@@ -530,7 +575,7 @@ module TsdPlugin {
                 stream.writeln(memberOv.declaration);
             } else {
                 this.writeDescription(((this.isModule && this.isTypedef) ? "function typedef" : "method"), stream, conf, logger, publicTypes);
-                var methodDecl = "";
+                let methodDecl = "";
                 if (this.isModule) {
                     //If in global namespace, we must declare this
                     if (this.doclet.memberof == null) {
@@ -546,7 +591,7 @@ module TsdPlugin {
                 }
                 methodDecl += this.getMethodName();
                 if (this.outputGenericTypes()) {
-                    var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
+                    let genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
                     if (genericTypes && genericTypes.length > 0) {
                         methodDecl += "<" + genericTypes.join(", ") + ">";
                     }
@@ -556,11 +601,12 @@ module TsdPlugin {
                 }
                 methodDecl += "(";
                 //Output args
-                var argVals = [];
-                if (this.doclet.params != null && this.doclet.params.length > 0) {
-                    var forceNullable = false;
-                    for (var arg of this.doclet.params) {
-                        var argStr = arg.name;
+                let argVals = [];
+                let params = this.studyParameters(null, conf, logger);
+                if (params.length > 0) {
+                    let forceNullable = false;
+                    for (let arg of params) {
+                        let argStr = arg.name;
                         if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
@@ -585,12 +631,12 @@ module TsdPlugin {
                 methodDecl += argVals.join(", ") + ")";
                 
                 //Determine return type
-                var retTypes = [];
+                let retTypes = [];
                 if (this.doclet.returns != null) {
-                    for (var retDoc of this.doclet.returns) {
+                    for (let retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            var rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
-                            for (var r of rts) {
+                            let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
+                            for (let r of rts) {
                                 retTypes.push(r);
                             }
                         }
@@ -599,9 +645,9 @@ module TsdPlugin {
                 
                 TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
                 TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
-                var retType = retTypes.join("|"); //If multiple, return type is TS union
+                let retType = retTypes.join("|"); //If multiple, return type is TS union
                 
-                var retToken = ": ";
+                let retToken = ": ";
                 if (this.isTypedef) {
                     retToken = " => ";
                 }
