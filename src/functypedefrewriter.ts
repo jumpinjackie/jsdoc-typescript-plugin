@@ -10,7 +10,8 @@ module TsdPlugin {
                    doclet.type != null &&
                    doclet.type.names != null &&
                    doclet.type.names.length == 1 &&
-                   doclet.type.names.indexOf("function") >= 0;
+                   doclet.type.names.indexOf("function") >= 0 &&
+                   doclet.comment.indexOf("@callback") < 0;
         }
         static cleanArg(str: string): string {
             var clean = str;
@@ -35,13 +36,14 @@ module TsdPlugin {
                 let comment = doclet.comment.split("\n *").join("");
                 
                 // A function that returns a value
-                let matches = comment.match(/@typedef \{function\((.*?)\)\s*:(.*?)\}/);
+                let matches = comment.match(/@typedef \{function\((.*?)\)\s*:\s*(.*?)\}/);
                 if (matches && matches.length == 3) {
                     let argPart = matches[1];
                     let retPart = matches[2];
                     let args = argPart.split(",")
                                       .filter(a => !FunctionTypedefRewriter.isContextualParameter(a))
-                                      .map(a => FunctionTypedefRewriter.cleanArg(a).trim());
+                                      .map(a => FunctionTypedefRewriter.cleanArg(a).trim())
+                                      .filter(a => a != null && a != "");
                     let params = [];
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
@@ -102,7 +104,8 @@ module TsdPlugin {
                     let argPart = matches[1];
                     let args = argPart.split(",")
                                       .filter(a => !FunctionTypedefRewriter.isContextualParameter(a))
-                                      .map(a => FunctionTypedefRewriter.cleanArg(a).trim());
+                                      .map(a => FunctionTypedefRewriter.cleanArg(a).trim())
+                                      .filter(a => a != null && a != "");
                     let params = [];
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
