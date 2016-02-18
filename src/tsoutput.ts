@@ -933,7 +933,12 @@ module TsdPlugin {
             
             this.writeDescription(DocletKind.Class, stream, conf, logger);
             
-            var clsDecl = "class " + this.doclet.name;
+            var clsDecl = "";
+            //If un-parented, the emitted class will be global and must be declared as a result
+            if (this.getParentModule() == null) {
+                clsDecl = "declare ";
+            }
+            clsDecl += "class " + this.doclet.name;
             var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
             //Class generic parameters
             if (genericTypes.length > 0) {
