@@ -360,6 +360,12 @@ module TsdPlugin {
             return false;
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
+            if (conf.outputDocletDefs) {
+                stream.writeln("/* doclet for typedef");
+                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(" */");
+            }
+            
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -507,6 +513,12 @@ module TsdPlugin {
         }
         
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
+            if (conf.outputDocletDefs) {
+                stream.writeln("/* doclet for function");
+                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(" */");
+            }
+            
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -520,6 +532,10 @@ module TsdPlugin {
                 this.writeDescription(((this.isModule && this.isTypedef) ? "function typedef" : "method"), stream, conf, logger, publicTypes);
                 var methodDecl = "";
                 if (this.isModule) {
+                    //If in global namespace, we must declare this
+                    if (this.doclet.memberof == null) {
+                        methodDecl += "declare ";
+                    }
                     if (this.isTypedef)
                         methodDecl += "type ";
                     else
@@ -809,8 +825,13 @@ module TsdPlugin {
             this.writeDescription(DocletKind.Typedef, stream, conf, logger);
             var hasMembers = this.members.length > 0;
             
+            var declareMe = "";
+            if (this.getParentModule() == null) {
+                declareMe = "declare ";
+            }
+            
             if (this.enumType == TSEnumType.Number && hasMembers) {
-                stream.writeln(`enum ${this.doclet.name} {`);
+                stream.writeln(`${declareMe}enum ${this.doclet.name} {`);
                 stream.indent();
                 var props: TSProperty[] = [];
                 for (let member of this.members) {
@@ -847,7 +868,7 @@ module TsdPlugin {
                 //NOTE: If this is referenced in a parameter or return type, must make 
                 //sure to rewrite that type as 'string'. If generating union string literals
                 //this is not required
-                stream.writeln(`class ${this.doclet.name} {`);
+                stream.writeln(`${declareMe}class ${this.doclet.name} {`);
                 stream.indent();
                 for (var member of this.members) {
                     if (member instanceof TSProperty) {
@@ -873,7 +894,7 @@ module TsdPlugin {
                     stream.unindent();
                     stream.writeln("}");
                 } else {
-                    var typeDecl = `type ${this.doclet.name}`;
+                    var typeDecl = `${declareMe}type ${this.doclet.name}`;
                     if (this.doclet != null && this.doclet.type != null) {
                         var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
                         //If we find 'Function' in here, send the hint that they should use @callback to document function types
@@ -926,7 +947,7 @@ module TsdPlugin {
         }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
-                stream.writeln("/* doclet for typedef");
+                stream.writeln("/* doclet for class");
                 stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
                 stream.writeln(" */");
             }

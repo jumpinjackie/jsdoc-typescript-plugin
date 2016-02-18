@@ -3,13 +3,14 @@
         "includePattern": ".+\\.js(doc)?$",
         "excludePattern": "(^|\\/|\\\\)_",
         "include": [
-            "examples/misc"
+            "examples/bad"
         ]
     },
     "plugins": ["plugins/typescript"],
     "typescript": {
-        "rootModuleName": "test",
-        "outDir": "./typings"
+        "rootModuleName": "bad",
+        "outDir": "./typings",
+        "rewriteFunctionTypedefs": true
     },
     "templates": {
         "default": {

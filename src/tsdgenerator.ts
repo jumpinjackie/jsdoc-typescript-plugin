@@ -136,12 +136,15 @@ module TsdPlugin {
                 } else if (doclet.kind == DocletKind.Typedef) {
                     if (TsdGenerator.isCallbackType(doclet)) {
                         let parentModule = doclet.memberof;
-                        if (this.moduleMembers[parentModule] == null)
+                        if (parentModule != null && this.moduleMembers[parentModule] == null)
                             this.moduleMembers[parentModule] = [];
                         let method = new TSMethod(doclet)
                         method.setIsModule(true);
                         method.setIsTypedef(true);
-                        this.moduleMembers[parentModule].push(method);
+                        if (parentModule != null)
+                            this.moduleMembers[parentModule].push(method);
+                        else
+                            this.globalMembers.push(method);
                     } else {
                         var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
                         tdf.setIsPublic(isPublic);
@@ -408,38 +411,41 @@ module TsdPlugin {
                 types: [],
                 members: []
             };
-            for (var typedef of this.userTypeAliases) {
-                var moduleName = typedef.getParentModule();
+            for (let typedef of this.userTypeAliases) {
+                let moduleName = typedef.getParentModule();
                 if (TsdGenerator.putTypeInTree(typedef, moduleName, root) === true)
                     this.stats.typedefs.user++;
             }
-            for (var iface of this.userInterfaces) {
-                var moduleName = iface.getParentModule();
+            for (let iface of this.userInterfaces) {
+                let moduleName = iface.getParentModule();
                 if (TsdGenerator.putTypeInTree(iface, moduleName, root) === true)
                     this.stats.ifaces++;
             }
-            for (var modName in this.moduleMembers) {
-                var members = this.moduleMembers[modName];
-                for (var member of members) {
+            for (let oType of this.globalMembers) {
+                root.members.push(oType);
+            }
+            for (let modName in this.moduleMembers) {
+                let members = this.moduleMembers[modName];
+                for (let member of members) {
                     if (TsdGenerator.putTypeInTree(member, modName, root) === true)
                         this.stats.moduleMembers++;
                 }
             }
-            for (var typeName in this.classes) {
-                var cls = this.classes[typeName];
+            for (let typeName in this.classes) {
+                let cls = this.classes[typeName];
                 if (!cls.getIsPublic())
                     continue;
                 console.log(`Processing class: ${typeName}`);
-                var moduleName = cls.getParentModule();
+                let moduleName = cls.getParentModule();
                 if (TsdGenerator.putTypeInTree(cls, moduleName, root) === true)
                     this.stats.classes++;
             }
-            for (var typeName in this.typedefs) {
-                var tdf = this.typedefs[typeName];
+            for (let typeName in this.typedefs) {
+                let tdf = this.typedefs[typeName];
                 if (!tdf.getIsPublic())
                     continue;
                 console.log(`Processing typedef: ${typeName}`);
-                var moduleName = tdf.getParentModule();
+                let moduleName = tdf.getParentModule();
                 if (TsdGenerator.putTypeInTree(tdf, moduleName, root) === true)
                     this.stats.typedefs.gen++;
             }

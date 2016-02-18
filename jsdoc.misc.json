@@ -1,0 +1,25 @@
+{
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_",
+        "include": [
+            "examples/misc"
+        ]
+    },
+    "plugins": ["plugins/typescript"],
+    "typescript": {
+        "rootModuleName": "misc",
+        "outDir": "./typings",
+        "rewriteFunctionTypedefs": true
+    },
+    "templates": {
+        "default": {
+            "outputSourceFiles": true,
+            "outputSourceReference": true
+        }
+    },
+    "opts": {
+        "recurse": true,
+        "explain": false
+    }
+}
