@@ -430,7 +430,7 @@ module TsdPlugin {
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
-                console.log(`Adding ${oType.getFullName()} to global namespace`);
+                //console.log(`Adding ${oType.getFullName()} to global namespace`);
                 root.types.push(oType);
             }
             for (let modName in this.moduleMembers) {
@@ -495,8 +495,6 @@ module TsdPlugin {
             
             //Write the main d.ts body
             var tree = this.assembleModuleTree();
-            
-            console.log(`Global namespace has  ${tree.types.length} types`);
             ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes);
             
             //Write custom footer if specified
