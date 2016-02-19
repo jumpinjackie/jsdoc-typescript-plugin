@@ -1147,12 +1147,8 @@ module TsdPlugin {
          */
         children: Dictionary<ITSModule>;
         /**
-         * Types defined at this level
+         * Types/vars/functions defined at this level
          */
         types: IOutputtable[];
-        /**
-         * Vars, Functions and other assorted members at this module level 
-         */
-        members: TSMember[];
     }
 }

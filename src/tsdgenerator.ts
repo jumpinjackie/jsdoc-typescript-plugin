@@ -151,6 +151,14 @@ module TsdPlugin {
                         if (parentModName != null)
                             tdf.setParentModule(parentModName);
                     }
+                } else if (doclet.kind == DocletKind.Function) {
+                    let parentModule = doclet.memberof;
+                    if (parentModule == null) {
+                        let method = new TSMethod(doclet);
+                        method.setIsModule(true);
+                        method.setIsTypedef(false);
+                        this.globalMembers.push(method);
+                    }
                 }
             }
         }
@@ -186,6 +194,9 @@ module TsdPlugin {
                         //Before we bail, let's assume this is a module level member and
                         //see if it's the right doclet kind
                         let parentModule = doclet.memberof;
+                        if (parentModule == null)
+                            continue;
+                            
                         if (doclet.kind == DocletKind.Function) {
                             if (this.moduleMembers[parentModule] == null)
                                 this.moduleMembers[parentModule] = [];
@@ -366,8 +377,7 @@ module TsdPlugin {
                     tree.children[name] = {
                         isRoot: (i == 0),
                         children: {},
-                        types: [],
-                        members: []
+                        types: []
                     }
                 }
                 tree = tree.children[name];
@@ -386,8 +396,7 @@ module TsdPlugin {
                         root.children[moduleName] = {
                             isRoot: true,
                             children: {},
-                            types: [],
-                            members: []
+                            types: []
                         }
                     }
                     root.children[moduleName].types.push(type);
@@ -405,11 +414,10 @@ module TsdPlugin {
          * This method groups all of our collected TS types according to their parent module
          */
         private assembleModuleTree(): ITSModule {
-            var root: ITSModule = {
+            let root: ITSModule = {
                 isRoot: null,
                 children: {},
-                types: [],
-                members: []
+                types: []
             };
             for (let typedef of this.userTypeAliases) {
                 let moduleName = typedef.getParentModule();
@@ -422,7 +430,8 @@ module TsdPlugin {
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
-                root.members.push(oType);
+                console.log(`Adding ${oType.getFullName()} to global namespace`);
+                root.types.push(oType);
             }
             for (let modName in this.moduleMembers) {
                 let members = this.moduleMembers[modName];
@@ -486,6 +495,8 @@ module TsdPlugin {
             
             //Write the main d.ts body
             var tree = this.assembleModuleTree();
+            
+            console.log(`Global namespace has  ${tree.types.length} types`);
             ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes);
             
             //Write custom footer if specified

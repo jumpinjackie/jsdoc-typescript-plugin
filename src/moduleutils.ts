@@ -14,16 +14,14 @@ module TsdPlugin {
          * Writes the TS module tree out to the specified output stream
          */
         public static outputTsd(module: ITSModule, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
-            for (var type of module.types) {
+            for (let type of module.types) {
+                //console.log(`Outputting type: ${type.getFullName()}`);
                 type.output(stream, conf, logger, publicTypes);
             }
-            for (var member of module.members) {
-                member.output(stream, conf, logger, publicTypes);
-            }
-            for (var moduleName in module.children) {
-                var child = module.children[moduleName];
+            for (let moduleName in module.children) {
+                let child = module.children[moduleName];
                 //Root modules have to be declared
-                var decl = ((child.isRoot === true) ? "declare " : "");
+                let decl = ((child.isRoot === true) ? "declare " : "");
                 //Write module decl
                 if (ModuleUtils.isAMD(moduleName)) {
                     stream.writeln(`${decl}module "${moduleName}" {`)
