@@ -44,9 +44,22 @@ module TsdPlugin {
      * Describes a method parameter
      */
     export interface IDocletParameter extends IDocletTypeInfo {
+        /**
+         * The name of this parameter
+         */
         name: string;
+        /**
+         * Indicates of this parameter is optional. Alias for optional
+         */
         nullable?: boolean;
+        /**
+         * Indicates of this parameter is optional. Alias for nullable
+         */
         optional?: boolean;
+        /**
+         * Indicates if this parameter is a variable argument list
+         */
+        variable?: boolean;
     }
 
     /**

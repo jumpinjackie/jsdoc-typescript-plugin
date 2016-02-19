@@ -460,7 +460,7 @@ module TsdPlugin {
                     }
                 }
             }
-            return arg.nullable == true || 
+            return arg.nullable == true ||
                    arg.optional == true ||
                    arg.type.names.indexOf("undefined") >= 0;
         }
@@ -606,7 +606,11 @@ module TsdPlugin {
                 if (params.length > 0) {
                     let forceNullable = false;
                     for (let arg of params) {
-                        let argStr = arg.name;
+                        let argStr = "";
+                        if (arg.variable) {
+                            argStr += "...";
+                        }
+                        argStr += arg.name;
                         if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
@@ -620,6 +624,9 @@ module TsdPlugin {
                             let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
                             TypeUtil.fixStringEnumTypes(utypes, publicTypes);
                             argStr += utypes.join("|");
+                            if (arg.variable) {
+                                argStr += "[]";
+                            }
                         } else {
                             //logger.warn(`Argument '${arg.name}' of method (${this.doclet.longname}) has no type annotation. Defaulting to 'any'`);
                             //Fallback to any
