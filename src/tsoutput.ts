@@ -196,6 +196,9 @@ module TsdPlugin {
                     return replTypes.join("|");
                 }
                 
+                //When referenced, tildefied types should be dotted
+                typeName = typeName.replace("~", ".");
+                
                 if (context != null) {
                     context.addType(typeName, conf, logger);
                 }
