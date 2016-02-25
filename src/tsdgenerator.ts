@@ -17,6 +17,7 @@ module TsdPlugin {
     export class TsdGenerator {
         private moduleMembers: Dictionary<TSMember[]>;
         private globalMembers: TSMember[];
+        private moduleDoclets: Dictionary<IDoclet>;
         private classes: Dictionary<TSClass>;
         private typedefs: Dictionary<TSTypedef>;
         private userTypeAliases: TSUserTypeAlias[];
@@ -54,6 +55,7 @@ module TsdPlugin {
             }
             this.classes = {};
             this.typedefs = {};
+            this.moduleDoclets = {};
             this.moduleMembers = {};
             this.globalMembers = [];
             this.userInterfaces = [];
@@ -159,6 +161,8 @@ module TsdPlugin {
                         method.setIsTypedef(false);
                         this.globalMembers.push(method);
                     }
+                } else if (doclet.kind == DocletKind.Module) {
+                    this.moduleDoclets[doclet.name] = doclet;
                 }
             }
         }
@@ -385,11 +389,17 @@ module TsdPlugin {
             }
             return tree;
         }
-        private static putTypeInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
+        private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
             if (moduleName == null) {
                 root.types.push(type);
                 return true;
             } else {
+                //Before we put the definition in, if it is a function and we know nothing about its
+                //parent module (or it is private), skip it.
+                if (type.getKind() == TSOutputtableKind.Method &&
+                    (this.moduleDoclets[moduleName] == null || TypeUtil.isPrivateDoclet(this.moduleDoclets[moduleName], this.config))) {
+                    return false;
+                }
                 if (ModuleUtils.isAMD(moduleName)) {
                     //No nesting required for AMD modules
                     if (!root.children[moduleName]) {
@@ -421,12 +431,12 @@ module TsdPlugin {
             };
             for (let typedef of this.userTypeAliases) {
                 let moduleName = typedef.getParentModule();
-                if (TsdGenerator.putTypeInTree(typedef, moduleName, root) === true)
+                if (this.putDefinitionInTree(typedef, moduleName, root) === true)
                     this.stats.typedefs.user++;
             }
             for (let iface of this.userInterfaces) {
                 let moduleName = iface.getParentModule();
-                if (TsdGenerator.putTypeInTree(iface, moduleName, root) === true)
+                if (this.putDefinitionInTree(iface, moduleName, root) === true)
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
@@ -436,7 +446,7 @@ module TsdPlugin {
             for (let modName in this.moduleMembers) {
                 let members = this.moduleMembers[modName];
                 for (let member of members) {
-                    if (TsdGenerator.putTypeInTree(member, modName, root) === true)
+                    if (this.putDefinitionInTree(member, modName, root) === true)
                         this.stats.moduleMembers++;
                 }
             }
@@ -446,7 +456,7 @@ module TsdPlugin {
                     continue;
                 console.log(`Processing class: ${typeName}`);
                 let moduleName = cls.getParentModule();
-                if (TsdGenerator.putTypeInTree(cls, moduleName, root) === true)
+                if (this.putDefinitionInTree(cls, moduleName, root) === true)
                     this.stats.classes++;
             }
             for (let typeName in this.typedefs) {
@@ -455,7 +465,7 @@ module TsdPlugin {
                     continue;
                 console.log(`Processing typedef: ${typeName}`);
                 let moduleName = tdf.getParentModule();
-                if (TsdGenerator.putTypeInTree(tdf, moduleName, root) === true)
+                if (this.putDefinitionInTree(tdf, moduleName, root) === true)
                     this.stats.typedefs.gen++;
             }
             return root;

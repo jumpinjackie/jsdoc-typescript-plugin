@@ -23,10 +23,16 @@ module TsdPlugin {
                 //Root modules have to be declared
                 let decl = ((child.isRoot === true) ? "declare " : "");
                 //Write module decl
-                if (ModuleUtils.isAMD(moduleName)) {
-                    stream.writeln(`${decl}module "${moduleName}" {`)
+                
+                //Strip module: prefix if found
+                let modName: string = moduleName;
+                if (modName.indexOf("module:") == 0) {
+                    modName = modName.substring(7);
+                }
+                if (ModuleUtils.isAMD(modName)) {
+                    stream.writeln(`${decl}module "${modName}" {`)
                 } else {
-                    stream.writeln(`${decl}module ${moduleName} {`);
+                    stream.writeln(`${decl}module ${modName} {`);
                 }
                 stream.indent();
                 ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes);

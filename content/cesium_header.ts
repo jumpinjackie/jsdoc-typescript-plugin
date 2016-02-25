@@ -8,3 +8,7 @@
 //
 
 declare module __Cesium {
+    /**
+     * Type alias for a promise
+     */
+    declare type Promise<T> = PromiseLike<T>;

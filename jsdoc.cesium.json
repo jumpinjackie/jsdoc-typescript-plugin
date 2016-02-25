@@ -16,7 +16,8 @@
         "fillUndocumentedDoclets": true,
         "defaultReturnType": "void",
         "headerFile": "./content/cesium_header.ts",
-        "footerFile": "./content/cesium_footer.ts"
+        "footerFile": "./content/cesium_footer.ts",
+        "typeReplacements": {}
     },
     "templates": {
         "default": {

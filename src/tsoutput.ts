@@ -495,6 +495,11 @@ module TsdPlugin {
         
         protected outputGenericTypes(): boolean { return true; }
         
+        /**
+         * Studies the doclet parameters and returns a normalized set.
+         * 
+         * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
+         */
         private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): IDocletParameter[] {
             let params: IDocletParameter[] = [];
             let paramMap: Dictionary<IDocletParameterContainer> = {};
@@ -510,7 +515,10 @@ module TsdPlugin {
                             let parm = paramMap[parts[0]];
                             //If we get 'foo.bar', we should have already processed argument 'foo'
                             if (parm == null) {
-                                logger.error(`In method ${this.doclet.longname}: Argument (${arg.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                                //Only want to error when not visiting (ie. context is null)
+                                if (context == null) {
+                                    logger.error(`In method ${this.doclet.longname}: Argument (${arg.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                                }
                             } else {
                                 parm.members.push(arg);
                             }

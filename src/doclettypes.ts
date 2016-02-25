@@ -23,6 +23,10 @@ module TsdPlugin {
          * Doclet for a property
          */
         public static get Value(): string { return "value"; }
+        /**
+         * Doclet for a module
+         */
+        public static get Module(): string { return "module"; }
     }
 
     /**
