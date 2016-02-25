@@ -58,6 +58,7 @@
         "defaultReturnType": "void",
         "headerFile": "./content/ol_header.ts",
         "footerFile": "./content/ol_footer.ts",
+        "doNotSkipUndocumentedDoclets": true,
         "memberReplacements": {
             "ol.layer.VectorTile#getSource": {
                 "description": "Return the associated source of the layer (NOTE: TypeScript currently prevents us from returning the intended type of ol.source.VectorTile, you will have to manually cast the returned value to this type)",

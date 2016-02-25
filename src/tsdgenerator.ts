@@ -47,7 +47,10 @@ module TsdPlugin {
                 makePublic: (config.makePublic || []),
                 headerFile: config.headerFile,
                 footerFile: config.footerFile,
-                memberReplacements: (config.memberReplacements || {})
+                memberReplacements: (config.memberReplacements || {}),
+                doNotDeclareTopLevelElements: !!config.declareTopLevelElements,
+                ignoreModules: (config.ignoreModules || []),
+                doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets
             }
             var ignoreJsDocTypes = (config.ignore || []);
             for (let ignoreType of ignoreJsDocTypes) {
@@ -112,6 +115,9 @@ module TsdPlugin {
             for (var doclet of doclets) {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
+                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                    continue;
+
                 //TypeScript definition covers a module's *public* API surface, so
                 //skip private classes
                 var isPublic = !(TypeUtil.isPrivateDoclet(doclet, this.config));
@@ -178,7 +184,9 @@ module TsdPlugin {
             for (var doclet of doclets) {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
-                    
+                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                    continue;
+
                 var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
@@ -394,26 +402,31 @@ module TsdPlugin {
                 root.types.push(type);
                 return true;
             } else {
-                //Before we put the definition in, if it is a function and we know nothing about its
-                //parent module (or it is private), skip it.
-                if (type.getKind() == TSOutputtableKind.Method &&
-                    (this.moduleDoclets[moduleName] == null || TypeUtil.isPrivateDoclet(this.moduleDoclets[moduleName], this.config))) {
+                let moduleNameClean = ModuleUtils.cleanModuleName(moduleName);
+                //Before we put the definition in, if it is a function or constant and its parent module is private or
+                //configured to be ignored, skip it.
+                let bIgnoreThisType = (type.getKind() == TSOutputtableKind.Method || type.getKind() == TSOutputtableKind.Property) &&
+                    (
+                        (this.moduleDoclets[moduleNameClean] != null && TypeUtil.isPrivateDoclet(this.moduleDoclets[moduleNameClean], this.config)) ||
+                        (this.config.ignoreModules.indexOf(moduleNameClean) >= 0)
+                    );
+                if (bIgnoreThisType) {
                     return false;
                 }
-                if (ModuleUtils.isAMD(moduleName)) {
+                if (ModuleUtils.isAMD(moduleNameClean)) {
                     //No nesting required for AMD modules
-                    if (!root.children[moduleName]) {
-                        root.children[moduleName] = {
+                    if (!root.children[moduleNameClean]) {
+                        root.children[moduleNameClean] = {
                             isRoot: true,
                             children: {},
                             types: []
                         }
                     }
-                    root.children[moduleName].types.push(type);
+                    root.children[moduleNameClean].types.push(type);
                     return true;
                 } else {
                     //Explode this module name and see how many levels we need to go
-                    var moduleNameParts = moduleName.split(".");
+                    var moduleNameParts = moduleNameClean.split(".");
                     var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
                     tree.types.push(type);
                     return true;

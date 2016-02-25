@@ -116,5 +116,18 @@ module TsdPlugin {
          * Value is the replacement for it
          */
         memberReplacements: Dictionary<IMemberDeclaration>;
+        /**
+         * Indicates if top-level elements (ie: doclets without parents) should be declared. Default is false, set to true 
+         * if you wrap the emitted types around a custom top-level module through the custom header/footer feature 
+         */
+        doNotDeclareTopLevelElements: boolean;
+        /**
+         * A list of modules to ignore (without the module: prefix), any member under this module will be ignored
+         */
+        ignoreModules: string[];
+        /**
+         * Indicates if doclets with undocumented = true should be skipped or not. Default is false.
+         */
+        doNotSkipUndocumentedDoclets: boolean;
     }
 }

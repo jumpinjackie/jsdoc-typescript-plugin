@@ -586,7 +586,7 @@ module TsdPlugin {
                 let methodDecl = "";
                 if (this.isModule) {
                     //If in global namespace, we must declare this
-                    if (this.doclet.memberof == null) {
+                    if (this.doclet.memberof == null && conf.doNotDeclareTopLevelElements == false) {
                         methodDecl += "declare ";
                     }
                     if (this.isTypedef)
@@ -887,7 +887,7 @@ module TsdPlugin {
             var hasMembers = this.members.length > 0;
             
             var declareMe = "";
-            if (this.getParentModule() == null) {
+            if (this.getParentModule() == null && conf.doNotDeclareTopLevelElements == false) {
                 declareMe = "declare ";
             }
             
@@ -1017,7 +1017,7 @@ module TsdPlugin {
             
             var clsDecl = "";
             //If un-parented, the emitted class will be global and must be declared as a result
-            if (this.getParentModule() == null) {
+            if (this.getParentModule() == null && conf.doNotDeclareTopLevelElements == false) {
                 clsDecl = "declare ";
             }
             clsDecl += "class " + this.doclet.name;

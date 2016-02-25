@@ -17,6 +17,10 @@
         "defaultReturnType": "void",
         "headerFile": "./content/cesium_header.ts",
         "footerFile": "./content/cesium_footer.ts",
+        "doNotDeclareTopLevelElements": true,
+        "ignoreModules": [
+            "<anonymous>"
+        ],
         "typeReplacements": {}
     },
     "templates": {

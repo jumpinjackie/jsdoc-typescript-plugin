@@ -10,6 +10,14 @@ module TsdPlugin {
             return name.indexOf("/") >= 0;
         }
         
+        public static cleanModuleName(moduleName: string): string {
+            let modName: string = moduleName;
+            if (modName.indexOf("module:") == 0) {
+                modName = modName.substring(7);
+            }
+            return modName;
+        }
+        
         /**
          * Writes the TS module tree out to the specified output stream
          */
@@ -25,10 +33,7 @@ module TsdPlugin {
                 //Write module decl
                 
                 //Strip module: prefix if found
-                let modName: string = moduleName;
-                if (modName.indexOf("module:") == 0) {
-                    modName = modName.substring(7);
-                }
+                let modName: string = ModuleUtils.cleanModuleName(moduleName);
                 if (ModuleUtils.isAMD(modName)) {
                     stream.writeln(`${decl}module "${modName}" {`)
                 } else {
