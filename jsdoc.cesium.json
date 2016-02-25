@@ -6,10 +6,11 @@
             "node_modules/cesium/Source"
         ],
         "exclude": [
-            "node_modules/cesium/Source/ThirdParty"
+            "node_modules/cesium/Source/ThirdParty",
+            "node_modules/cesium/Source/Workers/cesiumWorkerBootstrapper.js"
         ]
     },
-    "plugins": ["plugins/typescript"],
+    "plugins": ["plugins/cesiumTags", "plugins/typescript"],
     "typescript": {
         "rootModuleName": "cesium",
         "outDir": "./typings",
