@@ -129,5 +129,9 @@ module TsdPlugin {
          * Indicates if doclets with undocumented = true should be skipped or not. Default is false.
          */
         doNotSkipUndocumentedDoclets: boolean;
+        /**
+         * Sets the initial indentation level. Each level starts indentation by one "tab" (4 spaces)
+         */
+        initialIndentation: number;
     }
 }

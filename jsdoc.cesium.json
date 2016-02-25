@@ -19,6 +19,7 @@
         "headerFile": "./content/cesium_header.ts",
         "footerFile": "./content/cesium_footer.ts",
         "doNotDeclareTopLevelElements": true,
+        "initialIndentation": 1,
         "ignoreModules": [
             "<anonymous>"
         ],

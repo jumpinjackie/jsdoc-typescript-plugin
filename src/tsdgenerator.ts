@@ -50,7 +50,8 @@ module TsdPlugin {
                 memberReplacements: (config.memberReplacements || {}),
                 doNotDeclareTopLevelElements: !!config.declareTopLevelElements,
                 ignoreModules: (config.ignoreModules || []),
-                doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets
+                doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets,
+                initialIndentation: (config.initialIndentation || 0)
             }
             var ignoreJsDocTypes = (config.ignore || []);
             for (let ignoreType of ignoreJsDocTypes) {
@@ -518,7 +519,13 @@ module TsdPlugin {
             
             //Write the main d.ts body
             var tree = this.assembleModuleTree();
+            for (let i = 0; i < this.config.initialIndentation; i++) {
+                output.indent();
+            }
             ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes);
+            for (let i = 0; i < this.config.initialIndentation; i++) {
+                output.unindent();
+            }
             
             //Write custom footer if specified
             if (this.config.headerFile != null) {
