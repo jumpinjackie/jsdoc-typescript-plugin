@@ -15,6 +15,10 @@ declare module __Cesium {
     
     type TypedArray = any[];
     
+    type Image = HTMLImageElement;
+    
+    type Canvas = HTMLCanvasElement;
+    
     /**
      * The type of a geometric primitive, i.e., points, lines, and triangles.
      */
