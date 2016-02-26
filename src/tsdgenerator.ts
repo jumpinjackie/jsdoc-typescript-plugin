@@ -48,7 +48,7 @@ module TsdPlugin {
                 headerFile: config.headerFile,
                 footerFile: config.footerFile,
                 memberReplacements: (config.memberReplacements || {}),
-                doNotDeclareTopLevelElements: !!config.declareTopLevelElements,
+                doNotDeclareTopLevelElements: !!config.doNotDeclareTopLevelElements,
                 ignoreModules: (config.ignoreModules || []),
                 doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets,
                 initialIndentation: (config.initialIndentation || 0)

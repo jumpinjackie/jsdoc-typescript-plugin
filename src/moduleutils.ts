@@ -15,6 +15,9 @@ module TsdPlugin {
             if (modName.indexOf("module:") == 0) {
                 modName = modName.substring(7);
             }
+            if (modName.indexOf("~") >= 0) {
+                modName = modName.substring(modName.indexOf("~") + 1);
+            }
             return modName;
         }
         
@@ -29,7 +32,7 @@ module TsdPlugin {
             for (let moduleName in module.children) {
                 let child = module.children[moduleName];
                 //Root modules have to be declared
-                let decl = ((child.isRoot === true) ? "declare " : "");
+                let decl = ((child.isRoot === true && conf.doNotDeclareTopLevelElements === false) ? "declare " : "");
                 //Write module decl
                 
                 //Strip module: prefix if found
