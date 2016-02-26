@@ -69,6 +69,22 @@ module TsdPlugin {
     
     export class TypeUtil {
         
+        public static isTsElementNotPublic(type: IOutputtable): boolean {
+            if (type instanceof TSMethod) {
+                return !type.getIsPublic();
+            }
+            if (type instanceof TSComposable) {
+                return !type.getIsPublic();
+            }
+            return false;
+        }
+        
+        public static isEnumDoclet(doclet: IDoclet): boolean {
+            return (doclet.kind == DocletKind.Member &&
+                   doclet.isEnum === true &&
+                   (doclet.properties || []).length > 0) || (doclet.comment || "").indexOf("@enum") >= 0;
+        }
+        
         public static fixStringEnumTypes(typeNames: string[], publicTypes: Dictionary<IOutputtable>): void {
             //If we encounter any string enum typedefs, replace type with 'string'
             for (let i = 0; i < typeNames.length; i++) {
@@ -333,7 +349,7 @@ module TsdPlugin {
         public tryGetEnumValue(): any {
             if (this.doclet.meta && 
                 this.doclet.meta.code &&
-                this.doclet.meta.code.type == "Literal") {
+                (this.doclet.meta.code.type == "Literal" || this.doclet.meta.code.type == "UnaryExpression")) {
                 return this.doclet.meta.code.value;
             }
             return null;
@@ -778,12 +794,15 @@ module TsdPlugin {
      * A TS type that has child members
      */
     export abstract class TSComposable extends TSOutputtable {
-        public members: TSMember[];
+        protected members: TSMember[];
         protected isPublic: boolean;
         constructor(doclet: IDoclet) {
             super(doclet);
             this.members = [];
             this.isPublic = false;
+        }
+        public addMember(member: TSMember): void {
+            this.members.push(member);
         }
         public findMember(name: string, kind: string): TSMember {
             var matches = this.members.filter(m => {
@@ -838,9 +857,27 @@ module TsdPlugin {
      */
     export class TSTypedef extends TSComposable {
         private enumType: TSEnumType;
+        private alreadyAddedEnumMembers: boolean;
         constructor(doclet: IDoclet) {
             super(doclet);
             this.enumType = this.determineEnumType();
+            this.alreadyAddedEnumMembers = false;
+            //This is a non-typedef kind of enum
+            if (this.enumType != TSEnumType.Invalid &&
+                this.doclet.isEnum === true &&
+                (this.doclet.properties || []).length > 0) {
+                for (var prop of this.doclet.properties) {
+                    this.addMember(new TSProperty(prop, false));
+                }
+                this.alreadyAddedEnumMembers = true;
+            }
+        }
+        public addMember(member: TSMember): void {
+            if (this.enumType != TSEnumType.Invalid && this.alreadyAddedEnumMembers == true) {
+                console.log(`Skip adding member ${member.getDoclet().name} as the parent enum ${this.doclet.name} already has its members added`);
+                return;
+            }
+            super.addMember(member);
         }
         private determineEnumType(): TSEnumType {
             var eType = TSEnumType.Invalid;
@@ -908,6 +945,12 @@ module TsdPlugin {
                 for (let i = 0; i < props.length; i++) {
                     let prop = props[i];
                     let eValue = prop.tryGetEnumValue();
+                    let desc = prop.getDoclet().description;
+                    if (desc != null) {
+                        stream.writeln("/**");
+                        stream.writeln(` * ${desc}`);
+                        stream.writeln(" */");
+                    }
                     stream.writeln(`${prop.getDoclet().name} = ${eValue}${(i < props.length - 1) ? "," : ""}`);
                 }
                 stream.unindent();

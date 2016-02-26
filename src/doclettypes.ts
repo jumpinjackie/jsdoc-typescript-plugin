@@ -27,6 +27,10 @@ module TsdPlugin {
          * Doclet for a module
          */
         public static get Module(): string { return "module"; }
+        /**
+         * Doclet for a constant
+         */
+        public static get Constant(): string { return "constant"; }
     }
 
     /**

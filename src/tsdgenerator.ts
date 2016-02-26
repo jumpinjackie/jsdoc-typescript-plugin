@@ -20,6 +20,7 @@ module TsdPlugin {
         private moduleDoclets: Dictionary<IDoclet>;
         private classes: Dictionary<TSClass>;
         private typedefs: Dictionary<TSTypedef>;
+        private trackedDoclets: Dictionary<IDoclet>;
         private userTypeAliases: TSUserTypeAlias[];
         private userInterfaces: TSUserInterface[];
         
@@ -51,7 +52,8 @@ module TsdPlugin {
                 doNotDeclareTopLevelElements: !!config.doNotDeclareTopLevelElements,
                 ignoreModules: (config.ignoreModules || []),
                 doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets,
-                initialIndentation: (config.initialIndentation || 0)
+                initialIndentation: (config.initialIndentation || 0),
+                globalModuleAliases: (config.globalModuleAliases || [])
             }
             var ignoreJsDocTypes = (config.ignore || []);
             for (let ignoreType of ignoreJsDocTypes) {
@@ -61,6 +63,7 @@ module TsdPlugin {
             this.typedefs = {};
             this.moduleDoclets = {};
             this.moduleMembers = {};
+            this.trackedDoclets = {};
             this.globalMembers = [];
             this.userInterfaces = [];
             this.userTypeAliases = [];
@@ -112,64 +115,108 @@ module TsdPlugin {
                 return this.typedefs[name];
             }
         }
+        
+        private treatModuleNameAsGlobal(moduleName: string): boolean {
+            return this.config.globalModuleAliases.indexOf(moduleName) >= 0;
+        }
+        
         private parseClassesAndTypedefs(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
+                //On ignore list
                 if (this.ignoreThisType(doclet.longname))
                     continue;
+                //Undocumented and we're ignoring them
                 if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
                     continue;
 
                 //TypeScript definition covers a module's *public* API surface, so
                 //skip private classes
-                var isPublic = !(TypeUtil.isPrivateDoclet(doclet, this.config));
-                
-                var parentModName = null;
+                let isPublic = !(TypeUtil.isPrivateDoclet(doclet, this.config));
+                let parentModName = null;
                 if (doclet.longname.indexOf("module:") >= 0) {
                     //Assuming that anything annotated "module:" will have a "." to denote end of module and start of class name
-                    var modLen = "module:".length;
-                    var dotIdx = doclet.longname.indexOf(".");
+                    let modLen = "module:".length;
+                    let dotIdx = doclet.longname.indexOf(".");
                     if (dotIdx < 0)
                         dotIdx = doclet.longname.length;
                     parentModName = doclet.longname.substring(modLen, dotIdx);
                 } else if (doclet.memberof) {
                     parentModName = doclet.memberof;
                 }
+                let makeGlobal = this.config.globalModuleAliases.indexOf(parentModName) >= 0;
                 if (doclet.kind == DocletKind.Class) {
                     //Key class definition on longname
-                    var cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
+                    let cls = this.ensureClassDef(doclet.longname, () => new TSClass(doclet));
                     cls.setIsPublic(isPublic);
                     if (parentModName != null)
                         cls.setParentModule(parentModName);
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
+                    this.trackedDoclets[doclet.longname] = doclet;
                 } else if (doclet.kind == DocletKind.Typedef) {
                     if (TsdGenerator.isCallbackType(doclet)) {
-                        let parentModule = doclet.memberof;
-                        if (parentModule != null && this.moduleMembers[parentModule] == null)
-                            this.moduleMembers[parentModule] = [];
+                        if (parentModName != null && this.moduleMembers[parentModName] == null)
+                            this.moduleMembers[parentModName] = [];
                         let method = new TSMethod(doclet)
                         method.setIsModule(true);
                         method.setIsTypedef(true);
-                        if (parentModule != null)
-                            this.moduleMembers[parentModule].push(method);
-                        else
+                        if (parentModName != null && !makeGlobal)
+                            this.moduleMembers[parentModName].push(method);
+                        else if (makeGlobal)
                             this.globalMembers.push(method);
                     } else {
-                        var tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                        let tdf = null;
+                        if (makeGlobal)
+                            tdf = new TSTypedef(doclet);
+                        else
+                            tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
                         tdf.setIsPublic(isPublic);
-                        if (parentModName != null)
+                        if (parentModName != null && !makeGlobal)
                             tdf.setParentModule(parentModName);
+                        else if (makeGlobal)
+                            this.globalMembers.push(tdf);
                     }
+                    this.trackedDoclets[doclet.longname] = doclet;
                 } else if (doclet.kind == DocletKind.Function) {
                     let parentModule = doclet.memberof;
                     if (parentModule == null) {
                         let method = new TSMethod(doclet);
                         method.setIsModule(true);
+                        method.setIsPublic(isPublic);
                         method.setIsTypedef(false);
                         this.globalMembers.push(method);
+                        this.trackedDoclets[doclet.longname] = doclet;
                     }
-                } else if (doclet.kind == DocletKind.Module) {
+                } else if (TypeUtil.isEnumDoclet(doclet)) {
+                    let tdf = null;
+                    if (makeGlobal)
+                        tdf = new TSTypedef(doclet);
+                    else
+                        tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                    tdf.setIsPublic(isPublic);
+                    if (parentModName != null && !makeGlobal)
+                        tdf.setParentModule(parentModName);
+                    else if (makeGlobal)
+                        this.globalMembers.push(tdf);
+                    this.trackedDoclets[doclet.longname] = doclet;
+                }
+            }
+        }
+        private parseModules(doclets: IDoclet[]): void {
+            for (var doclet of doclets) {
+                //Already covered in 1st pass
+                if (this.trackedDoclets[doclet.longname] != null)
+                    continue;
+                //On ignore list
+                if (this.ignoreThisType(doclet.longname))
+                    continue;
+                //Undocumented and we're ignoring them
+                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                    continue;
+                
+                if (doclet.kind == DocletKind.Module) {
                     this.moduleDoclets[doclet.name] = doclet;
+                    this.trackedDoclets[doclet.longname] = doclet;
                 }
             }
         }
@@ -183,8 +230,13 @@ module TsdPlugin {
         }
         private processTypeMembers(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
+                //Already covered in 1st pass
+                if (this.trackedDoclets[doclet.longname] != null)
+                    continue;
+                //On ignore list
                 if (this.ignoreThisType(doclet.longname))
                     continue;
+                //Undocumented and we're ignoring them
                 if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
                     continue;
 
@@ -203,20 +255,30 @@ module TsdPlugin {
                         //Bail on this iteration here if not public
                         if (!isPublic)
                             continue;
-                        
+
                         //Before we bail, let's assume this is a module level member and
                         //see if it's the right doclet kind
                         let parentModule = doclet.memberof;
                         if (parentModule == null)
                             continue;
-                            
+
+                        parentModule = ModuleUtils.cleanModuleName(parentModule);
+                        
+                        //HACK-ish: If we found an enum, that this is a member of, skip it if it already exists
+                        let parentDoclet = this.trackedDoclets[doclet.memberof];
+                        if (parentDoclet != null && TypeUtil.isEnumDoclet(parentDoclet)) {
+                            let matches = (parentDoclet.properties || []).filter(prop => prop.name == doclet.name);
+                            if (matches.length > 0)
+                                continue;
+                        }
+
                         if (doclet.kind == DocletKind.Function) {
                             if (this.moduleMembers[parentModule] == null)
                                 this.moduleMembers[parentModule] = [];
                             let method = new TSMethod(doclet)
                             method.setIsModule(true);
                             this.moduleMembers[parentModule].push(method);
-                        } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
+                        } else if (doclet.kind == DocletKind.Constant || doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
                             if (this.moduleMembers[parentModule] == null)
                                 this.moduleMembers[parentModule] = [];
                             let prop = new TSProperty(doclet, false);
@@ -232,11 +294,11 @@ module TsdPlugin {
                 if (doclet.kind == DocletKind.Function) {
                     var method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
-                    cls.members.push(method);
+                    cls.addMember(method);
                 } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
                     var prop = new TSProperty(doclet, isTypedef);
                     prop.setIsPublic(isPublic);
-                    cls.members.push(prop);
+                    cls.addMember(prop);
                 }
             }
         }
@@ -398,8 +460,12 @@ module TsdPlugin {
             }
             return tree;
         }
+        
         private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
             if (moduleName == null) {
+                if (TypeUtil.isTsElementNotPublic(type)) {
+                    return false;
+                }
                 root.types.push(type);
                 return true;
             } else {
@@ -414,6 +480,11 @@ module TsdPlugin {
                 if (bIgnoreThisType) {
                     return false;
                 }
+                
+                if (TypeUtil.isTsElementNotPublic(type)) {
+                    return false;
+                }
+                
                 if (ModuleUtils.isAMD(moduleNameClean)) {
                     //No nesting required for AMD modules
                     if (!root.children[moduleNameClean]) {
@@ -455,6 +526,10 @@ module TsdPlugin {
             }
             for (let oType of this.globalMembers) {
                 //console.log(`Adding ${oType.getFullName()} to global namespace`);
+                if (oType instanceof TSMember && !oType.getIsPublic())
+                    continue;
+                if (oType instanceof TSComposable && !oType.getIsPublic())
+                    continue;
                 root.types.push(oType);
             }
             for (let modName in this.moduleMembers) {
@@ -504,7 +579,9 @@ module TsdPlugin {
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
-            //2nd pass
+            //2nd pass. We process modules in this pass instead of the 1st so that enums do not get double-registered as modules as well
+            this.parseModules(doclets);
+            //3rd pass
             this.processTypeMembers(doclets);
             //Process user-defined types
             this.processUserDefinedTypes();

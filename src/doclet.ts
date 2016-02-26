@@ -78,5 +78,13 @@ module TsdPlugin {
          * Arbitrary JSDoc metadata
          */
         meta?: any;
+        /**
+         * Indicates if this doclet is an enum
+         */
+        isEnum?: boolean;
+        /**
+         * If isEnum == true, contains the members of this enum. Note that other libraries may define enums differently (eg. A typedef with members)
+         */
+        properties?: IDoclet[];
     }
 }

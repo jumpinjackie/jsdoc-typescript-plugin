@@ -133,5 +133,9 @@ module TsdPlugin {
          * Sets the initial indentation level. Each level starts indentation by one "tab" (4 spaces)
          */
         initialIndentation: number;
+        /**
+         * Any module on this list, for any types found under it, will be added to the global namespace instead
+         */
+        globalModuleAliases?: string[];
     }
 }

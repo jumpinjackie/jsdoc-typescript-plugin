@@ -14,13 +14,23 @@
     "typescript": {
         "rootModuleName": "cesium",
         "outDir": "./typings",
+        "outputDocletDefs": false,
         "fillUndocumentedDoclets": true,
         "defaultReturnType": "void",
         "headerFile": "./content/cesium_header.ts",
         "footerFile": "./content/cesium_footer.ts",
         "doNotDeclareTopLevelElements": true,
         "initialIndentation": 1,
+        "ignore": [
+            "module:ComponentDataType",
+            "module:PrimitiveType",
+            "<anonymous>~ComponentDataType",
+            "<anonymous>~PrimitiveType"
+        ],
         "ignoreModules": [
+            "<anonymous>"
+        ],
+        "globalModuleAliases": [
             "<anonymous>"
         ],
         "typeReplacements": {}

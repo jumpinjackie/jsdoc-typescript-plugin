@@ -12,3 +12,81 @@ declare module __Cesium {
      * Type alias for a promise
      */
     type Promise<T> = PromiseLike<T>;
+    
+    type TypedArray = any[];
+    
+    /**
+     * The type of a geometric primitive, i.e., points, lines, and triangles.
+     */
+    enum PrimitiveType {
+        /**
+         * Points primitive where each vertex (or index) is a separate point.
+         */
+        POINTS = 0x0000,
+        /**
+         * Lines primitive where each two vertices (or indices) is a line segment.  Line segments are not necessarily connected.
+         */
+        LINES = 0x0001,
+        /**
+         * Line loop primitive where each vertex (or index) after the first connects a line to
+the previous vertex, and the last vertex implicitly connects to the first.
+         */
+        LINE_LOOP = 0x0002,
+        /**
+         * Line strip primitive where each vertex (or index) after the first connects a line to the previous vertex.
+         */
+        LINE_STRIP = 0x0003,
+        /**
+         * Triangles primitive where each three vertices (or indices) is a triangle.  Triangles do not necessarily share edges.
+         */
+        TRIANGLES = 0x0004,
+        /**
+         * Triangle strip primitive where each vertex (or index) after the first two connect to
+the previous two vertices forming a triangle.  For example, this can be used to model a wall.
+         */
+        TRIANGLE_STRIP = 0x0005,
+        /**
+         * Triangle fan primitive where each vertex (or index) after the first two connect to
+the previous vertex and the first vertex forming a triangle.  For example, this can be used
+to model a cone or circle.
+         */
+        TRIANGLE_FAN = 0x0006
+    }
+    
+    /**
+     * WebGL component datatypes.  Components are intrinsics,
+which form attributes, which form vertices.
+     */
+    enum ComponentDatatype {
+        /**
+         * 8-bit signed byte corresponding to <code>gl.BYTE</code> and the type
+of an element in <code>Int8Array</code>.
+         */
+        BYTE = 0x1400,
+        /**
+         * 8-bit unsigned byte corresponding to <code>UNSIGNED_BYTE</code> and the type
+of an element in <code>Uint8Array</code>.
+         */
+        UNSIGNED_BYTE = 0x1401,
+        /**
+         * 16-bit signed short corresponding to <code>SHORT</code> and the type
+of an element in <code>Int16Array</code>.
+         */
+        SHORT = 0x1402,
+        /**
+         * 16-bit unsigned short corresponding to <code>UNSIGNED_SHORT</code> and the type
+of an element in <code>Uint16Array</code>.
+         */
+        UNSIGNED_SHORT = 0x1403,
+        /**
+         * 32-bit floating-point corresponding to <code>FLOAT</code> and the type
+of an element in <code>Float32Array</code>.
+         */
+        FLOAT = 0x1406,
+        /**
+         * 64-bit floating-point corresponding to <code>gl.DOUBLE</code> (in Desktop OpenGL;
+this is not supported in WebGL, and is emulated in Cesium via {@link GeometryPipeline.encodeAttribute})
+and the type of an element in <code>Float64Array</code>.
+         */
+        DOUBLE = 0x140A
+    }
