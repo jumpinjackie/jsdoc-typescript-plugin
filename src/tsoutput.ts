@@ -98,10 +98,10 @@ module TsdPlugin {
             }
         }
         
-        public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration): boolean {
+        public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration = null): boolean {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
-            if (conf.publicAnnotation) {
+            if (conf != null && conf.publicAnnotation) {
                 var found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
                 if (found.length == 1) //tag found
                     return false;
@@ -802,7 +802,8 @@ module TsdPlugin {
             this.isPublic = false;
         }
         public addMember(member: TSMember): void {
-            this.members.push(member);
+            if (member.getIsPublic() || !TypeUtil.isPrivateDoclet(member.getDoclet()))
+                this.members.push(member);
         }
         public findMember(name: string, kind: string): TSMember {
             var matches = this.members.filter(m => {
@@ -867,7 +868,8 @@ module TsdPlugin {
                 this.doclet.isEnum === true &&
                 (this.doclet.properties || []).length > 0) {
                 for (var prop of this.doclet.properties) {
-                    this.addMember(new TSProperty(prop, false));
+                    if (!TypeUtil.isPrivateDoclet(prop))
+                        this.addMember(new TSProperty(prop, false));
                 }
                 this.alreadyAddedEnumMembers = true;
             }

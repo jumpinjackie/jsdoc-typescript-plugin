@@ -22,10 +22,24 @@
         "doNotDeclareTopLevelElements": true,
         "initialIndentation": 1,
         "ignore": [
-            "module:ComponentDataType",
-            "module:PrimitiveType",
-            "<anonymous>~ComponentDataType",
-            "<anonymous>~PrimitiveType"
+            "<anonymous>~ComponentDatatype",
+            "<anonymous>~ComponentDatatype.BYTE",
+            "<anonymous>~ComponentDatatype.UNSIGNED_BYTE",
+            "<anonymous>~ComponentDatatype.SHORT",
+            "<anonymous>~ComponentDatatype.UNSIGNED_SHORT",
+            "<anonymous>~ComponentDatatype.FLOAT",
+            "<anonymous>~ComponentDatatype.DOUBLE",
+            "<anonymous>~PrimitiveType",
+            "<anonymous>~PrimitiveType.POINTS",
+            "<anonymous>~PrimitiveType.LINES",
+            "<anonymous>~PrimitiveType.LINE_LOOP",
+            "<anonymous>~PrimitiveType.LINE_STRIP",
+            "<anonymous>~PrimitiveType.TRIANGLES",
+            "<anonymous>~PrimitiveType.TRIANGLE_STRIP",
+            "<anonymous>~PrimitiveType.TRIANGLE_FAN",
+            "<anonymous>~WindingOrder",
+            "<anonymous>~WindingOrder.CLOCKWISE",
+            "<anonymous>~WindingOrder.COUNTER_CLOCKWISE"
         ],
         "ignoreModules": [
             "<anonymous>"

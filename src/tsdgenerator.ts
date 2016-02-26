@@ -116,10 +116,6 @@ module TsdPlugin {
             }
         }
         
-        private treatModuleNameAsGlobal(moduleName: string): boolean {
-            return this.config.globalModuleAliases.indexOf(moduleName) >= 0;
-        }
-        
         private parseClassesAndTypedefs(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //On ignore list
@@ -233,7 +229,7 @@ module TsdPlugin {
                 //Already covered in 1st pass
                 if (this.trackedDoclets[doclet.longname] != null)
                     continue;
-                //On ignore list
+                //On the ignore list
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them

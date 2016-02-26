@@ -20,6 +20,20 @@ declare module __Cesium {
     type Canvas = HTMLCanvasElement;
     
     /**
+     * Winding order defines the order of vertices for a triangle to be considered front-facing.
+     */
+    enum WindingOrder {
+        /**
+         * Vertices are in clockwise order.
+         */
+        CLOCKWISE = 0x0900,
+        /**
+         * Vertices are in counter-clockwise order.
+         */
+        COUNTER_CLOCKWISE = 0x0901
+    }
+    
+    /**
      * The type of a geometric primitive, i.e., points, lines, and triangles.
      */
     enum PrimitiveType {
