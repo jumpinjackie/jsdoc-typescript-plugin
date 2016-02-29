@@ -16,6 +16,7 @@
         "test",
         "typings",
         "node_modules",
+        "typings/openlayers.baseline.d.ts",
         "content/ol_footer.ts",
         "content/ol_header.ts"
     ]

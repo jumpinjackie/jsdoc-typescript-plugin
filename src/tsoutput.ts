@@ -18,7 +18,7 @@ module TsdPlugin {
     /**
      * The default filter function for any JSON.stringify calls
      */
-    export function JsDocletStringifyFilter(key: string, value: any): any { 
+    function JsDocletStringifyFilter(key: string, value: any): any { 
         if (key === "comment") { 
             return undefined; 
         }
@@ -28,7 +28,13 @@ module TsdPlugin {
         return value; 
     }
     
+    export function DumpDoclet(doclet: IDoclet) {
+        return JSON.stringify(doclet, JsDocletStringifyFilter, 4);
+        //return JSON.stringify(doclet, null, 4);
+    }
+    
     //TODO: Generic placeholder parameters are being added, which may trip up the type hoisting afterwards
+    //TODO: It would be nice to filter out built-in types (ie. types in TypeScript's lib.d.ts)
     export class TypeVisibilityContext {
         private types: Dictionary<string>;
         private ignore: Dictionary<string>;
@@ -36,10 +42,13 @@ module TsdPlugin {
             this.types = {};
             this.ignore = {
                 "number": "number",
+                "Number": "Number",
                 "undefined": "undefined",
                 "null": "null",
                 "string": "string",
-                "boolean": "boolean"
+                "String": "String",
+                "boolean": "boolean",
+                "Boolean": "Boolean",
             };
         }
         public removeType(typeName: string): void {
@@ -381,7 +390,7 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
-                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
             
@@ -587,7 +596,7 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for function");
-                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
             
@@ -802,8 +811,7 @@ module TsdPlugin {
             this.isPublic = false;
         }
         public addMember(member: TSMember): void {
-            if (member.getIsPublic() || !TypeUtil.isPrivateDoclet(member.getDoclet()))
-                this.members.push(member);
+            this.members.push(member);
         }
         public findMember(name: string, kind: string): TSMember {
             var matches = this.members.filter(m => {
@@ -921,7 +929,7 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
-                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
             
@@ -1057,7 +1065,7 @@ module TsdPlugin {
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for class");
-                stream.writeln(JSON.stringify(this.doclet, JsDocletStringifyFilter, 4));
+                stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
             

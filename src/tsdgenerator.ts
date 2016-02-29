@@ -558,10 +558,10 @@ module TsdPlugin {
         
         public dumpDoclets(doclets: IDoclet[], streamFactory: IFileStreamFactory) {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName));
+            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
             for (var doc of doclets) {
-                output.writeln(JSON.stringify(doc, null /*JsDocletStringifyFilter*/, 4));
+                output.writeln(DumpDoclet(doc));
             }
             
             output.close(() => {
@@ -571,7 +571,7 @@ module TsdPlugin {
         
         public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName));
+            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);

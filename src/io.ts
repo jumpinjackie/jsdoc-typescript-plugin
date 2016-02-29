@@ -8,14 +8,17 @@ module TsdPlugin {
     export interface IFileStreamFactory {
         createStream(fileName: string): any; /* fs.WriteStream */
         readText(fileName: string): string;
+        endl: string;
     }
     
     export class IndentedOutputStream {
         private indentLevel: number;
         private output: any;
-        constructor(output: any /* fs.WriteStream */) {
+        private endl: string;
+        constructor(output: any /* fs.WriteStream */, endl: string) {
             this.indentLevel = 0;
             this.output = output;
+            this.endl = endl;
         }
         indent(): void {
             this.indentLevel++;
@@ -35,7 +38,7 @@ module TsdPlugin {
             return result + pattern;
         }
         writeln(str: string) {
-            this.output.write(`${this.indentedText()}${str}\n`);
+            this.output.write(`${this.indentedText()}${str}${this.endl}`);
         }
         close(callback: () => void) {
             this.output.on("finish", callback);

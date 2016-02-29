@@ -10,6 +10,7 @@
     "typescript": {
         "rootModuleName": "misc",
         "outDir": "./typings",
+        "outputDocletDefs": false,
         "rewriteFunctionTypedefs": true
     },
     "templates": {
