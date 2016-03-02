@@ -11,7 +11,8 @@
         "rootModuleName": "misc",
         "outDir": "./typings",
         "outputDocletDefs": false,
-        "rewriteFunctionTypedefs": true
+        "rewriteFunctionTypedefs": true,
+        "useUnionTypeForStringEnum": true
     },
     "templates": {
         "default": {

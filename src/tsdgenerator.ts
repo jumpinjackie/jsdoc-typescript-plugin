@@ -53,7 +53,8 @@ module TsdPlugin {
                 ignoreModules: (config.ignoreModules || []),
                 doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets,
                 initialIndentation: (config.initialIndentation || 0),
-                globalModuleAliases: (config.globalModuleAliases || [])
+                globalModuleAliases: (config.globalModuleAliases || []),
+                useUnionTypeForStringEnum: !!config.useUnionTypeForStringEnum
             }
             var ignoreJsDocTypes = (config.ignore || []);
             for (let ignoreType of ignoreJsDocTypes) {

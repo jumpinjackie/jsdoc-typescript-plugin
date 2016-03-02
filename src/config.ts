@@ -137,5 +137,9 @@ module TsdPlugin {
          * Any module on this list, for any types found under it, will be added to the global namespace instead
          */
         globalModuleAliases?: string[];
+        /**
+         * Controls whether to use TS 1.8 string union types for any string enums
+         */
+        useUnionTypeForStringEnum?: boolean;
     }
 }

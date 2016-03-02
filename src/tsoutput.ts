@@ -213,6 +213,11 @@ module TsdPlugin {
                     //Need to ensure this is string or number. In the event we find a string enum
                     //class, we must replace it with string
                     if (context != null) {
+                        //NOTE: Unlike other cases where we need to fix string enum types, this one is
+                        //unconditional as TypeScript does not support enums as KVP keys, even though
+                        //their underlying type is string|number
+                        //
+                        //See: https://github.com/Microsoft/TypeScript/issues/2491
                         if (context instanceof ReadOnlyTypeVisibilityContext) {
                             let toFix = [ keyType ];
                             context.fixStringEnumTypes(toFix);
@@ -450,7 +455,8 @@ module TsdPlugin {
                 if (this.doclet.type != null) {
                     let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
                     let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
-                    TypeUtil.fixStringEnumTypes(types, publicTypes);
+                    if (!conf.useUnionTypeForStringEnum)
+                        TypeUtil.fixStringEnumTypes(types, publicTypes);
                     TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
                     propDecl += types.join("|") + ";";
                 } else {
@@ -693,7 +699,8 @@ module TsdPlugin {
                             //Output as TS union type
                             let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
                             let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger, roContext);
-                            TypeUtil.fixStringEnumTypes(utypes, publicTypes);
+                            if (!conf.useUnionTypeForStringEnum)
+                                TypeUtil.fixStringEnumTypes(utypes, publicTypes);
                             argStr += utypes.join("|");
                             if (arg.variable) {
                                 argStr += "[]";
@@ -722,7 +729,8 @@ module TsdPlugin {
                     }
                 }
                 
-                TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
+                if (!conf.useUnionTypeForStringEnum)
+                    TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
                 TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
                 let retType = retTypes.join("|"); //If multiple, return type is TS union
                 
@@ -1111,40 +1119,33 @@ module TsdPlugin {
                 stream.unindent();
                 stream.writeln("}");
             } else if (this.enumType == TSEnumType.String && hasMembers) {
-                //TODO: TypeScript 1.8 will introduce union string literals, which will let us
-                //emit something like this:
-                //
-                //type StringEnum = "Foo" | "Bar";
-                //
-                //Instead of what we currently do which is:
-                //
-                //class StringEnum {
-                //    public static get Foo(): string = "Foo";
-                //    public static get Bar(): string = "Bar";
-                //}
-                //
-                //When TS 1.8 drops, we should allow both string enum forms to be generated
-                //depending on plugin configuration
-                
-                //Write as a class with static string members
-                //NOTE: If this is referenced in a parameter or return type, must make 
-                //sure to rewrite that type as 'string'. If generating union string literals
-                //this is not required
-                stream.writeln(`${declareMe}class ${this.doclet.name} {`);
-                stream.indent();
-                for (let member of this.members) {
-                    if (member instanceof TSProperty) {
-                        let eValue = member.tryGetEnumValue();
-                        stream.writeln("/**");
-                        stream.writeln(` * "${eValue}"`);
-                        stream.writeln(" */");
-                        stream.writeln(`public static ${member.getDoclet().name}: string;`);
-                    } else { //This is a documentation error
-                        logger.error(`Found non-property member ${member.getDoclet().name} in declared enum type ${this.getFullName()}`);
+                if (!conf.useUnionTypeForStringEnum) {
+                    //Write as a class with static string members
+                    //NOTE: If this is referenced in a parameter or return type, must make 
+                    //sure to rewrite that type as 'string' (see: fixStringEnumTypes)
+                    stream.writeln(`${declareMe}class ${this.doclet.name} {`);
+                    stream.indent();
+                    for (let member of this.members) {
+                        if (member instanceof TSProperty) {
+                            let eValue = member.tryGetEnumValue();
+                            stream.writeln("/**");
+                            stream.writeln(` * "${eValue}"`);
+                            stream.writeln(" */");
+                            stream.writeln(`public static ${member.getDoclet().name}: string;`);
+                        } else { //This is a documentation error
+                            logger.error(`Found non-property member ${member.getDoclet().name} in declared enum type ${this.getFullName()}`);
+                        }
                     }
+                    stream.unindent();
+                    stream.writeln("}");
+                } else {
+                    //TS 1.8 string enums are simple, just make a type alias that is the union of all the string values
+                    let eValues = this.members
+                                      .filter(m => m instanceof TSProperty)
+                                      .map(m => (<TSProperty>m).tryGetEnumValue())
+                                      .map(m => `"${m}"`);
+                    stream.writeln(`${declareMe}type ${this.doclet.name} = ${eValues.join(" | ")};`);
                 }
-                stream.unindent();
-                stream.writeln("}");
             } else { //Not an enum
                 //If it has methods and/or properties, treat this typedef as an interface
                 if (hasMembers) {
