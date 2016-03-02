@@ -36,7 +36,7 @@ module TsdPlugin {
     //TODO: Generic placeholder parameters are being added, which may trip up the type hoisting afterwards
     //TODO: It would be nice to filter out built-in types (ie. types in TypeScript's lib.d.ts)
     export class TypeVisibilityContext {
-        private types: Dictionary<string>;
+        protected types: Dictionary<string>;
         private ignore: Dictionary<string>;
         constructor() {
             this.types = {};
@@ -74,6 +74,23 @@ module TsdPlugin {
         }
         public isEmpty(): boolean { return Object.keys(this.types).length == 0; }
         public getTypes(): string[] { return Object.keys(this.types); }
+    }
+    
+    //This is bit of a hack, but we want fixStringEnumTypes to be available in
+    //a class that quacks like a TypeVisibilityContext, so we have the opportunity
+    //to fix keys in a kvp during type replacement
+    
+    class ReadOnlyTypeVisibilityContext extends TypeVisibilityContext {
+        private publicTypes: Dictionary<IOutputtable>;
+        constructor(publicTypes: Dictionary<IOutputtable>) {
+            super();
+            this.publicTypes = publicTypes;
+        }
+        public fixStringEnumTypes(typeNames: string[]): void {
+            TypeUtil.fixStringEnumTypes(typeNames, this.publicTypes);
+        }
+        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
+        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
     }
     
     export class TypeUtil {
@@ -120,6 +137,7 @@ module TsdPlugin {
             }
             
             return doclet.access == "private" ||
+                   doclet.access == "protected" ||
                    doclet.undocumented == true;
         }
         
@@ -191,6 +209,17 @@ module TsdPlugin {
                 if (rgxm) {
                     //console.log("is kvp");
                     var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context);
+                    
+                    //Need to ensure this is string or number. In the event we find a string enum
+                    //class, we must replace it with string
+                    if (context != null) {
+                        if (context instanceof ReadOnlyTypeVisibilityContext) {
+                            let toFix = [ keyType ];
+                            context.fixStringEnumTypes(toFix);
+                            keyType = toFix[0];
+                        }
+                    }
+                    
                     var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger, context);
                     return "{ [key: " + keyType + "]: " + valueType + "; }";
                 }
@@ -298,6 +327,8 @@ module TsdPlugin {
             this.doclet = doclet;
             this.isPublic = true;
         }
+        
+        public isStatic(): boolean { return this.doclet.scope == "static"; }
         
         public getDoclet(): IDoclet { return this.doclet; }
         
@@ -417,7 +448,8 @@ module TsdPlugin {
                     propDecl += ": ";
                 }
                 if (this.doclet.type != null) {
-                    var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                    let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                    let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
                     TypeUtil.fixStringEnumTypes(types, publicTypes);
                     TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
                     propDecl += types.join("|") + ";";
@@ -659,7 +691,8 @@ module TsdPlugin {
                         }
                         if (arg.type != null) {
                             //Output as TS union type
-                            let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger);
+                            let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                            let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger, roContext);
                             TypeUtil.fixStringEnumTypes(utypes, publicTypes);
                             argStr += utypes.join("|");
                             if (arg.variable) {
@@ -680,7 +713,8 @@ module TsdPlugin {
                 if (this.doclet.returns != null) {
                     for (let retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger);
+                            let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                            let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, roContext);
                             for (let r of rts) {
                                 retTypes.push(r);
                             }
@@ -825,6 +859,114 @@ module TsdPlugin {
             else
                 return null;
         }
+        private getDottedMemberName(doclet: IDoclet): string {
+            if (doclet.name.indexOf(".") >= 0)
+                return doclet.name;
+
+            if ((doclet.properties || []).length == 1) {
+                if (doclet.properties[0].name.indexOf(".") >= 0)
+                    return doclet.properties[0].name;
+            }
+
+            return null;
+        }
+        /**
+         * Studies the members of this doclet and returns a normalized set.
+         * 
+         * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
+         */
+        protected studyMembers(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): TSMember[] {
+            let studiedMembers: TSMember[] = [];
+            let staticMemberMap: Dictionary<ITsMemberContainer> = {};
+            let instanceMemberMap: Dictionary<ITsMemberContainer> = {};
+            
+            let members = (this.members || []).filter(m => m.getIsPublic());
+            
+            if (members.length > 0) {
+                for (let member of members) {
+                    let memberDoclet = member.getDoclet();
+                    if (member instanceof TSMethod) {
+                        if (member.isStatic()) {
+                            staticMemberMap[memberDoclet.name] = {
+                                members: [],
+                                member: member
+                            };
+                        } else {
+                            instanceMemberMap[memberDoclet.name] = {
+                                members: [],
+                                member: member
+                            };
+                        }
+                    } else {
+                        if (memberDoclet.type != null) {
+                            //Only pass the context down when parsing and converting if we're currently studying a non-private doclet
+                            if (!TypeUtil.isPrivateDoclet(memberDoclet))
+                                TypeUtil.parseAndConvertTypes(memberDoclet.type, conf, logger, context);
+                            let dottedMemberName = this.getDottedMemberName(memberDoclet);
+                            if (dottedMemberName != null) { //If it's dotted is a member of the options property
+                                let parts = dottedMemberName.split(".");
+                                
+                                //TODO: What if the part exists in both?
+                                let mbr = instanceMemberMap[parts[0]];
+                                if (mbr == null)
+                                    mbr = staticMemberMap[parts[0]];
+                                
+                                //If we get 'foo.bar', we should have already processed argument 'foo'
+                                if (mbr == null) {
+                                    //Only want to error when not visiting (ie. context is null)
+                                    if (context == null) {
+                                        logger.error(`In method ${this.doclet.longname}: Argument (${dottedMemberName}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                                    }
+                                } else {
+                                    mbr.members.push(member);
+                                }
+                            } else {
+                                if (member.isStatic()) {
+                                    staticMemberMap[memberDoclet.name] = {
+                                        members: [],
+                                        member: member
+                                    };
+                                } else {
+                                    instanceMemberMap[memberDoclet.name] = {
+                                        members: [],
+                                        member: member
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            //Since there is no guarantee of object keys being insertion order 
+            //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
+            //we'll loop the original doclet params and pick up the keyed parameter along the way 
+            for (let member of members) {
+                let memberDoclet = member.getDoclet();
+                if (member instanceof TSMethod) {
+                    let p = member.isStatic() ? staticMemberMap[memberDoclet.name] : instanceMemberMap[memberDoclet.name];
+                    if (p != null) {
+                        studiedMembers.push(p.member);
+                    } 
+                } else {
+                    if (memberDoclet.type != null) {
+                        let dottedMemberName = this.getDottedMemberName(memberDoclet);
+                        if (dottedMemberName == null) {
+                            let p = member.isStatic() ? staticMemberMap[memberDoclet.name] : instanceMemberMap[memberDoclet.name];
+                            if (p != null) {
+                                studiedMembers.push(p.member);
+                                if (p.members.length > 0 && context != null) {
+                                    //TODO: Define a new options interface and register it
+                                    //with the context
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return studiedMembers;
+        }
         public getParentTypeNames(): string[] { return this.doclet.augments; }
         /**
          * Finds a matching member from any of the current member's types inheritance hierarchy that doesn't inherit documentation
@@ -917,63 +1059,6 @@ module TsdPlugin {
                 return this.doclet.name;
             else
                 return `${mod}.${this.doclet.name}`;
-        }
-        /**
-         * Studies the members of this doclet and returns a normalized set.
-         * 
-         * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
-         */
-        private studyMembers(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): TSMember[] {
-            let studiedMembers: TSMember[] = [];
-            let paramMap: Dictionary<ITsMemberContainer> = {};
-            
-            let members = this.members || [];
-            
-            if (members.length > 0) {
-                for (let member of members) {
-                    let memberDoclet = member.getDoclet();
-                    if (memberDoclet.type != null) {
-                        TypeUtil.parseAndConvertTypes(memberDoclet.type, conf, logger, context);
-                        if (memberDoclet.name.indexOf(".") >= 0) { //If it's dotted is a member of the options property
-                            let parts = memberDoclet.name.split(".");
-                            let parm = paramMap[parts[0]];
-                            //If we get 'foo.bar', we should have already processed argument 'foo'
-                            if (parm == null) {
-                                //Only want to error when not visiting (ie. context is null)
-                                if (context == null) {
-                                    logger.error(`In method ${this.doclet.longname}: Argument (${memberDoclet.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
-                                }
-                            } else {
-                                parm.members.push(member);
-                            }
-                        } else {
-                            paramMap[memberDoclet.name] = {
-                                members: [],
-                                member: member
-                            };
-                        }
-                    }
-                }
-            }
-            
-            //Since there is no guarantee of object keys being insertion order 
-            //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
-            //we'll loop the original doclet params and pick up the keyed parameter along the way 
-            for (let member of members) {
-                let memberDoclet = member.getDoclet();
-                if (memberDoclet.type != null) {
-                    let p = paramMap[memberDoclet.name];
-                    if (p != null) {
-                        studiedMembers.push(p.member);
-                        if (p.members.length > 0 && context != null) {
-                            //TODO: Define a new options interface and register it
-                            //with the context
-                        }
-                    }
-                }
-            }
-            
-            return studiedMembers;
         }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
@@ -1118,7 +1203,8 @@ module TsdPlugin {
             }
             if (this.ctor != null)
                 this.ctor.visit(context, conf, logger);
-            for (var member of this.members) {
+            let members = this.studyMembers(context, conf, logger);
+            for (var member of members) {
                 if (member.getIsPublic() || member.inheritsDoc())
                     member.visit(context, conf, logger);
             }
@@ -1147,7 +1233,11 @@ module TsdPlugin {
             }
             //Inheritance
             if (this.doclet.augments != null) {
-                clsDecl += " extends " + this.doclet.augments.join(",");
+                var parents = this.doclet
+                                  .augments
+                                  .map(p => TypeUtil.getTypeReplacement(p, conf, logger, null))
+                                  .join(",");
+                clsDecl += " extends " + parents;
             }
             clsDecl += " {";
             stream.writeln(clsDecl);
@@ -1155,7 +1245,8 @@ module TsdPlugin {
             if (this.ctor != null) {
                 this.ctor.output(stream, conf, logger, publicTypes);
             }
-            for (var member of this.members) {
+            let members = this.studyMembers(null, conf, logger);
+            for (var member of members) {
                 //NOTE: inheritsDoc() is tested first before public visibility as it may inherit off of something that
                 //has public visibility
                 if (member.inheritsDoc()) {
