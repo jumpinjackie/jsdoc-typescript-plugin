@@ -116,6 +116,12 @@ module TsdPlugin {
             }
         }
         
+        private isTSInterfaceCandidate(doclet: IDoclet): boolean {
+            return !TsdGenerator.isCallbackType(doclet) && //Because callback types could also be through typedefs
+                   (doclet.kind == DocletKind.Typedef ||
+                   (doclet.comment || "").indexOf("@record") >= 0); 
+        }
+        
         private parseClassesAndTypedefs(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //On ignore list
@@ -160,7 +166,7 @@ module TsdPlugin {
                     else if (makeGlobal)
                         this.globalMembers.push(method);
                     this.trackedDoclets[doclet.longname] = doclet;
-                } else if (doclet.kind == DocletKind.Typedef) {
+                } else if (this.isTSInterfaceCandidate(doclet)) {
                     let tdf = null;
                     if (makeGlobal)
                         tdf = new TSTypedef(doclet);
