@@ -35,6 +35,19 @@ module TsdPlugin {
          */
         declaration: string;
     }
+    
+    export interface IEnumConfiguration {
+        /**
+         * The list of identifiers to process as class-like enums. Such enums are basically
+         * classes with static constant members. Any references to this enum class will be replaced
+         * with its underlying integral type (generally number|string)
+         */
+        classes: string[];
+        /**
+         * The list of identifiers to process as native enums.
+         */
+        native: string[];
+    }
 
     /**
      * Defines the root plugin configuration section of the JSDoc configuration
@@ -141,5 +154,9 @@ module TsdPlugin {
          * Controls whether to use TS 1.8 string union types for any string enums
          */
         useUnionTypeForStringEnum?: boolean;
+        /**
+         * Used to instruct the plugin to configure the given types as enums regardless of what the processed doclet may suggest it is
+         */
+        processAsEnums?: IEnumConfiguration;
     }
 }
