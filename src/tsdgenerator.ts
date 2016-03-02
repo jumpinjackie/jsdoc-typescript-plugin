@@ -149,29 +149,28 @@ module TsdPlugin {
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
                     this.trackedDoclets[doclet.longname] = doclet;
+                } else if (TsdGenerator.isCallbackType(doclet)) {
+                    if (parentModName != null && this.moduleMembers[parentModName] == null)
+                        this.moduleMembers[parentModName] = [];
+                    let method = new TSMethod(doclet)
+                    method.setIsModule(true);
+                    method.setIsTypedef(true);
+                    if (parentModName != null && !makeGlobal)
+                        this.moduleMembers[parentModName].push(method);
+                    else if (makeGlobal)
+                        this.globalMembers.push(method);
+                    this.trackedDoclets[doclet.longname] = doclet;
                 } else if (doclet.kind == DocletKind.Typedef) {
-                    if (TsdGenerator.isCallbackType(doclet)) {
-                        if (parentModName != null && this.moduleMembers[parentModName] == null)
-                            this.moduleMembers[parentModName] = [];
-                        let method = new TSMethod(doclet)
-                        method.setIsModule(true);
-                        method.setIsTypedef(true);
-                        if (parentModName != null && !makeGlobal)
-                            this.moduleMembers[parentModName].push(method);
-                        else if (makeGlobal)
-                            this.globalMembers.push(method);
-                    } else {
-                        let tdf = null;
-                        if (makeGlobal)
-                            tdf = new TSTypedef(doclet);
-                        else
-                            tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
-                        tdf.setIsPublic(isPublic);
-                        if (parentModName != null && !makeGlobal)
-                            tdf.setParentModule(parentModName);
-                        else if (makeGlobal)
-                            this.globalMembers.push(tdf);
-                    }
+                    let tdf = null;
+                    if (makeGlobal)
+                        tdf = new TSTypedef(doclet);
+                    else
+                        tdf = this.ensureTypedef(doclet.longname, () => new TSTypedef(doclet));
+                    tdf.setIsPublic(isPublic);
+                    if (parentModName != null && !makeGlobal)
+                        tdf.setParentModule(parentModName);
+                    else if (makeGlobal)
+                        this.globalMembers.push(tdf);
                     this.trackedDoclets[doclet.longname] = doclet;
                 } else if (doclet.kind == DocletKind.Function) {
                     let parentModule = doclet.memberof;
