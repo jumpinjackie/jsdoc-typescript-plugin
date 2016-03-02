@@ -437,6 +437,8 @@ module TsdPlugin {
     }
     
     interface IDocletParameterContainer { members: IDocletParameter[], param: IDocletParameter }
+    
+    interface ITsMemberContainer { members: TSMember[], member: TSMember }
 
     export class TSMethod extends TSMember {
         private isModule: boolean;
@@ -890,10 +892,10 @@ module TsdPlugin {
             super.addMember(member);
         }
         private determineEnumType(): TSEnumType {
-            var eType = TSEnumType.Invalid;
-            var matches = (this.doclet.comment || "").match(/@enum \{(.*)\}/);
+            let eType = TSEnumType.Invalid;
+            let matches = (this.doclet.comment || "").match(/@enum \{(.*)\}/);
             if (matches && matches.length == 2) {
-                var typeName = matches[1].toLowerCase();
+                let typeName = matches[1].toLowerCase();
                 if (typeName == "string")
                     eType = TSEnumType.String;
                 else if (typeName == "number")
@@ -916,9 +918,67 @@ module TsdPlugin {
             else
                 return `${mod}.${this.doclet.name}`;
         }
+        /**
+         * Studies the members of this doclet and returns a normalized set.
+         * 
+         * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
+         */
+        private studyMembers(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): TSMember[] {
+            let studiedMembers: TSMember[] = [];
+            let paramMap: Dictionary<ITsMemberContainer> = {};
+            
+            let members = this.members || [];
+            
+            if (members.length > 0) {
+                for (let member of members) {
+                    let memberDoclet = member.getDoclet();
+                    if (memberDoclet.type != null) {
+                        TypeUtil.parseAndConvertTypes(memberDoclet.type, conf, logger, context);
+                        if (memberDoclet.name.indexOf(".") >= 0) { //If it's dotted is a member of the options property
+                            let parts = memberDoclet.name.split(".");
+                            let parm = paramMap[parts[0]];
+                            //If we get 'foo.bar', we should have already processed argument 'foo'
+                            if (parm == null) {
+                                //Only want to error when not visiting (ie. context is null)
+                                if (context == null) {
+                                    logger.error(`In method ${this.doclet.longname}: Argument (${memberDoclet.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                                }
+                            } else {
+                                parm.members.push(member);
+                            }
+                        } else {
+                            paramMap[memberDoclet.name] = {
+                                members: [],
+                                member: member
+                            };
+                        }
+                    }
+                }
+            }
+            
+            //Since there is no guarantee of object keys being insertion order 
+            //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
+            //we'll loop the original doclet params and pick up the keyed parameter along the way 
+            for (let member of members) {
+                let memberDoclet = member.getDoclet();
+                if (memberDoclet.type != null) {
+                    let p = paramMap[memberDoclet.name];
+                    if (p != null) {
+                        studiedMembers.push(p.member);
+                        if (p.members.length > 0 && context != null) {
+                            //TODO: Define a new options interface and register it
+                            //with the context
+                        }
+                    }
+                }
+            }
+            
+            return studiedMembers;
+        }
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
-            for (var member of this.members) {
+            let members = this.studyMembers(context, conf, logger);
+            for (let member of members) {
                 if (member.getIsPublic()) // || member.inheritsDoc())
                     member.visit(context, conf, logger);
             }
@@ -934,9 +994,9 @@ module TsdPlugin {
             }
             
             this.writeDescription(DocletKind.Typedef, stream, conf, logger);
-            var hasMembers = this.members.length > 0;
+            let hasMembers = this.members.length > 0;
             
-            var declareMe = "";
+            let declareMe = "";
             if (this.getParentModule() == null && conf.doNotDeclareTopLevelElements == false) {
                 declareMe = "declare ";
             }
@@ -944,7 +1004,7 @@ module TsdPlugin {
             if (this.enumType == TSEnumType.Number && hasMembers) {
                 stream.writeln(`${declareMe}enum ${this.doclet.name} {`);
                 stream.indent();
-                var props: TSProperty[] = [];
+                let props: TSProperty[] = [];
                 for (let member of this.members) {
                     if (member instanceof TSProperty) {
                         props.push(member);
@@ -987,9 +1047,9 @@ module TsdPlugin {
                 //this is not required
                 stream.writeln(`${declareMe}class ${this.doclet.name} {`);
                 stream.indent();
-                for (var member of this.members) {
+                for (let member of this.members) {
                     if (member instanceof TSProperty) {
-                        var eValue = member.tryGetEnumValue();
+                        let eValue = member.tryGetEnumValue();
                         stream.writeln("/**");
                         stream.writeln(` * "${eValue}"`);
                         stream.writeln(" */");
@@ -1005,15 +1065,16 @@ module TsdPlugin {
                 if (hasMembers) {
                     stream.writeln(`interface ${this.doclet.name} {`);
                     stream.indent();
-                    for (var member of this.members) {
+                    let members = this.studyMembers(null, conf, logger);
+                    for (let member of members) {
                         member.output(stream, conf, logger, publicTypes);
                     }
                     stream.unindent();
                     stream.writeln("}");
                 } else {
-                    var typeDecl = `${declareMe}type ${this.doclet.name}`;
+                    let typeDecl = `${declareMe}type ${this.doclet.name}`;
                     if (this.doclet != null && this.doclet.type != null) {
-                        var types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
+                        let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
                         //If we find 'Function' in here, send the hint that they should use @callback to document function types
                         if (types.indexOf("Function") >= 0) {
                             logger.warn(`Type ${this.doclet.name} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
