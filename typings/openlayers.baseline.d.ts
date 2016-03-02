@@ -6114,13 +6114,6 @@ breaks.
              */
             constructor(opt_options?: olx.control.ZoomSliderOptions);
             /**
-             * Remove the control from its current map and attach it to the new map.
-             * Subclasses may set up event handlers to get notified about changes to
-             * the map here.
-             * @param map  (Required) Map.
-             */
-            setMap(map: ol.Map): void;
-            /**
              * Update the zoomslider element.
              * @param mapEvent  (Required) Map event.
              */
@@ -6684,7 +6677,7 @@ breaks.
         /**
          * Meters per unit lookup table.
          */
-        var METERS_PER_UNIT: { [key: ol.proj.Units]: number; };
+        var METERS_PER_UNIT: { [key: string]: number; };
         /**
          * Register proj4. If not explicitly registered, it will be assumed that
          * proj4js will be loaded in the global namespace. For example in a
@@ -18618,13 +18611,6 @@ declare module olx {
              * Stroke style.
              */
             stroke?: ol.style.Stroke;
-            /**
-             * The atlas manager to use for this circle. When using WebGL it is
-             * recommended to use an atlas manager to avoid texture switching.
-             * If an atlas manager is given, the circle is added to an atlas.
-             * By default no atlas manager is used.
-             */
-            atlasManager?: ol.style.AtlasManager;
         }
         /**
          * TODO: This typedef has no documentation. Contact the library author if this typedef should be documented
@@ -18779,13 +18765,6 @@ declare module olx {
              * Rotation in radians (positive rotation clockwise). Default is `0`.
              */
             rotation?: number;
-            /**
-             * The atlas manager to use for this symbol. When using WebGL it is
-             * recommended to use an atlas manager to avoid texture switching.
-             * If an atlas manager is given, the symbol is added to an atlas.
-             * By default no atlas manager is used.
-             */
-            atlasManager?: ol.style.AtlasManager;
         }
         /**
          * TODO: This typedef has no documentation. Contact the library author if this typedef should be documented
