@@ -14,7 +14,7 @@ module TsdPlugin {
     /**
      * The class that does all the grunt work
      */
-    export class TsdGenerator {
+    export class TsdGenerator implements IAdhocTypeRegistration {
         private moduleMembers: Dictionary<TSMember[]>;
         private globalMembers: TSMember[];
         private moduleDoclets: Dictionary<IDoclet>;
@@ -119,6 +119,14 @@ module TsdPlugin {
             } else {
                 return this.typedefs[name];
             }
+        }
+        
+        public registerTypedef(name: string, typedef: TSTypedef): boolean {
+            if (!this.typedefs[name]) {
+                this.typedefs[name] = typedef;
+                return true;
+            }
+            return false;
         }
         
         private isTSInterfaceCandidate(doclet: IDoclet): boolean {
@@ -336,7 +344,7 @@ module TsdPlugin {
         }
         private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Dictionary<IOutputtable> {
             var publicTypes: Dictionary<IOutputtable> = {}; 
-            var context = new TypeVisibilityContext();
+            var context = new TypeVisibilityContext(this);
             
             //First, visit all known public types and collect referenced types
             for (let typedef of this.userTypeAliases) {

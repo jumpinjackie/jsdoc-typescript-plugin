@@ -33,12 +33,20 @@ module TsdPlugin {
         //return JSON.stringify(doclet, null, 4);
     }
     
+    /**
+     * Allows for additional typedefs to be registered during the pre-processing phase
+     */
+    export interface IAdhocTypeRegistration {
+        registerTypedef(name: string, item: IOutputtable): boolean;
+    }
+    
     //TODO: Generic placeholder parameters are being added, which may trip up the type hoisting afterwards
     //TODO: It would be nice to filter out built-in types (ie. types in TypeScript's lib.d.ts)
     export class TypeVisibilityContext {
         protected types: Dictionary<string>;
         private ignore: Dictionary<string>;
-        constructor() {
+        private reg: IAdhocTypeRegistration;
+        constructor(reg: IAdhocTypeRegistration) {
             this.types = {};
             this.ignore = {
                 "number": "number",
@@ -50,6 +58,14 @@ module TsdPlugin {
                 "boolean": "boolean",
                 "Boolean": "Boolean",
             };
+        }
+        public registerTypedef(name: string, typedef: IOutputtable): string {
+            let registeredName = name;
+            if (this.reg != null) {
+                let bRegistered = this.reg.registerTypedef(name, typedef);
+                //TODO: Handle the case of name collision (bRegistered = false)
+            }
+            return registeredName;
         }
         public removeType(typeName: string): void {
             if (this.hasType(typeName)) {
@@ -82,8 +98,8 @@ module TsdPlugin {
     
     class ReadOnlyTypeVisibilityContext extends TypeVisibilityContext {
         private publicTypes: Dictionary<IOutputtable>;
-        constructor(publicTypes: Dictionary<IOutputtable>) {
-            super();
+        constructor(reg: IAdhocTypeRegistration, publicTypes: Dictionary<IOutputtable>) {
+            super(reg);
             this.publicTypes = publicTypes;
         }
         public fixStringEnumTypes(typeNames: string[]): void {
@@ -453,7 +469,7 @@ module TsdPlugin {
                     propDecl += ": ";
                 }
                 if (this.doclet.type != null) {
-                    let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                    let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
                     let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
                     if (!conf.useUnionTypeForStringEnum)
                         TypeUtil.fixStringEnumTypes(types, publicTypes);
@@ -697,7 +713,7 @@ module TsdPlugin {
                         }
                         if (arg.type != null) {
                             //Output as TS union type
-                            let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                            let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
                             let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger, roContext);
                             if (!conf.useUnionTypeForStringEnum)
                                 TypeUtil.fixStringEnumTypes(utypes, publicTypes);
@@ -720,7 +736,7 @@ module TsdPlugin {
                 if (this.doclet.returns != null) {
                     for (let retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            let roContext = new ReadOnlyTypeVisibilityContext(publicTypes);
+                            let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
                             let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, roContext);
                             for (let r of rts) {
                                 retTypes.push(r);
@@ -1284,21 +1300,29 @@ module TsdPlugin {
     /**
      * A user-defined interface
      */
-    export class TSUserInterface extends TSChildElement implements IOutputtableChildElement {
+    export class TSUserInterface extends TSTypedef implements IOutputtableChildElement {
         private name: string;
-        private members: string[];
+        private adhocMembers: string[];
         constructor(moduleName: string, name: string, members: string[]) {
-            super();
+            super({
+                description: "",
+                name: name,
+                longname: (moduleName != null ? `${moduleName}.${name}` : name),
+                kind: DocletKind.Typedef,
+                memberof: moduleName,
+                scope: "public"
+            });
             this.setParentModule(moduleName);
+            this.setIsPublic(true);
             this.name = name;
-            this.members = members;
+            this.adhocMembers = members;
         }
         public getFullName(): string { return this.getQualifiedName(); }
         public getKind(): TSOutputtableKind { return TSOutputtableKind.UserInterface; }
         private outputDecl(stream: IndentedOutputStream): void {
             stream.writeln(`interface ${this.name} {`);
             stream.indent();
-            for (var member of this.members) {
+            for (var member of this.adhocMembers) {
                 stream.writeln(`${member};`);
             }
             stream.unindent();
