@@ -15,6 +15,10 @@ module TsdPlugin {
         UserTypeAlias
     }
     
+    function CamelCase(name: string) {
+        return name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    
     /**
      * The default filter function for any JSON.stringify calls
      */
@@ -47,6 +51,7 @@ module TsdPlugin {
         private ignore: Dictionary<string>;
         private reg: IAdhocTypeRegistration;
         constructor(reg: IAdhocTypeRegistration) {
+            this.reg = reg;
             this.types = {};
             this.ignore = {
                 "number": "number",
@@ -344,9 +349,15 @@ module TsdPlugin {
     export abstract class TSMember implements IOutputtable {
         protected doclet: IDoclet;
         protected isPublic: boolean;
+        protected ovReturnType: string;
         constructor(doclet: IDoclet) {
             this.doclet = doclet;
             this.isPublic = true;
+            this.ovReturnType = null;
+        }
+        
+        public setOverrideReturnType(typeName: string): void {
+            this.ovReturnType = typeName;
         }
         
         public isStatic(): boolean { return this.doclet.scope == "static"; }
@@ -468,16 +479,20 @@ module TsdPlugin {
                 } else {
                     propDecl += ": ";
                 }
-                if (this.doclet.type != null) {
-                    let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
-                    let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
-                    if (!conf.useUnionTypeForStringEnum)
-                        TypeUtil.fixStringEnumTypes(types, publicTypes);
-                    TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
-                    propDecl += types.join("|") + ";";
+                if (this.ovReturnType != null) {
+                    propDecl += this.ovReturnType + ";";
                 } else {
-                    logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has no return type defined. Defaulting to "any"`);
-                    propDecl += "any;";
+                    if (this.doclet.type != null) {
+                        let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
+                        let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
+                        if (!conf.useUnionTypeForStringEnum)
+                            TypeUtil.fixStringEnumTypes(types, publicTypes);
+                        TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
+                        propDecl += types.join("|") + ";";
+                    } else {
+                        logger.warn(`Property ${this.doclet.name} of ${this.doclet.memberof} has no return type defined. Defaulting to "any"`);
+                        propDecl += "any;";
+                    }
                 }
                 stream.writeln(propDecl);
             }
@@ -625,14 +640,51 @@ module TsdPlugin {
                     if (p != null) {
                         params.push(p.param);
                         if (p.members.length > 0 && context != null) {
-                            //TODO: Define a new options interface and register it
-                            //with the context
+                            //Define a new options interface and register it with the context
+                            let moduleName = null;
+                            let typeName = this.generateOptionsInterfaceName();
+                            let memberDefs = [];
+                            
+                            for (var member of p.members) {
+                                //This should be a dotted member. Split it
+                                let parts = member.name.split(".");
+                                let propName = parts[parts.length - 1];
+                                //TODO: Fix return type
+                                memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: any`);
+                            }
+                            
+                            var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                            context.registerTypedef(typeName, iface);
+                            console.log(`Registered ad-hoc interface type: ${typeName}`);
+                            
+                            //TODO: Hmmm, should we be modifying doclets given by JSDoc?
+                            p.param.type.names = [
+                                typeName
+                            ];
                         }
                     }
                 }
             }
             
             return params;
+        }
+        
+        private generateOptionsInterfaceName(): string {
+            let methodNameCamelCase = this.getMethodName();
+            if (methodNameCamelCase == "constructor") {
+                //This should be the class name
+                methodNameCamelCase = this.doclet.name;
+            } else {
+                //Use ${ClassName}${MethodName} as insurance against name collision should
+                //we encounter more than one options parameter for methods of the same name
+                let parts = this.doclet.memberof.split(".");
+                //In case this is tildefied
+                let classNameParts = parts[parts.length - 1].split("~");
+                let className = classNameParts[classNameParts.length - 1];
+                methodNameCamelCase = className + CamelCase(methodNameCamelCase);
+            }
+            methodNameCamelCase = CamelCase(methodNameCamelCase.replace("module:", ""));
+            return `I${methodNameCamelCase}Options`;
         }
         
         public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
@@ -731,39 +783,46 @@ module TsdPlugin {
                 }
                 methodDecl += argVals.join(", ") + ")";
                 
-                //Determine return type
-                let retTypes = [];
-                if (this.doclet.returns != null) {
-                    for (let retDoc of this.doclet.returns) {
-                        if (retDoc.type != null) {
-                            let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
-                            let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, roContext);
-                            for (let r of rts) {
-                                retTypes.push(r);
+                if (this.ovReturnType != null) {
+                    let retToken = ": ";
+                    if (this.isTypedef) {
+                        retToken = " => ";
+                    }
+                    methodDecl += retToken + this.ovReturnType;
+                } else {
+                    //Determine return type
+                    let retTypes = [];
+                    if (this.doclet.returns != null) {
+                        for (let retDoc of this.doclet.returns) {
+                            if (retDoc.type != null) {
+                                let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
+                                let rts = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, roContext);
+                                for (let r of rts) {
+                                    retTypes.push(r);
+                                }
                             }
                         }
                     }
-                }
-                
-                if (!conf.useUnionTypeForStringEnum)
-                    TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
-                TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
-                let retType = retTypes.join("|"); //If multiple, return type is TS union
-                
-                let retToken = ": ";
-                if (this.isTypedef) {
-                    retToken = " => ";
-                }
-                
-                if (this.outputReturnType()) {
-                    if (retType != null && retType != "") {
-                        methodDecl += retToken + retType;
-                    } else {
-                        //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
-                        methodDecl += retToken + conf.defaultReturnType;
+                    
+                    if (!conf.useUnionTypeForStringEnum)
+                        TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
+                    TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
+                    let retType = retTypes.join("|"); //If multiple, return type is TS union
+                    
+                    let retToken = ": ";
+                    if (this.isTypedef) {
+                        retToken = " => ";
+                    }
+                    
+                    if (this.outputReturnType()) {
+                        if (retType != null && retType != "") {
+                            methodDecl += retToken + retType;
+                        } else {
+                            //logger.warn(`No return type specified on (${this.doclet.longname}). Defaulting to '${conf.defaultReturnType}'`);
+                            methodDecl += retToken + conf.defaultReturnType;
+                        }
                     }
                 }
-                
                 methodDecl += ";";
                 stream.writeln(methodDecl);
             }
@@ -980,8 +1039,25 @@ module TsdPlugin {
                             if (p != null) {
                                 studiedMembers.push(p.member);
                                 if (p.members.length > 0 && context != null) {
-                                    //TODO: Define a new options interface and register it
-                                    //with the context
+                                    //Define a new options interface and register it with the context
+                                    let moduleName = null;
+                                    let typeName = this.generateOptionsInterfaceName();
+                                    let memberDefs = [];
+                                    
+                                    for (let childMember of p.members) {
+                                        let memberDoclet = childMember.getDoclet();
+                                        //This should be a dotted member. Split it
+                                        let parts = memberDoclet.name.split(".");
+                                        let propName = parts[parts.length - 1];
+                                        //TODO: Fix return type
+                                        memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: any`);
+                                    }
+                                    
+                                    var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                                    context.registerTypedef(typeName, iface);
+                                    console.log(`Registered ad-hoc interface type: ${typeName}`);
+                                    
+                                    p.member.setOverrideReturnType(typeName);
                                 }
                             }
                         }
@@ -991,6 +1067,12 @@ module TsdPlugin {
             
             return studiedMembers;
         }
+        
+        private generateOptionsInterfaceName(): string {
+            let methodNameCamelCase = CamelCase(this.doclet.name.replace(":module", ""));
+            return `I${methodNameCamelCase}Options`;
+        }
+        
         public getParentTypeNames(): string[] { return this.doclet.augments; }
         /**
          * Finds a matching member from any of the current member's types inheritance hierarchy that doesn't inherit documentation
@@ -1095,6 +1177,11 @@ module TsdPlugin {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
+        private getTypeName(): string {
+            let parts = this.doclet.name.split(".");
+            let parts2 = parts[parts.length - 1].split("~");
+            return parts2[parts2.length - 1].replace("module:", "");
+        }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
@@ -1110,8 +1197,10 @@ module TsdPlugin {
                 declareMe = "declare ";
             }
             
+            let typeName = this.getTypeName();
+            
             if (this.enumType == TSEnumType.Number && hasMembers) {
-                stream.writeln(`${declareMe}enum ${this.doclet.name} {`);
+                stream.writeln(`${declareMe}enum ${typeName} {`);
                 stream.indent();
                 let props: TSProperty[] = [];
                 for (let member of this.members) {
@@ -1139,7 +1228,7 @@ module TsdPlugin {
                     //Write as a class with static string members
                     //NOTE: If this is referenced in a parameter or return type, must make 
                     //sure to rewrite that type as 'string' (see: fixStringEnumTypes)
-                    stream.writeln(`${declareMe}class ${this.doclet.name} {`);
+                    stream.writeln(`${declareMe}class ${typeName} {`);
                     stream.indent();
                     for (let member of this.members) {
                         if (member instanceof TSProperty) {
@@ -1165,7 +1254,7 @@ module TsdPlugin {
             } else { //Not an enum
                 //If it has methods and/or properties, treat this typedef as an interface
                 if (hasMembers) {
-                    stream.writeln(`interface ${this.doclet.name} {`);
+                    stream.writeln(`interface ${typeName} {`);
                     stream.indent();
                     let members = this.studyMembers(null, conf, logger);
                     for (let member of members) {
@@ -1174,12 +1263,12 @@ module TsdPlugin {
                     stream.unindent();
                     stream.writeln("}");
                 } else {
-                    let typeDecl = `${declareMe}type ${this.doclet.name}`;
+                    let typeDecl = `${declareMe}type ${typeName}`;
                     if (this.doclet != null && this.doclet.type != null) {
                         let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger);
                         //If we find 'Function' in here, send the hint that they should use @callback to document function types
                         if (types.indexOf("Function") >= 0) {
-                            logger.warn(`Type ${this.doclet.name} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
+                            logger.warn(`Type ${typeName} was aliased to the generic 'Function' type. Consider using @callback (http://usejsdoc.org/tags-callback.html) to document function types`);
                         }
                         typeDecl += " = " + types.join("|") + ";\n";
                     } else { //Fallback
@@ -1319,17 +1408,18 @@ module TsdPlugin {
         }
         public getFullName(): string { return this.getQualifiedName(); }
         public getKind(): TSOutputtableKind { return TSOutputtableKind.UserInterface; }
-        private outputDecl(stream: IndentedOutputStream): void {
+        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
             stream.writeln(`interface ${this.name} {`);
             stream.indent();
             for (var member of this.adhocMembers) {
-                stream.writeln(`${member};`);
+                var lines = member.split("\n");
+                lines[lines.length - 1] += ";";
+                for (var line of lines) {
+                    stream.writeln(line);
+                }
             }
             stream.unindent();
             stream.writeln("}");
-        }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
-            this.outputDecl(stream);
         }
         public getQualifiedName(): string {
             var mod = this.getParentModule();

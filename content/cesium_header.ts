@@ -14,3 +14,13 @@ declare module __Cesium {
     type Promise<T> = PromiseLike<T>;
     
     type TypedArray = any[];
+    
+    /**
+     * Alias for HTML image
+     */
+    type Image = HTMLImageElement;
+    
+    /**
+     * Alias for HTML canvas
+     */
+    type Canvas = HTMLCanvasElement;
