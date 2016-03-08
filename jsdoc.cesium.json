@@ -25,6 +25,7 @@
             "classes": [
                 "Color",
                 "module:ClockStep",
+                "module:ClockRange",
                 "module:ComponentDatatype",
                 "module:CornerType",
                 "module:EasingFunction",
