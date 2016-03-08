@@ -604,9 +604,27 @@ module TsdPlugin {
             let paramMap: Dictionary<IDocletParameterContainer> = {};
             
             let methodParams = this.doclet.params || [];
+            let processedArgs: Dictionary<string> = {};
+            let argCounter = 1;
             
             if (methodParams.length > 0) {
                 for (let arg of methodParams) {
+                    //Are we visiting?
+                    if (context != null) {
+                        //Must auto-rename any argument named "arguments" as that is a reserved word
+                        //in TypeScript in an argument context
+                        if (arg.name == "arguments") {
+                            let name = `arg${argCounter}`;
+                            while (processedArgs[arg.name] != null) {
+                                argCounter++;
+                                name = `arg${argCounter}`;
+                            }
+                            //Should we be rewriting the doclet?
+                            arg.name = name;
+                        }
+                        processedArgs[arg.name] = arg.name;
+                    }
+                    
                     if (arg.type != null) {
                         TypeUtil.parseAndConvertTypes(arg.type, conf, logger, context);
                         if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
