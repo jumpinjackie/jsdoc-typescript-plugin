@@ -13,3 +13,13 @@ declare module __Cesium {
     type Promise<T> = PromiseLike<T>;
     
     type TypedArray = any[];
+    
+    type Packable = any;
+    
+    type Proxy = any;
+    
+    type Context = any;
+    
+    type Frustum = any;
+    
+    type DrawCommand = any;
