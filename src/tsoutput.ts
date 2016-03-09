@@ -667,8 +667,9 @@ module TsdPlugin {
                                 //This should be a dotted member. Split it
                                 let parts = member.name.split(".");
                                 let propName = parts[parts.length - 1];
-                                //TODO: Fix return type
-                                memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: any`);
+                                let retType = TypeUtil.parseAndConvertTypes(member.type, conf, logger);
+                                
+                                memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: ${retType.join("|")}`);
                             }
                             
                             var iface = new TSUserInterface(moduleName, typeName, memberDefs);
@@ -1067,8 +1068,9 @@ module TsdPlugin {
                                         //This should be a dotted member. Split it
                                         let parts = memberDoclet.name.split(".");
                                         let propName = parts[parts.length - 1];
-                                        //TODO: Fix return type
-                                        memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: any`);
+                                        let retType = TypeUtil.parseAndConvertTypes(memberDoclet.type, conf, logger, context);
+                                        
+                                        memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: ${retType.join("|")}`);
                                     }
                                     
                                     var iface = new TSUserInterface(moduleName, typeName, memberDefs);
