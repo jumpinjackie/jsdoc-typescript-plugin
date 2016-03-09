@@ -36,17 +36,19 @@ module TsdPlugin {
         declaration: string;
     }
     
+    export type PrimitiveType = "string" | "number";
+    
     export interface IEnumConfiguration {
         /**
-         * The list of identifiers to process as class-like enums. Such enums are basically
-         * classes with static constant members. Any references to this enum class will be replaced
-         * with its underlying integral type (generally number|string)
+         * The list of identifiers in their original JSDoc format to process as class-like enums. Such 
+         * enums are basically classes with static constant members. Any references to this enum class 
+         * will be replaced with its underlying integral type (generally number|string)
          */
-        classes: string[];
+        classes: Dictionary<PrimitiveType>;
         /**
          * The list of identifiers to process as native enums.
          */
-        native: string[];
+        //native: string[];
     }
 
     /**

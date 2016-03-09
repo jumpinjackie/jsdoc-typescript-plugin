@@ -107,14 +107,27 @@ module TsdPlugin {
             super(reg);
             this.publicTypes = publicTypes;
         }
-        public fixStringEnumTypes(typeNames: string[]): void {
-            TypeUtil.fixStringEnumTypes(typeNames, this.publicTypes);
+        public fixEnumTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration): void {
+            TypeUtil.fixEnumTypes(typeNames, this.publicTypes, conf);
         }
         public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
         public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
     }
     
     export class TypeUtil {
+        
+        /**
+         * Returns a clean version of the given type name, stripped of whatever JSDoc-isms
+         */
+        public static cleanTypeName(name: string, bQualified = false): string {
+            let parts = name.replace("module:", "").split("~");
+            let qualifiedName = parts[parts.length - 1];
+            if (!qualifiedName) {
+                let nParts = qualifiedName.split(".");
+                return nParts[nParts.length - 1];
+            }
+            return qualifiedName;
+        }
         
         public static isTsElementNotPublic(type: IOutputtable): boolean {
             if (type instanceof TSMethod) {
@@ -132,14 +145,36 @@ module TsdPlugin {
                    (doclet.properties || []).length > 0) || (doclet.comment || "").indexOf("@enum") >= 0;
         }
         
-        public static fixStringEnumTypes(typeNames: string[], publicTypes: Dictionary<IOutputtable>): void {
+        /**
+         * Fixes any references to class-type "enums"
+         */
+        public static fixEnumTypeReferences(typeNames: string[], conf: ITypeScriptPluginConfiguration): string[] {
+            return typeNames.map(rt => {
+                if (conf.processAsEnums.classes[rt]) {
+                    return conf.processAsEnums.classes[rt];
+                }
+                return rt;
+            });
+        }
+        
+        public static fixEnumTypes(typeNames: string[], publicTypes: Dictionary<IOutputtable>, conf: ITypeScriptPluginConfiguration): void {
             //If we encounter any string enum typedefs, replace type with 'string'
             for (let i = 0; i < typeNames.length; i++) {
                 let ot = publicTypes[typeNames[i]];
-                if (ot != null && ot.getKind() == TSOutputtableKind.Typedef) {
-                    let tdf = <TSTypedef>ot;
-                    if (tdf.getEnumType() == TSEnumType.String) {
-                        typeNames[i] = "string";
+                if (ot != null) {
+                    if (ot.getKind() == TSOutputtableKind.Typedef) {
+                        let tdf = <TSTypedef>ot;
+                        if (tdf.getEnumType() == TSEnumType.String) {
+                            typeNames[i] = "string";
+                        }
+                    } else {
+                        let doc = ot.getDoclet();
+                        if (doc != null) {
+                            let longname = doc.longname;
+                            if (conf.processAsEnums.classes[longname]) {
+                                typeNames[i] = conf.processAsEnums.classes[longname];
+                            }
+                        }
                     }
                 }
             }
@@ -241,7 +276,7 @@ module TsdPlugin {
                         //See: https://github.com/Microsoft/TypeScript/issues/2491
                         if (context instanceof ReadOnlyTypeVisibilityContext) {
                             let toFix = [ keyType ];
-                            context.fixStringEnumTypes(toFix);
+                            context.fixEnumTypes(toFix, conf);
                             keyType = toFix[0];
                         }
                     }
@@ -342,6 +377,7 @@ module TsdPlugin {
     export interface IOutputtable {
         getFullName(): string;
         getKind(): TSOutputtableKind;
+        getDoclet(): IDoclet;
         output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void;
         visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
     }
@@ -485,8 +521,9 @@ module TsdPlugin {
                     if (this.doclet.type != null) {
                         let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
                         let types = TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, roContext);
+                        types = TypeUtil.fixEnumTypeReferences(types, conf);
                         if (!conf.useUnionTypeForStringEnum)
-                            TypeUtil.fixStringEnumTypes(types, publicTypes);
+                            TypeUtil.fixEnumTypes(types, publicTypes, conf);
                         TypeUtil.replaceFunctionTypes(types, this.doclet, conf, logger);
                         propDecl += types.join("|") + ";";
                     } else {
@@ -619,7 +656,7 @@ module TsdPlugin {
                                 argCounter++;
                                 name = `arg${argCounter}`;
                             }
-                            //Should we be rewriting the doclet?
+                            //Should we be rewriting the doclet here?
                             arg.name = name;
                         }
                         processedArgs[arg.name] = arg.name;
@@ -696,13 +733,10 @@ module TsdPlugin {
             } else {
                 //Use ${ClassName}${MethodName} as insurance against name collision should
                 //we encounter more than one options parameter for methods of the same name
-                let parts = this.doclet.memberof.split(".");
-                //In case this is tildefied
-                let classNameParts = parts[parts.length - 1].split("~");
-                let className = classNameParts[classNameParts.length - 1];
+                let className = TypeUtil.cleanTypeName(this.doclet.memberof);
                 methodNameCamelCase = className + CamelCase(methodNameCamelCase);
             }
-            methodNameCamelCase = CamelCase(methodNameCamelCase.replace("module:", ""));
+            methodNameCamelCase = CamelCase(TypeUtil.cleanTypeName(methodNameCamelCase));
             return `I${methodNameCamelCase}Options`;
         }
         
@@ -786,8 +820,9 @@ module TsdPlugin {
                             //Output as TS union type
                             let roContext = new ReadOnlyTypeVisibilityContext(null, publicTypes);
                             let utypes = TypeUtil.parseAndConvertTypes(arg.type, conf, logger, roContext);
+                            utypes = TypeUtil.fixEnumTypeReferences(utypes, conf);
                             if (!conf.useUnionTypeForStringEnum)
-                                TypeUtil.fixStringEnumTypes(utypes, publicTypes);
+                                TypeUtil.fixEnumTypes(utypes, publicTypes, conf);
                             argStr += utypes.join("|");
                             if (arg.variable) {
                                 argStr += "[]";
@@ -823,8 +858,10 @@ module TsdPlugin {
                         }
                     }
                     
+                    retTypes = TypeUtil.fixEnumTypeReferences(retTypes, conf);
+                    
                     if (!conf.useUnionTypeForStringEnum)
-                        TypeUtil.fixStringEnumTypes(retTypes, publicTypes);
+                        TypeUtil.fixEnumTypes(retTypes, publicTypes, conf);
                     TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
                     let retType = retTypes.join("|"); //If multiple, return type is TS union
                     
@@ -1197,11 +1234,6 @@ module TsdPlugin {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
-        private getTypeName(): string {
-            let parts = this.doclet.name.split(".");
-            let parts2 = parts[parts.length - 1].split("~");
-            return parts2[parts2.length - 1].replace("module:", "");
-        }
         public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
@@ -1217,7 +1249,7 @@ module TsdPlugin {
                 declareMe = "declare ";
             }
             
-            let typeName = this.getTypeName();
+            let typeName = TypeUtil.cleanTypeName(this.doclet.name);
             
             if (this.enumType == TSEnumType.Number && hasMembers) {
                 stream.writeln(`${declareMe}enum ${typeName} {`);
@@ -1465,6 +1497,7 @@ module TsdPlugin {
             this.typeAlias = typeAlias;
             this.type = type;
         }
+        public getDoclet(): IDoclet { return null; }
         public isOptional(): boolean {
             var types = this.type.split("|").map(t => t.trim());
             return types.indexOf("undefined") >= 0;

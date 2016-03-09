@@ -56,8 +56,8 @@ module TsdPlugin {
                 globalModuleAliases: (config.globalModuleAliases || []),
                 useUnionTypeForStringEnum: !!config.useUnionTypeForStringEnum,
                 processAsEnums: {
-                    classes: (config.processAsEnums || {}).classes || [],
-                    native: (config.processAsEnums || {}).native || []
+                    //native: (config.processAsEnums || {}).native || [],
+                    classes: (config.processAsEnums || {}).classes || {}
                 }
             }
             var ignoreJsDocTypes = (config.ignore || []);

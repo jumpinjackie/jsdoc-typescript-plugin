@@ -22,45 +22,44 @@
         "doNotDeclareTopLevelElements": true,
         "initialIndentation": 1,
         "processAsEnums": {
-            "classes": [
-                "Color",
-                "module:ClockStep",
-                "module:ClockRange",
-                "module:ComponentDatatype",
-                "module:CornerType",
-                "module:EasingFunction",
-                "module:ExtrapolationType",
-                "module:IndexDatatype",
-                "module:Intersect",
-                "module:KeyboardEventModifier",
-                "module:PixelFormat",
-                "module:PrimitiveType",
-                "module:WindingOrder",
-                "module:BingMapsStyle",
-                "module:ReferenceFrame",
-                "module:ScreenSpaceEventType",
-                "module:TerrainQuantization",
-                "module:TimeConstants",
-                "module:Visibility",
-                "module:BoundingSphereState",
-                "module:BlendEquation",
-                "module:BlendFunction",
-                "module:CameraEventType",
-                "module:CullFace",
-                "module:DepthFunction",
-                "module:HeightReference",
-                "module:HorizontalOrigin",
-                "module:LabelStyle",
-                "module:ModelAnimationLoop",
-                "module:QuadtreeTileLoadState",
-                "module:SceneMode",
-                "module:StencilFunction",
-                "module:StencilOperation",
-                "module:VerticalOrigin"
-            ],
-            "native": [
-                
-            ]
+            "classes": {
+                "Color": "number",
+                "ClockStep": "number",
+                "ClockRange": "number",
+                "ComponentDatatype": "number",
+                "CornerType": "number",
+                "EasingFunction": "number",
+                "ExtrapolationType": "number",
+                "IndexDatatype": "number",
+                "Intersect": "number",
+                "InterpolationAlgorithm": "number",
+                "KeyboardEventModifier": "number",
+                "PixelFormat": "number",
+                "PrimitiveType": "number",
+                "WindingOrder": "number",
+                "BingMapsStyle": "number",
+                "ReferenceFrame": "number",
+                "ScreenSpaceEventType": "number",
+                "TerrainQuantization": "number",
+                "TimeConstants": "number",
+                "Visibility": "number",
+                "BoundingSphereState": "number",
+                "BlendEquation": "number",
+                "BlendFunction": "number",
+                "CameraEventType": "number",
+                "CullFace": "number",
+                "DepthFunction": "number",
+                "HeightReference": "number",
+                "HorizontalOrigin": "number",
+                "LabelStyle": "number",
+                "ModelAnimationLoop": "number",
+                "QuadtreeTileLoadState": "number",
+                "SceneMode": "number",
+                "StencilFunction": "number",
+                "StencilOperation": "number",
+                "VerticalOrigin": "number",
+                "TimeStandard": "number"
+            }
         },
         "ignore": [],
         "ignoreModules": [
@@ -69,7 +68,10 @@
         "globalModuleAliases": [
             "<anonymous>"
         ],
-        "typeReplacements": {}
+        "typeReplacements": {
+            "Image": "HTMLImageElement",
+            "Canvas": "HTMLCanvasElement"
+        }
     },
     "templates": {
         "default": {
