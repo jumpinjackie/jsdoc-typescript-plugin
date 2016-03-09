@@ -329,6 +329,14 @@ module TsdPlugin {
                 //When referenced, tildefied types should be dotted
                 tn = tn.replace("~", ".");
                 
+                //DIRTY HACK: Due to my horrible regex skills, the generic type regex currently breaks down if we
+                //encounter nested generic types.
+                //
+                //When we fix this (https://github.com/jumpinjackie/jsdoc-typescript-plugin/issues/54), this can be removed
+                //
+                //In the meantime, just "patch" the incorrect output
+                tn = tn.replace(".<", "<");
+                
                 if (context != null) {
                     context.addType(tn, conf, logger);
                 }
