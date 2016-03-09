@@ -197,10 +197,22 @@ module TsdPlugin {
                    doclet.undocumented == true;
         }
         
+        private static stripOuterParentheses(part: string): string {
+            if (part.length > 2 && part[0] == "(" && part[part.length - 1] == ")") {
+                return part.substring(1, part.length - 1).trim();
+            }
+            return part.trim();
+        }
+        
         public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string {
+            let tn = typeName;
+            //Strip off nullability qualifier if it exists
+            if (tn.charAt(0) == "!")
+                tn = tn.substring(1);
+                
             //Look in user configured overrides
-            if (conf.typeReplacements.hasOwnProperty(typeName)) {
-                return conf.typeReplacements[typeName];
+            if (conf.typeReplacements.hasOwnProperty(tn)) {
+                return conf.typeReplacements[tn];
             } else {
                 //Before returning, see if the type annotation matches known patterns
                 //
@@ -209,7 +221,7 @@ module TsdPlugin {
                 //notation
                 
                 //Anonymous function with return type
-                var rgxm = typeName.match(/function\((.+)\):\s+(.+)/);
+                var rgxm = tn.match(/function\((.+)\):\s+(.+)/);
                 if (rgxm) {
                     //console.log("is anon function with return type");
                     var typeArgs = rgxm[1].split(",")
@@ -229,7 +241,7 @@ module TsdPlugin {
                     return "(" + funcParams.join(", ") + ") => " + TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context).trim();
                 }
                 //Anonymous function with no return type
-                rgxm = typeName.match(/function\((.+)\)/);
+                rgxm = tn.match(/function\((.+)\)/);
                 if (rgxm) {
                     //console.log("is anon function with no return type");
                     var typeArgs = rgxm[1].split(",")
@@ -248,23 +260,25 @@ module TsdPlugin {
                     }
                     return "(" + funcParams.join(", ") + ") => any";
                 }
-                //Array - Array.<type>
-                rgxm = typeName.match(/(Array\.)\<(.+)>/); 
-                if (rgxm) {
-                    //console.log("is array");
-                    return TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context) + "[]";
-                }
                 //Array - type[]
-                rgxm = typeName.match(/(.+)\[\]$/);
+                rgxm = tn.match(/(.+)\[\]$/);
                 if (rgxm) {
                     //console.log("is array");
-                    return TypeUtil.getTypeReplacement(rgxm[1].trim(), conf, logger, context) + "[]";
+                    //Don't strip parentheses here as that would indicate an array of unioned types
+                    return TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context) + "[]";
+                }
+                //Array - Array.<type>
+                rgxm = tn.match(/(^Array\.)\<(.+)>/); 
+                if (rgxm) {
+                    //console.log("is array");
+                    //Don't strip parentheses here as that would indicate an array of unioned types
+                    return TypeUtil.getTypeReplacement(rgxm[2], conf, logger, context) + "[]";
                 }
                 //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
-                rgxm = typeName.match(/(Object\.)\<(.+)\,(.+)\>/);
+                rgxm = tn.match(/(^Object\.)\<(.+)\,(.+)\>/);
                 if (rgxm) {
                     //console.log("is kvp");
-                    var keyType = TypeUtil.getTypeReplacement(rgxm[2].trim(), conf, logger, context);
+                    var keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
                     
                     //Need to ensure this is string or number. In the event we find a string enum
                     //class, we must replace it with string
@@ -281,45 +295,46 @@ module TsdPlugin {
                         }
                     }
                     
-                    var valueType = TypeUtil.getTypeReplacement(rgxm[3].trim(), conf, logger, context);
+                    let valueType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[3]), conf, logger, context);
                     return "{ [key: " + keyType + "]: " + valueType + "; }";
                 }
                 //Some generic type - SomeGenericType.<AnotherType>
-                rgxm = typeName.match(/(.+)(.\<)(.+)\>/);
+                rgxm = tn.match(/(.+)(.\<)(.+)\>/);
                 if (rgxm) {
                     //console.log("is generic type");
-                    var genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
-                    var genericTypeArgs = rgxm[3].split(",")
-                                                 .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
+                    let genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
+                    let part = TypeUtil.stripOuterParentheses(rgxm[3]);
+                    let genericTypeArgs = part.split(",")
+                                              .map(tn => TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(tn), conf, logger, context));
                     return genericType + "<" + genericTypeArgs.join(",") + ">";
                 }
                 //Array - untyped
-                if (typeName.toLowerCase() == "array") {
+                if (tn.toLowerCase() == "array") {
                     //console.log("is untyped array");
                     //TODO: Include symbol context
                     logger.warn("Encountered untyped array. Treating as 'any[]'");
                     return "any[]";
                 }
                 //Union-type - typeA|typeB
-                if (typeName.indexOf("|") >= 0) {
+                if (tn.indexOf("|") >= 0) {
                     //console.log("union type");
-                    var types = typeName.split("|");
-                    var replTypes = [];
-                    for (var i = 0; i < types.length; i++) {
-                        replTypes.push(TypeUtil.getTypeReplacement(types[i].trim(), conf, logger, context));
+                    let types = tn.split("|");
+                    let replTypes = [];
+                    for (let i = 0; i < types.length; i++) {
+                        replTypes.push(TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(types[i]), conf, logger, context));
                     }
                     return replTypes.join("|");
                 }
                 
                 //When referenced, tildefied types should be dotted
-                typeName = typeName.replace("~", ".");
+                tn = tn.replace("~", ".");
                 
                 if (context != null) {
-                    context.addType(typeName, conf, logger);
+                    context.addType(tn, conf, logger);
                 }
                 
                 //No other replacement suggestions, return as is
-                return typeName;
+                return tn;
             }
         }
         
@@ -697,7 +712,7 @@ module TsdPlugin {
                         if (p.members.length > 0 && context != null) {
                             //Define a new options interface and register it with the context
                             let moduleName = null;
-                            let typeName = this.generateOptionsInterfaceName();
+                            let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
                             for (var member of p.members) {
@@ -725,7 +740,7 @@ module TsdPlugin {
             return params;
         }
         
-        private generateOptionsInterfaceName(): string {
+        private generateOptionsInterfaceName(conf: ITypeScriptPluginConfiguration): string {
             let methodNameCamelCase = this.getMethodName();
             if (methodNameCamelCase == "constructor") {
                 //This should be the class name
@@ -734,7 +749,11 @@ module TsdPlugin {
                 //Use ${ClassName}${MethodName} as insurance against name collision should
                 //we encounter more than one options parameter for methods of the same name
                 let className = TypeUtil.cleanTypeName(this.doclet.memberof);
-                methodNameCamelCase = className + CamelCase(methodNameCamelCase);
+                if (conf.globalModuleAliases.indexOf(className) >= 0) {
+                    methodNameCamelCase = CamelCase(methodNameCamelCase);
+                } else {
+                    methodNameCamelCase = className + CamelCase(methodNameCamelCase);
+                }
             }
             methodNameCamelCase = CamelCase(TypeUtil.cleanTypeName(methodNameCamelCase));
             return `I${methodNameCamelCase}Options`;
@@ -1126,7 +1145,7 @@ module TsdPlugin {
         }
         
         private generateOptionsInterfaceName(): string {
-            let methodNameCamelCase = CamelCase(this.doclet.name.replace(":module", ""));
+            let methodNameCamelCase = CamelCase(TypeUtil.cleanTypeName(this.doclet.name));
             return `I${methodNameCamelCase}Options`;
         }
         

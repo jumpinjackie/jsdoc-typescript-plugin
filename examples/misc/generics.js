@@ -1,5 +1,15 @@
 /**
  * @constructor
+ */
+SomeType = function() { };
+
+/**
+ * @constructor
+ */
+SomeOtherType = function() { };
+
+/**
+ * @constructor
  * @classdesc 
  * A generic class
  * @template T
@@ -28,3 +38,17 @@ Foo.prototype.setBar = function(arg, arg2) { };
  * @return {T} THe class generic type
  */
 Foo.prototype.getBar = function() { return null; };
+
+/**
+ * @return {Foo.<SomeType|SomeOtherType>}
+ */
+function returnFoo() {
+    return null;
+}
+
+/**
+ * @return {Foo.<SomeType[]>}
+ */
+function returnFoo2() {
+    return null;
+}
