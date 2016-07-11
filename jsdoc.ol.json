@@ -27,9 +27,11 @@
                 "proj4": "any",
                 "EsriJSONGeometry": "any",
                 "GeoJSONObject": "any",
+                "GeoJSONFeature": "any",
                 "GeoJSONFeatureCollection": "any",
                 "GeoJSONGeometry": "any",
-                "GeoJSONGeometryCollection": "any"
+                "GeoJSONGeometryCollection": "any",
+                "TileJSON": "any"
             },
             "module": {
                 "goog.events": {
