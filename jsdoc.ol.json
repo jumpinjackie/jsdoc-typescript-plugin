@@ -20,7 +20,14 @@
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
         "rewriteFunctionTypedefs": true,
-        "ignore": [],
+        "ignore": [
+            "ol.Color",
+            "ol.Size",
+            "ol.Pixel",
+            "ol.Coordinate",
+            "ol.TileCoord",
+            "ol.Extent"
+        ],
         "makePublic": [],
         "aliases": {
             "global": {
