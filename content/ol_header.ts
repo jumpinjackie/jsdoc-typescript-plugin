@@ -1,4 +1,4 @@
-// Type definitions for OpenLayers v3.17.1
+// Type definitions for OpenLayers v3.18.1
 // Project: http://openlayers.org/
 // Definitions by: Jackie Ng <https://github.com/jumpinjackie>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -27,7 +27,7 @@ declare module goog {
 }
 
 // These types normally resolve to number[] by the plugin, which is fine, but TypeScript lets us define
-// "constrained" array types (I forget what the actual feature is called) which is much more expressive 
+// tuple types (ie. Arrays of specific size and item types) which is much more expressive 
 // and clearer than what the plugin generates
 //
 // For example, instead of number[] for ol.Coordinate, we can express this as [number, number], ie. A
