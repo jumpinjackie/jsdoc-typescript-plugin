@@ -8,16 +8,10 @@
         "rootDir": "src",
         "sourceMap": true
     },
-    "exclude": [
-        "docs",
-        "content",
-        "examples",
-        "plugins",
-        "test",
-        "typings",
-        "node_modules",
-        "typings/openlayers.baseline.d.ts",
-        "content/ol_footer.ts",
-        "content/ol_header.ts"
+    "include": [
+      "src/**/*.ts"
+    ],
+    "files": [
+      "typings/tsd.d.ts"
     ]
 }

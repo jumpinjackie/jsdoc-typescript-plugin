@@ -1,6 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
-/// <reference path="./doclet.ts" />
-/// <reference path="./config.ts" />
 
 module TsdPlugin {
     /**

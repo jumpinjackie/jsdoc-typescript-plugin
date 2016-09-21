@@ -1,4 +1,3 @@
-/// <reference path="./doclet.ts" />
 
 module TsdPlugin {
     /**
