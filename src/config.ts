@@ -111,7 +111,7 @@ module TsdPlugin {
          * You can avoid double-ups by specifying types to ignore in this list. Such doclets
          * will be ignored, giving precedence to your user-defined aliases and interfaces.
          */
-        ignoreTypes: Dictionary<string>;
+        ignoreTypes: string[];
         /**
          * A list of types to always make public. Add types here if you are manually defining types in a
          * custom header or footer and those types reference types that may not be public when the 

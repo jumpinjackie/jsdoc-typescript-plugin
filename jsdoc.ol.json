@@ -20,7 +20,7 @@
         "outDir": "./typings",
         "fillUndocumentedDoclets": true,
         "rewriteFunctionTypedefs": true,
-        "ignore": [
+        "ignoreTypes": [
             "ol.Color",
             "ol.Size",
             "ol.Pixel",

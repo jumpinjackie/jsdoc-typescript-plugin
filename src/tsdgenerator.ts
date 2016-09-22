@@ -23,6 +23,7 @@ module TsdPlugin {
         private trackedDoclets = {} as Dictionary<IDoclet>;
         private userTypeAliases = [] as TSUserTypeAlias[];
         private userInterfaces = [] as TSUserInterface[];
+        private ignoreTypes = new Set<string>();
 
         private stats: IGeneratorStats = {
             typedefs: {
@@ -36,7 +37,7 @@ module TsdPlugin {
         
         private config: ITypeScriptPluginConfiguration;
 
-        constructor(config: any) {
+        constructor(config: ITypeScriptPluginConfiguration) {
 
             const defaults: ITypeScriptPluginConfiguration = {
                 rootModuleName: "generated",
@@ -60,7 +61,7 @@ module TsdPlugin {
                     global: {},
                     module: {}
                 },
-                ignoreTypes: {},
+                ignoreTypes: [],
                 makePublic: [],
                 headerFile: undefined,
                 footerFile: undefined,
@@ -84,18 +85,15 @@ module TsdPlugin {
                 typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
             });
 
-            if (config.ignore) {
-                for (let ignoreType of config.ignore) {
-                    this.config.ignoreTypes[ignoreType] = ignoreType;
+            if (config.ignoreTypes) {
+                for (let ignoreType of config.ignoreTypes) {
+                    this.ignoreTypes.add(ignoreType);
                 }
             }
         }
 
         private ignoreThisType(fullname: string): boolean {
-            if (this.config.ignoreTypes[fullname])
-                return true;
-            else
-                return false;
+          return this.ignoreTypes.has(fullname);
         }
         
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
