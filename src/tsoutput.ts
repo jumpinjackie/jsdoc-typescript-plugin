@@ -76,12 +76,12 @@ module TsdPlugin {
         public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {
             this.addTypes([ typeName ], conf, logger);
         }
-        private ignoreType(typeName: string): boolean {
+        private shouldIgnoreType(typeName: string): boolean {
             return this.ignore.has(typeName);
         }
         public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {
             for (let type of typeNames) {
-                if (!this.ignoreType(type)) {
+                if (!this.shouldIgnoreType(type)) {
                     this.types.add(type);
                 }
             }

@@ -92,7 +92,7 @@ module TsdPlugin {
             }
         }
 
-        private ignoreThisType(fullname: string): boolean {
+        private shouldIgnoreType(fullname: string): boolean {
           return this.ignoreTypes.has(fullname);
         }
         
@@ -140,7 +140,7 @@ module TsdPlugin {
         private parseClassesAndTypedefs(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //On ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
@@ -224,7 +224,7 @@ module TsdPlugin {
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
                 //On ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
@@ -250,7 +250,7 @@ module TsdPlugin {
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
                 //On the ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
