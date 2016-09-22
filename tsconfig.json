@@ -3,10 +3,9 @@
         "module": "system",
         "target": "es5",
         "noImplicitAny": false,
-        "outDir": "build",
         "outFile": "plugins/typescript.js",
-        "rootDir": "src",
-        "sourceMap": true
+        "sourceMap": true,
+        "lib": ["es6", "dom"]
     },
     "include": [
       "src/**/*.ts"

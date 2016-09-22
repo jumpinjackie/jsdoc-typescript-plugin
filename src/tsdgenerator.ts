@@ -15,78 +15,82 @@ module TsdPlugin {
      * The class that does all the grunt work
      */
     export class TsdGenerator implements IAdhocTypeRegistration {
-        private moduleMembers: Dictionary<TSMember[]>;
-        private globalMembers: TSMember[];
-        private moduleDoclets: Dictionary<IDoclet>;
-        private classes: Dictionary<TSClass>;
-        private typedefs: Dictionary<TSTypedef>;
-        private trackedDoclets: Dictionary<IDoclet>;
-        private userTypeAliases: TSUserTypeAlias[];
-        private userInterfaces: TSUserInterface[];
+        private moduleMembers = {} as Dictionary<TSMember[]>;
+        private globalMembers = [] as TSMember[];
+        private moduleDoclets = {} as Dictionary<IDoclet>;
+        private classes = {} as Dictionary<TSClass>;
+        private typedefs = {} as Dictionary<TSTypedef>;
+        private trackedDoclets = {} as Dictionary<IDoclet>;
+        private userTypeAliases = [] as TSUserTypeAlias[];
+        private userInterfaces = [] as TSUserInterface[];
+
+        private stats: IGeneratorStats = {
+            typedefs: {
+                user: 0,
+                gen: 0
+            },
+            moduleMembers: 0,
+            ifaces: 0,
+            classes: 0
+        };
         
         private config: ITypeScriptPluginConfiguration;
-        private stats: IGeneratorStats;
+
         constructor(config: any) {
-            this.config = {
-                rootModuleName: (config.rootModuleName || "generated"),
-                outDir: (config.outDir || "."),
-                typeReplacements: (config.typeReplacements || {}),
-                defaultCtorDesc: (config.defaultCtorDesc || ("Constructor for " + CLS_DESC_PLACEHOLDER)),
-                fillUndocumentedDoclets: !!config.fillUndocumentedDoclets,
-                outputDocletDefs: !!config.outputDocletDefs,
-                publicAnnotation: (config.publicAnnotation || null),
-                defaultReturnType: (config.defaultReturnType || "any"),
+
+            const defaults: ITypeScriptPluginConfiguration = {
+                rootModuleName: "generated",
+                outDir: ".",
+                typeReplacements: {
+                    "*":        "any",
+                    "?":        "any",
+                    "Object":   "any",
+                    "function": "Function"
+                },
+                defaultCtorDesc: `Constructor for ${CLS_DESC_PLACEHOLDER}`,
+                fillUndocumentedDoclets: false,
+                outputDocletDefs: false,
+                publicAnnotation: null,
+                defaultReturnType: "any",
                 aliases: {
-                    global: ((config.aliases || {}).global || {}),
-                    module: ((config.aliases || {}).module || {})
+                    global: {},
+                    module: {}
                 },
                 interfaces: {
-                    global: ((config.interfaces || {}).global || {}),
-                    module: ((config.interfaces || {}).module || {})
+                    global: {},
+                    module: {}
                 },
                 ignoreTypes: {},
-                makePublic: (config.makePublic || []),
-                headerFile: config.headerFile,
-                footerFile: config.footerFile,
-                memberReplacements: (config.memberReplacements || {}),
-                doNotDeclareTopLevelElements: !!config.doNotDeclareTopLevelElements,
-                ignoreModules: (config.ignoreModules || []),
-                doNotSkipUndocumentedDoclets: !!config.doNotSkipUndocumentedDoclets,
-                initialIndentation: (config.initialIndentation || 0),
-                globalModuleAliases: (config.globalModuleAliases || []),
-                useUnionTypeForStringEnum: !!config.useUnionTypeForStringEnum,
+                makePublic: [],
+                headerFile: undefined,
+                footerFile: undefined,
+                memberReplacements: {},
+                doNotDeclareTopLevelElements: false,
+                ignoreModules: [],
+                doNotSkipUndocumentedDoclets: false,
+                initialIndentation: 0,
+                globalModuleAliases: [],
+                useUnionTypeForStringEnum: false,
                 processAsEnums: {
-                    //native: (config.processAsEnums || {}).native || [],
-                    classes: (config.processAsEnums || {}).classes || {}
+                    //native: [],
+                    classes: {}
+                }
+            };
+
+            this.config = Object.assign(defaults, config, {
+                aliases: Object.assign(defaults.aliases, config.aliases),
+                interfaces: Object.assign(defaults.interfaces, config.interfaces),
+                processAsEnums: Object.assign(defaults.processAsEnums, config.processAsEnums),
+                typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
+            });
+
+            if (config.ignore) {
+                for (let ignoreType of config.ignore) {
+                    this.config.ignoreTypes[ignoreType] = ignoreType;
                 }
             }
-            var ignoreJsDocTypes = (config.ignore || []);
-            for (let ignoreType of ignoreJsDocTypes) {
-                this.config.ignoreTypes[ignoreType] = ignoreType;
-            }
-            this.classes = {};
-            this.typedefs = {};
-            this.moduleDoclets = {};
-            this.moduleMembers = {};
-            this.trackedDoclets = {};
-            this.globalMembers = [];
-            this.userInterfaces = [];
-            this.userTypeAliases = [];
-            this.stats = {
-                typedefs: {
-                    user: 0,
-                    gen: 0
-                },
-                moduleMembers: 0,
-                ifaces: 0,
-                classes: 0
-            };
-            //Register standard TS type replacements
-            this.config.typeReplacements["*"] = "any";
-            this.config.typeReplacements["?"] = "any";
-            this.config.typeReplacements["Object"] = "any";
-            this.config.typeReplacements["function"] = "Function";
         }
+
         private ignoreThisType(fullname: string): boolean {
             if (this.config.ignoreTypes[fullname])
                 return true;
