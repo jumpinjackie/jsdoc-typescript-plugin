@@ -143,7 +143,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
                 //TypeScript definition covers a module's *public* API surface, so
@@ -227,7 +227,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
                 
                 if (doclet.kind == DocletKind.Module) {
@@ -253,7 +253,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
                 var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
@@ -529,12 +529,12 @@ module TsdPlugin {
             };
             for (let typedef of this.userTypeAliases) {
                 let moduleName = typedef.getParentModule();
-                if (this.putDefinitionInTree(typedef, moduleName, root) === true)
+                if (this.putDefinitionInTree(typedef, moduleName, root))
                     this.stats.typedefs.user++;
             }
             for (let iface of this.userInterfaces) {
                 let moduleName = iface.getParentModule();
-                if (this.putDefinitionInTree(iface, moduleName, root) === true)
+                if (this.putDefinitionInTree(iface, moduleName, root))
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
@@ -547,7 +547,7 @@ module TsdPlugin {
             }
             this.moduleMembers.forEach((members, modName) => {
                 for (let member of members) {
-                    if (this.putDefinitionInTree(member, modName, root) === true)
+                    if (this.putDefinitionInTree(member, modName, root))
                         this.stats.moduleMembers++;
                 }
             });
@@ -556,7 +556,7 @@ module TsdPlugin {
                     return;
                 console.log(`Processing class: ${typeName}`);
                 let moduleName = cls.getParentModule();
-                if (this.putDefinitionInTree(cls, moduleName, root) === true)
+                if (this.putDefinitionInTree(cls, moduleName, root))
                     this.stats.classes++;
             });
             this.typedefs.forEach((tdf, typeName) => {
@@ -564,7 +564,7 @@ module TsdPlugin {
                     return;
                 console.log(`Processing typedef: ${typeName}`);
                 let moduleName = tdf.getParentModule();
-                if (this.putDefinitionInTree(tdf, moduleName, root) === true)
+                if (this.putDefinitionInTree(tdf, moduleName, root))
                     this.stats.typedefs.gen++;
             });
             return root;
