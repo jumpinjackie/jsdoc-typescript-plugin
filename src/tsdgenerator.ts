@@ -16,13 +16,13 @@ module TsdPlugin {
      */
     export class TsdGenerator implements IAdhocTypeRegistration {
         private moduleMembers = new Map<string, TSMember[]>();
-        private globalMembers = [] as TSMember[];
+        private globalMembers = new Array<TSMember>();
         private moduleDoclets = new Map<string, IDoclet>();
         private classes = new Map<string, TSClass>();
         private typedefs = new Map<string, TSTypedef>();
         private trackedDoclets = new Map<string, IDoclet>();
-        private userTypeAliases = [] as TSUserTypeAlias[];
-        private userInterfaces = [] as TSUserInterface[];
+        private userTypeAliases = new Array<TSUserTypeAlias>();
+        private userInterfaces = new Array<TSUserInterface>();
         private ignoreTypes = new Set<string>();
 
         private stats: IGeneratorStats = {
