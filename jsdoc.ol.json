@@ -67,7 +67,7 @@
         "defaultReturnType": "void",
         "headerFile": "./content/ol_header.ts",
         "footerFile": "./content/ol_footer.ts",
-        "doNotSkipUndocumentedDoclets": true,
+        "skipUndocumentedDoclets": false,
         "useUnionTypeForStringEnum": false,
         "memberReplacements": {
             "ol.layer.VectorTile#getSource": {

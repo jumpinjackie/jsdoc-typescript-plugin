@@ -37,7 +37,7 @@ module TsdPlugin {
             }
             module.children.forEach((child, moduleName) => {
                 //Root modules have to be declared
-                let decl = ((child.isRoot === true && conf.doNotDeclareTopLevelElements === false) ? "declare " : "");
+                let decl = ((child.isRoot === true && conf.declareTopLevelElements) ? "declare " : "");
                 //Write module decl
                 
                 //Strip module: prefix if found

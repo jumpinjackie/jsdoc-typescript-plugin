@@ -66,9 +66,9 @@ module TsdPlugin {
                 headerFile: undefined,
                 footerFile: undefined,
                 memberReplacements: {},
-                doNotDeclareTopLevelElements: false,
+                declareTopLevelElements: true,
                 ignoreModules: [],
-                doNotSkipUndocumentedDoclets: false,
+                skipUndocumentedDoclets: true,
                 initialIndentation: 0,
                 globalModuleAliases: [],
                 useUnionTypeForStringEnum: false,
@@ -143,7 +143,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
                     continue;
 
                 //TypeScript definition covers a module's *public* API surface, so
@@ -227,7 +227,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
                     continue;
                 
                 if (doclet.kind == DocletKind.Module) {
@@ -253,7 +253,7 @@ module TsdPlugin {
                 if (this.ignoreThisType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented === true && this.config.skipUndocumentedDoclets)
                     continue;
 
                 var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
