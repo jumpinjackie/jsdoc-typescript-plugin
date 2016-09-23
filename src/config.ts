@@ -60,7 +60,7 @@ module TsdPlugin {
     /**
      * Defines the root plugin configuration section of the JSDoc configuration
      */
-    export interface ITypeScriptPluginConfiguration {
+    export interface IPluginConfig {
 
         /**
          * The name of the TypeScript definition file

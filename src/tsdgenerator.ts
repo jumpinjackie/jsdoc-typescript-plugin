@@ -14,7 +14,7 @@ module TsdPlugin {
     /**
      * The class that does all the grunt work
      */
-    export class TsdGenerator implements IAdhocTypeRegistration {
+    export class TsdGenerator implements ITypeRegistrar {
         private moduleMembers = new Map<string, TSMember[]>();
         private globalMembers = new Array<TSMember>();
         private moduleDoclets = new Map<string, jsdoc.IDoclet>();
@@ -35,11 +35,11 @@ module TsdPlugin {
             classes: 0
         };
         
-        private config: ITypeScriptPluginConfiguration;
+        private config: IPluginConfig;
 
-        constructor(config: ITypeScriptPluginConfiguration) {
+        constructor(config: IPluginConfig) {
 
-            const defaults: ITypeScriptPluginConfiguration = {
+            const defaults: IPluginConfig = {
                 rootModuleName: "generated",
                 outDir: ".",
                 typeReplacements: {

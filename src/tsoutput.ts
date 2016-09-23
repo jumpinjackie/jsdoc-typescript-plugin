@@ -37,7 +37,7 @@ module TsdPlugin {
     /**
      * Allows for additional typedefs to be registered during the pre-processing phase
      */
-    export interface IAdhocTypeRegistration {
+    export interface ITypeRegistrar {
         registerTypedef(name: string, item: IOutputtable): boolean;
     }
     
@@ -56,7 +56,7 @@ module TsdPlugin {
             "Boolean"
         ]);
 
-        constructor(private reg: IAdhocTypeRegistration) {}
+        constructor(private reg: ITypeRegistrar) {}
         public registerTypedef(name: string, typedef: IOutputtable): string {
             let registeredName = name;
             if (this.reg != null) {
@@ -73,13 +73,13 @@ module TsdPlugin {
         public hasType(typeName: string): boolean {
             return this.types.has(typeName);
         }
-        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {
+        public addType(typeName: string, conf: IPluginConfig, logger: ILogger) {
             this.addTypes([ typeName ], conf, logger);
         }
         private shouldIgnoreType(typeName: string): boolean {
             return this.ignore.has(typeName);
         }
-        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {
+        public addTypes(typeNames: string[], conf: IPluginConfig, logger: ILogger) {
             for (let type of typeNames) {
                 if (!this.shouldIgnoreType(type)) {
                     this.types.add(type);
@@ -96,15 +96,15 @@ module TsdPlugin {
     
     class ReadOnlyTypeVisibilityContext extends TypeVisibilityContext {
         private publicTypes: Map<string, IOutputtable>;
-        constructor(reg: IAdhocTypeRegistration, publicTypes: Map<string, IOutputtable>) {
+        constructor(reg: ITypeRegistrar, publicTypes: Map<string, IOutputtable>) {
             super(reg);
             this.publicTypes = publicTypes;
         }
-        public fixEnumTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration): void {
+        public fixEnumTypes(typeNames: string[], conf: IPluginConfig): void {
             TypeUtil.fixEnumTypes(typeNames, this.publicTypes, conf);
         }
-        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
-        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
+        public addTypes(typeNames: string[], conf: IPluginConfig, logger: ILogger) {}
+        public addType(typeName: string, conf: IPluginConfig, logger: ILogger) {}
     }
     
     export class TypeUtil {
@@ -143,7 +143,7 @@ module TsdPlugin {
          */
         public static fixEnumTypeReferences(
           typeNames: string[],
-          conf:      ITypeScriptPluginConfiguration
+          conf:      IPluginConfig
         ): string[] {
             return typeNames.map(rt => {
                 if (conf.processAsEnums.classes[rt]) {
@@ -157,7 +157,7 @@ module TsdPlugin {
           typeNames:   string[],
           publicTypes: Map<string,
           IOutputtable>,
-          conf:        ITypeScriptPluginConfiguration
+          conf:        IPluginConfig
         ): void {
             //If we encounter any string enum typedefs, replace type with 'string'
             for (let i = 0; i < typeNames.length; i++) {
@@ -181,7 +181,7 @@ module TsdPlugin {
             }
         }
         
-        public static isPrivateDoclet(doclet: jsdoc.IDoclet, conf: ITypeScriptPluginConfiguration = null): boolean {
+        public static isPrivateDoclet(doclet: jsdoc.IDoclet, conf: IPluginConfig = null): boolean {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
             if (conf != null && conf.publicAnnotation) {
@@ -205,7 +205,7 @@ module TsdPlugin {
             return part.trim();
         }
         
-        public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string {
+        public static getTypeReplacement(typeName: string, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string {
             let tn = typeName;
             //Strip off nullability qualifier if it exists
             if (tn.charAt(0) == "!")
@@ -347,7 +347,7 @@ module TsdPlugin {
             }
         }
         
-        public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: jsdoc.IDoclet, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): void {
+        public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: jsdoc.IDoclet, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): void {
             for (let i = 0; i < parsedReturnTypes.length; i++) {
                 if (parsedReturnTypes[i] == "Function") {
                     //console.log(`Parsing function return type for ${doclet.longname} from @return in comments`);
@@ -366,7 +366,7 @@ module TsdPlugin {
             }
         }
         
-        public static parseAndConvertTypes(typeAnno: jsdoc.IType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
+        public static parseAndConvertTypes(typeAnno: jsdoc.IType, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string[] {
             let utypes = [];
             if (typeAnno.names.length > 0) {
                 for (let anno of typeAnno.names) {
@@ -404,13 +404,13 @@ module TsdPlugin {
         getDoclet(): jsdoc.IDoclet;
         output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void;
         visit(
           context: TypeVisibilityContext,
-          conf:    ITypeScriptPluginConfiguration,
+          conf:    IPluginConfig,
           logger:  ILogger
         ): void;
     }
@@ -459,7 +459,7 @@ module TsdPlugin {
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void { }
@@ -471,7 +471,7 @@ module TsdPlugin {
         protected writeDescription(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -493,14 +493,14 @@ module TsdPlugin {
         
         public abstract output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void;
         
         public abstract visit(
           context: TypeVisibilityContext,
-          conf:    ITypeScriptPluginConfiguration,
+          conf:    IPluginConfig,
           logger:  ILogger
         ): void;
     }
@@ -564,7 +564,7 @@ module TsdPlugin {
 
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -616,7 +616,7 @@ module TsdPlugin {
             }
         }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             if (this.doclet.type != null) {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
@@ -691,7 +691,7 @@ module TsdPlugin {
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -733,7 +733,7 @@ module TsdPlugin {
          * 
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
-        private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): jsdoc.IParameter[] {
+        private studyParameters(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): jsdoc.IParameter[] {
             let params: jsdoc.IParameter[] = [];
             let paramMap = new Map<string, IParameterContainer>();
             
@@ -822,7 +822,7 @@ module TsdPlugin {
             return params;
         }
         
-        private generateOptionsInterfaceName(conf: ITypeScriptPluginConfiguration): string {
+        private generateOptionsInterfaceName(conf: IPluginConfig): string {
             let methodNameCamelCase = this.getMethodName();
             if (methodNameCamelCase == "constructor") {
                 //This should be the class name
@@ -841,7 +841,7 @@ module TsdPlugin {
             return `I${methodNameCamelCase}Options`;
         }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             this.studyParameters(context, conf, logger);
             if (this.outputReturnType()) {
                 if (this.doclet.returns != null) {
@@ -857,7 +857,7 @@ module TsdPlugin {
         
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -1018,7 +1018,7 @@ module TsdPlugin {
         
         public visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void {
             super.visit(context, conf, logger);
@@ -1026,7 +1026,7 @@ module TsdPlugin {
         
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -1079,7 +1079,7 @@ module TsdPlugin {
         protected writeDescription(
             kind:   string,
             stream: IndentedOutputStream,
-            conf:   ITypeScriptPluginConfiguration,
+            conf:   IPluginConfig,
             logger: ILogger
         ): void {
             //Description as comments
@@ -1101,14 +1101,14 @@ module TsdPlugin {
         
         public abstract output(
             stream:      IndentedOutputStream,
-            conf:        ITypeScriptPluginConfiguration,
+            conf:        IPluginConfig,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>
         ): void;
         
         public abstract visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void;
     }
@@ -1165,7 +1165,7 @@ module TsdPlugin {
          */
         protected studyMembers(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): TSMember[] {
             let studiedMembers: TSMember[] = [];
@@ -1395,7 +1395,7 @@ module TsdPlugin {
 
         public visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
@@ -1411,7 +1411,7 @@ module TsdPlugin {
 
         public output(
             stream: IndentedOutputStream,
-            conf:   ITypeScriptPluginConfiguration,
+            conf:   IPluginConfig,
             logger: ILogger, publicTypes: Map<string, IOutputtable>
         ): void {
             if (conf.outputDocletDefs) {
@@ -1535,7 +1535,7 @@ module TsdPlugin {
 
         public visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
@@ -1555,7 +1555,7 @@ module TsdPlugin {
 
         public output(
             stream:      IndentedOutputStream,
-            conf:        ITypeScriptPluginConfiguration,
+            conf:        IPluginConfig,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>
         ): void {
@@ -1661,7 +1661,7 @@ module TsdPlugin {
 
         public output(
             stream: IndentedOutputStream,
-            conf:   ITypeScriptPluginConfiguration,
+            conf:   IPluginConfig,
             logger: ILogger
         ): void {
             stream.writeln(`interface ${this.name} {`);
@@ -1687,7 +1687,7 @@ module TsdPlugin {
 
         public visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
@@ -1734,7 +1734,7 @@ module TsdPlugin {
 
         public output(
             stream: IndentedOutputStream,
-            conf:   ITypeScriptPluginConfiguration,
+            conf:   IPluginConfig,
             logger: ILogger
         ): void {
             this.outputDecl(stream);
@@ -1750,7 +1750,7 @@ module TsdPlugin {
 
         public visit(
             context: TypeVisibilityContext,
-            conf:    ITypeScriptPluginConfiguration,
+            conf:    IPluginConfig,
             logger:  ILogger
         ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
