@@ -8,36 +8,36 @@ module TsdPlugin {
         /**
          * Doclet for a function
          */
-        public static get Function(): string { return "function"; }
+        static Function = "function";
 
         /**
          * Doclet for a typedef
          */
-        public static get Typedef(): string { return "typedef"; }
+        static Typedef = "typedef";
 
         /**
          * Doclet for a class
          */
-        public static get Class(): string { return "class"; }
+        static Class = "class";
 
         /**
          * Doclet for a member
          */
-        public static get Member(): string { return "member"; }
+        static Member = "member";
 
         /**
          * Doclet for a property
          */
-        public static get Value(): string { return "value"; }
+        static Value = "value";
 
         /**
          * Doclet for a module
          */
-        public static get Module(): string { return "module"; }
+        static Module = "module";
 
         /**
          * Doclet for a constant
          */
-        public static get Constant(): string { return "constant"; }
+        static Constant = "constant";
     }
 }
