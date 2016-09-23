@@ -5,7 +5,7 @@ module TsdPlugin {
      */
     export class FunctionTypedefRewriter {
 
-        private static isFunctionTypedef(doclet: IDoclet): boolean {
+        private static isFunctionTypedef(doclet: jsdoc.IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef &&
                    doclet.type != null &&
                    doclet.type.names != null &&
@@ -30,7 +30,7 @@ module TsdPlugin {
             return str.indexOf(":") >= 0;
         }
 
-        public static rewrite(doclet: IDoclet): void {
+        public static rewrite(doclet: jsdoc.IDoclet): void {
             if (FunctionTypedefRewriter.isFunctionTypedef(doclet)) {
                 // The meat that makes this possible is the @typedef annotation in the comments
                 // Use regex to test for common patterns

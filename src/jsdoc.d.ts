@@ -1,5 +1,42 @@
 
-module TsdPlugin {
+declare module "jsdoc/env" {
+    class Environment {
+        public static conf: any;
+    }
+    export = Environment;
+}
+
+declare module "jsdoc/util/logger" {
+    class Logger {
+        public warn(msg: string);
+        public error(msg: string);
+        public fatal(msg: string);
+    }
+    export = Logger;
+}
+
+declare module jsdoc {
+    /**
+     * The event passed on a JsDoc newDoclet event
+     */
+    export interface IJsDocNewDocletEvent {
+
+        /**
+         * The processed doclet
+         */
+        doclet: IDoclet;
+    }
+    
+    /**
+     * The event passed on a JsDoc processingComplete event
+     */
+    export interface IJsDocProcessingCompleteEvent {
+
+        /**
+         * The processed doclets
+         */
+        doclets: IDoclet[];
+    }
 
     /**
      * Represents a JsDoc doclet, a parsed piece of documentation for a type, function
@@ -106,5 +143,56 @@ module TsdPlugin {
          * If isEnum == true, contains the members of this enum. Note that other libraries may define enums differently (eg. A typedef with members)
          */
         properties?: IDoclet[];
+    }
+
+    /**
+     * Type name
+     */
+    export interface IDocletType {
+        names: string[];
+    }
+
+    /**
+     * Type information
+     */
+    export interface IDocletTypeInfo {
+        type: IDocletType;
+        description?: string;
+    }
+
+    /**
+     * Describes a method parameter
+     */
+    export interface IDocletParameter extends IDocletTypeInfo {
+
+        /**
+         * The name of this parameter
+         */
+        name: string;
+
+        /**
+         * Indicates of this parameter is optional. Alias for optional
+         */
+        nullable?: boolean;
+
+        /**
+         * Indicates of this parameter is optional. Alias for nullable
+         */
+        optional?: boolean;
+
+        /**
+         * Indicates if this parameter is a variable argument list
+         */
+        variable?: boolean;
+    }
+
+    /**
+     * Describes a tag (annotation)
+     */
+    export interface IDocletTag {
+        originalTitle: string;
+        title: string;
+        text: string;
+        value?: string;
     }
 }

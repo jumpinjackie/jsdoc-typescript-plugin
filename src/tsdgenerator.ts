@@ -17,10 +17,10 @@ module TsdPlugin {
     export class TsdGenerator implements IAdhocTypeRegistration {
         private moduleMembers = new Map<string, TSMember[]>();
         private globalMembers = new Array<TSMember>();
-        private moduleDoclets = new Map<string, IDoclet>();
+        private moduleDoclets = new Map<string, jsdoc.IDoclet>();
         private classes = new Map<string, TSClass>();
         private typedefs = new Map<string, TSTypedef>();
-        private trackedDoclets = new Map<string, IDoclet>();
+        private trackedDoclets = new Map<string, jsdoc.IDoclet>();
         private userTypeAliases = new Array<TSUserTypeAlias>();
         private userInterfaces = new Array<TSUserInterface>();
         private ignoreTypes = new Set<string>();
@@ -130,13 +130,13 @@ module TsdPlugin {
             return false;
         }
         
-        private isTSInterfaceCandidate(doclet: IDoclet): boolean {
+        private isTSInterfaceCandidate(doclet: jsdoc.IDoclet): boolean {
             return !TsdGenerator.isCallbackType(doclet) && //Because callback types could also be through typedefs
                    (doclet.kind == DocletKind.Typedef ||
                    (doclet.comment || "").indexOf("@record") >= 0); 
         }
         
-        private parseClassesAndTypedefs(doclets: IDoclet[]): void {
+        private parseClassesAndTypedefs(doclets: jsdoc.IDoclet[]): void {
             for (var doclet of doclets) {
                 //On ignore list
                 if (this.shouldIgnoreType(doclet.longname))
@@ -218,7 +218,7 @@ module TsdPlugin {
             }
         }
 
-        private parseModules(doclets: IDoclet[]): void {
+        private parseModules(doclets: jsdoc.IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
@@ -237,7 +237,7 @@ module TsdPlugin {
             }
         }
 
-        private static isCallbackType(doclet: IDoclet): boolean {
+        private static isCallbackType(doclet: jsdoc.IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef && 
                    doclet.type != null &&
                    doclet.type.names != null &&
@@ -246,7 +246,7 @@ module TsdPlugin {
                    (doclet.comment || "").indexOf("@callback") >= 0;
         }
 
-        private processTypeMembers(doclets: IDoclet[]): void {
+        private processTypeMembers(doclets: jsdoc.IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
@@ -582,7 +582,7 @@ module TsdPlugin {
             return root;
         }
 
-        public dumpDoclets(doclets: IDoclet[], streamFactory: IFileStreamFactory) {
+        public dumpDoclets(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory) {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
             var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
@@ -595,7 +595,7 @@ module TsdPlugin {
             });
         }
 
-        public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
+        public process(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
             var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
