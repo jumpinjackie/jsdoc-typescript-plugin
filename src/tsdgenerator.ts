@@ -85,10 +85,8 @@ module TsdPlugin {
                 typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
             });
 
-            if (config.ignoreTypes) {
-                for (let ignoreType of config.ignoreTypes) {
-                    this.ignoreTypes.add(ignoreType);
-                }
+            for (let ignoreType of this.config.ignoreTypes) {
+                this.ignoreTypes.add(ignoreType);
             }
         }
 
