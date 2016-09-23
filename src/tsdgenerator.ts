@@ -467,7 +467,7 @@ module TsdPlugin {
             return publicTypes;
         }
 
-        private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
+        private ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
             let tree: ITSModule = root;
             let i = 0;
             for (let name of moduleNameParts) {
@@ -523,7 +523,7 @@ module TsdPlugin {
                 } else {
                     //Explode this module name and see how many levels we need to go
                     let moduleNameParts = moduleNameClean.split(".");
-                    let tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
+                    let tree = this.ensureModuleTree(root, moduleNameParts);
                     tree.types.push(type);
                     return true;
                 }
