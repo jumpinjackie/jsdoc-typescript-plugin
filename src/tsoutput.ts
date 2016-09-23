@@ -366,7 +366,7 @@ module TsdPlugin {
             }
         }
         
-        public static parseAndConvertTypes(typeAnno: jsdoc.IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
+        public static parseAndConvertTypes(typeAnno: jsdoc.IType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
             let utypes = [];
             if (typeAnno.names.length > 0) {
                 for (let anno of typeAnno.names) {
@@ -380,7 +380,7 @@ module TsdPlugin {
             return utypes;
         }
         
-        public static extractGenericTypesFromDocletTags(tags: jsdoc.IDocletTag[]): string[] {
+        public static extractGenericTypesFromDocletTags(tags: jsdoc.ITag[]): string[] {
             let genericTypes = [];
             //@template is non-standard, but the presence of this annotation conveys
             //generic type information that we should capture
@@ -623,9 +623,15 @@ module TsdPlugin {
         }
     }
     
-    interface IDocletParameterContainer { members: jsdoc.IDocletParameter[], param: jsdoc.IDocletParameter }
+    interface IParameterContainer {
+      members: jsdoc.IParameter[];
+      param:   jsdoc.IParameter;
+    }
     
-    interface ITsMemberContainer { members: TSMember[], member: TSMember }
+    interface ITsMemberContainer {
+      members: TSMember[];
+      member:  TSMember;
+    }
 
     export class TSMethod extends TSMember {
         private isModule: boolean;
@@ -650,7 +656,7 @@ module TsdPlugin {
         
         protected getMethodName(): string { return this.doclet.name; }
         
-        private isArgOptional(arg: jsdoc.IDocletParameter, publicTypes: Map<string, IOutputtable>): boolean {
+        private isArgOptional(arg: jsdoc.IParameter, publicTypes: Map<string, IOutputtable>): boolean {
             //If the argument is a typedef, it will (and should) be the only argument type
             if (arg.type != null && arg.type.names.length > 0) {
                 if (arg.type.names.length == 1) {
@@ -727,9 +733,9 @@ module TsdPlugin {
          * 
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
-        private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): jsdoc.IDocletParameter[] {
-            let params: jsdoc.IDocletParameter[] = [];
-            let paramMap = new Map<string, IDocletParameterContainer>();
+        private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): jsdoc.IParameter[] {
+            let params: jsdoc.IParameter[] = [];
+            let paramMap = new Map<string, IParameterContainer>();
             
             let methodParams = this.doclet.params || [];
             let processedArgs = new Map<string, string>();

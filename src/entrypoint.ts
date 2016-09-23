@@ -5,12 +5,12 @@ let logger = require("jsdoc/util/logger");
 let tsConf = env.conf.typescript || {};
 
 exports.handlers = {
-    newDoclet(e: jsdoc.IJsDocNewDocletEvent): void {
+    newDoclet(e: jsdoc.INewDocletEvent): void {
         if (tsConf.rewriteFunctionTypedefs === true) {
             TsdPlugin.FunctionTypedefRewriter.rewrite(e.doclet);
         }
     },
-    processingComplete(e: jsdoc.IJsDocProcessingCompleteEvent): void {
+    processingComplete(e: jsdoc.IProcessingCompleteEvent): void {
         let proc = new TsdPlugin.TsdGenerator(tsConf);
         let sf = {
             createStream: (fileName) => fs.createWriteStream(fileName),

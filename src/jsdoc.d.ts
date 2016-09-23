@@ -19,7 +19,7 @@ declare module jsdoc {
     /**
      * The event passed on a JsDoc newDoclet event
      */
-    export interface IJsDocNewDocletEvent {
+    export interface INewDocletEvent {
 
         /**
          * The processed doclet
@@ -30,7 +30,7 @@ declare module jsdoc {
     /**
      * The event passed on a JsDoc processingComplete event
      */
-    export interface IJsDocProcessingCompleteEvent {
+    export interface IProcessingCompleteEvent {
 
         /**
          * The processed doclets
@@ -67,17 +67,17 @@ declare module jsdoc {
         /**
          * Parameter information
          */
-        params?: IDocletParameter[];
+        params?: IParameter[];
 
         /**
          * Return type information
          */
-        returns?: IDocletTypeInfo[];
+        returns?: ITypeInfo[];
 
         /**
          * Data about custom annotations applied on this doclet
          */
-        tags?: IDocletTag[];
+        tags?: ITag[];
 
         /**
          * The name of this identifier
@@ -112,7 +112,7 @@ declare module jsdoc {
         /**
          * The type of this identifier. Not applicable for functions
          */
-        type?: IDocletType;
+        type?: IType;
 
         /**
          * If this is a class doclet, denotes the types that this class inherits from
@@ -148,22 +148,22 @@ declare module jsdoc {
     /**
      * Type name
      */
-    export interface IDocletType {
+    export interface IType {
         names: string[];
     }
 
     /**
      * Type information
      */
-    export interface IDocletTypeInfo {
-        type: IDocletType;
+    export interface ITypeInfo {
+        type: IType;
         description?: string;
     }
 
     /**
      * Describes a method parameter
      */
-    export interface IDocletParameter extends IDocletTypeInfo {
+    export interface IParameter extends ITypeInfo {
 
         /**
          * The name of this parameter
@@ -189,7 +189,7 @@ declare module jsdoc {
     /**
      * Describes a tag (annotation)
      */
-    export interface IDocletTag {
+    export interface ITag {
         originalTitle: string;
         title: string;
         text: string;
