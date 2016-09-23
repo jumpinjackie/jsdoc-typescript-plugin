@@ -79,9 +79,9 @@ module TsdPlugin {
             };
 
             this.config = Object.assign(defaults, config, {
-                aliases: Object.assign(defaults.aliases, config.aliases),
-                interfaces: Object.assign(defaults.interfaces, config.interfaces),
-                processAsEnums: Object.assign(defaults.processAsEnums, config.processAsEnums),
+                aliases:          Object.assign(defaults.aliases, config.aliases),
+                interfaces:       Object.assign(defaults.interfaces, config.interfaces),
+                processAsEnums:   Object.assign(defaults.processAsEnums, config.processAsEnums),
                 typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
             });
 
@@ -107,6 +107,7 @@ module TsdPlugin {
                 return this.classes.get(name);
             }
         }
+
         private ensureTypedef(name: string, factory?: () => TSTypedef): TSTypedef {
             if (!this.typedefs.has(name)) {
                 if (factory != null) {
@@ -216,6 +217,7 @@ module TsdPlugin {
                 }
             }
         }
+
         private parseModules(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
@@ -234,6 +236,7 @@ module TsdPlugin {
                 }
             }
         }
+
         private static isCallbackType(doclet: IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef && 
                    doclet.type != null &&
@@ -242,6 +245,7 @@ module TsdPlugin {
                    //This is to check that the function type was documented using @callback instead of @typedef
                    (doclet.comment || "").indexOf("@callback") >= 0;
         }
+
         private processTypeMembers(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
@@ -316,32 +320,40 @@ module TsdPlugin {
                 }
             }
         }
+
         private processUserDefinedTypes(): void {
             //Output user-injected type aliases
             //global
             for (var typeAlias in this.config.aliases.global) {
-                this.userTypeAliases.push(new TSUserTypeAlias(null, typeAlias, this.config.aliases.global[typeAlias]));
+                let typeName = this.config.aliases.global[typeAlias];
+                this.userTypeAliases.push(
+                    new TSUserTypeAlias(null, typeAlias, typeName));
             }
             //module
             for (var moduleName in this.config.aliases.module) {
                 for (var typeAlias in this.config.aliases.module[moduleName]) {
-                    this.userTypeAliases.push(new TSUserTypeAlias(moduleName, typeAlias, this.config.aliases.module[moduleName][typeAlias]));
+                    let typeName = this.config.aliases.module[moduleName][typeAlias];
+                    this.userTypeAliases.push(
+                        new TSUserTypeAlias(moduleName, typeAlias, typeName));
                 }
             }
             //Output user-injected interfaces
             //global
             for (var typeName in this.config.interfaces.global) {
                 var iface = this.config.interfaces.global[typeName];
-                this.userInterfaces.push(new TSUserInterface(null, typeName, iface));
+                this.userInterfaces.push(
+                    new TSUserInterface(null, typeName, iface));
             }
             //module
             for (var moduleName in this.config.interfaces.module) {
                 for (var typeName in this.config.interfaces.module[moduleName]) {
                     var iface = this.config.interfaces.module[moduleName][typeName];
-                    this.userInterfaces.push(new TSUserInterface(moduleName, typeName, iface));
+                    this.userInterfaces.push(
+                        new TSUserInterface(moduleName, typeName, iface));
                 }
             }
         }
+
         private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Map<string, IOutputtable> {
             var publicTypes = new Map<string, IOutputtable>();
             var context = new TypeVisibilityContext(this);
@@ -408,7 +420,7 @@ module TsdPlugin {
                     }
                 }
             }
-            
+
             var pass = 1;
             while (!context.isEmpty()) {
                 //NOTE: This is an array copy. Any new types added in this
@@ -454,6 +466,7 @@ module TsdPlugin {
             
             return publicTypes;
         }
+
         private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
             var tree: ITSModule = root;
             var i = 0;
@@ -471,7 +484,7 @@ module TsdPlugin {
             }
             return tree;
         }
-        
+
         private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
             if (moduleName == null) {
                 if (TypeUtil.isTsElementNotPublic(type)) {
@@ -516,6 +529,7 @@ module TsdPlugin {
                 }
             }
         }
+
         /**
          * This method groups all of our collected TS types according to their parent module
          */
@@ -567,7 +581,7 @@ module TsdPlugin {
             });
             return root;
         }
-        
+
         public dumpDoclets(doclets: IDoclet[], streamFactory: IFileStreamFactory) {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
             var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
@@ -580,7 +594,7 @@ module TsdPlugin {
                 console.log(`Saved dumped doclets to: ${fileName}`);
             });
         }
-        
+
         public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
             var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
@@ -617,7 +631,7 @@ module TsdPlugin {
                 var footer = streamFactory.readText(this.config.footerFile);
                 output.writeln(footer);
             }
-            
+
             output.close(() => {
                 console.log("Wrote:");
                 console.log(`  ${this.stats.typedefs.user} user-specified typedefs`);

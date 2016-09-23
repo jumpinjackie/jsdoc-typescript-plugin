@@ -4,6 +4,7 @@ module TsdPlugin {
      * A helper class to rewrite @typedef based function annotations into the @callback form
      */
     export class FunctionTypedefRewriter {
+
         private static isFunctionTypedef(doclet: IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef &&
                    doclet.type != null &&
@@ -12,6 +13,7 @@ module TsdPlugin {
                    doclet.type.names.indexOf("function") >= 0 &&
                    doclet.comment.indexOf("@callback") < 0;
         }
+
         static cleanArg(str: string): string {
             var clean = str;
             
@@ -23,9 +25,11 @@ module TsdPlugin {
             
             return clean;
         }
+
         static isContextualParameter(str: string): boolean {
             return str.indexOf(":") >= 0;
         }
+
         public static rewrite(doclet: IDoclet): void {
             if (FunctionTypedefRewriter.isFunctionTypedef(doclet)) {
                 // The meat that makes this possible is the @typedef annotation in the comments

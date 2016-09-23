@@ -15,17 +15,21 @@ module TsdPlugin {
         private indentLevel: number;
         private output: any;
         private endl: string;
+
         constructor(output: any /* fs.WriteStream */, endl: string) {
             this.indentLevel = 0;
             this.output = output;
             this.endl = endl;
         }
+
         indent(): void {
             this.indentLevel++;
         }
+
         unindent(): void {
             this.indentLevel--;
         }
+
         private indentedText(): string {
             var pattern = " ";
             var count = this.indentLevel * 4;
@@ -37,9 +41,11 @@ module TsdPlugin {
             }
             return result + pattern;
         }
+
         writeln(str: string) {
             this.output.write(`${this.indentedText()}${str}${this.endl}`);
         }
+
         close(callback: () => void) {
             this.output.on("finish", callback);
             this.output.end();
