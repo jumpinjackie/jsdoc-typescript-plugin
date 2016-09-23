@@ -469,8 +469,8 @@ module TsdPlugin {
 
         private ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
             let tree: ITSModule = root;
-            let i = 0;
-            for (let name of moduleNameParts) {
+            for (let i = 0; i < moduleNameParts.length; i++) {
+                let name = moduleNameParts[i];
                 //Doesn't exist at this level, make it
                 if (!tree.children.has(name)) {
                     tree.children.set(name, {
@@ -480,7 +480,6 @@ module TsdPlugin {
                     });
                 }
                 tree = tree.children.get(name);
-                i++;
             }
             return tree;
         }
