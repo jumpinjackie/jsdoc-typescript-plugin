@@ -24,15 +24,20 @@ module TsdPlugin {
         /**
          * Writes the TS module tree out to the specified output stream
          */
-        public static outputTsd(module: ITSModule, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Dictionary<IOutputtable>): void {
+        public static outputTsd(
+            module:      ITSModule,
+            stream:      IndentedOutputStream,
+            conf:        ITypeScriptPluginConfiguration,
+            logger:      ILogger,
+            publicTypes: Map<string, IOutputtable>
+        ): void {
             for (let type of module.types) {
                 //console.log(`Outputting type: ${type.getFullName()}`);
                 type.output(stream, conf, logger, publicTypes);
             }
-            for (let moduleName in module.children) {
-                let child = module.children[moduleName];
+            module.children.forEach((child, moduleName) => {
                 //Root modules have to be declared
-                let decl = ((child.isRoot === true && conf.doNotDeclareTopLevelElements === false) ? "declare " : "");
+                let decl = ((child.isRoot === true && conf.declareTopLevelElements) ? "declare " : "");
                 //Write module decl
                 
                 //Strip module: prefix if found
@@ -46,7 +51,7 @@ module TsdPlugin {
                 ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes);
                 stream.unindent();
                 stream.writeln("}");
-            }
+            });
         }
     }
 }

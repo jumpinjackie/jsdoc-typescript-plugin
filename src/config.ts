@@ -111,7 +111,7 @@ module TsdPlugin {
          * You can avoid double-ups by specifying types to ignore in this list. Such doclets
          * will be ignored, giving precedence to your user-defined aliases and interfaces.
          */
-        ignoreTypes: Dictionary<string>;
+        ignoreTypes: string[];
         /**
          * A list of types to always make public. Add types here if you are manually defining types in a
          * custom header or footer and those types reference types that may not be public when the 
@@ -135,7 +135,7 @@ module TsdPlugin {
          * Indicates if top-level elements (ie: doclets without parents) should be declared. Default is false, set to true 
          * if you wrap the emitted types around a custom top-level module through the custom header/footer feature 
          */
-        doNotDeclareTopLevelElements: boolean;
+        declareTopLevelElements: boolean;
         /**
          * A list of modules to ignore (without the module: prefix), any member under this module will be ignored
          */
@@ -143,7 +143,7 @@ module TsdPlugin {
         /**
          * Indicates if doclets with undocumented = true should be skipped or not. Default is false.
          */
-        doNotSkipUndocumentedDoclets: boolean;
+        skipUndocumentedDoclets: boolean;
         /**
          * Sets the initial indentation level. Each level starts indentation by one "tab" (4 spaces)
          */

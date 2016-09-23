@@ -15,14 +15,15 @@ module TsdPlugin {
      * The class that does all the grunt work
      */
     export class TsdGenerator implements IAdhocTypeRegistration {
-        private moduleMembers = {} as Dictionary<TSMember[]>;
-        private globalMembers = [] as TSMember[];
-        private moduleDoclets = {} as Dictionary<IDoclet>;
-        private classes = {} as Dictionary<TSClass>;
-        private typedefs = {} as Dictionary<TSTypedef>;
-        private trackedDoclets = {} as Dictionary<IDoclet>;
-        private userTypeAliases = [] as TSUserTypeAlias[];
-        private userInterfaces = [] as TSUserInterface[];
+        private moduleMembers = new Map<string, TSMember[]>();
+        private globalMembers = new Array<TSMember>();
+        private moduleDoclets = new Map<string, IDoclet>();
+        private classes = new Map<string, TSClass>();
+        private typedefs = new Map<string, TSTypedef>();
+        private trackedDoclets = new Map<string, IDoclet>();
+        private userTypeAliases = new Array<TSUserTypeAlias>();
+        private userInterfaces = new Array<TSUserInterface>();
+        private ignoreTypes = new Set<string>();
 
         private stats: IGeneratorStats = {
             typedefs: {
@@ -36,7 +37,7 @@ module TsdPlugin {
         
         private config: ITypeScriptPluginConfiguration;
 
-        constructor(config: any) {
+        constructor(config: ITypeScriptPluginConfiguration) {
 
             const defaults: ITypeScriptPluginConfiguration = {
                 rootModuleName: "generated",
@@ -60,14 +61,14 @@ module TsdPlugin {
                     global: {},
                     module: {}
                 },
-                ignoreTypes: {},
+                ignoreTypes: [],
                 makePublic: [],
                 headerFile: undefined,
                 footerFile: undefined,
                 memberReplacements: {},
-                doNotDeclareTopLevelElements: false,
+                declareTopLevelElements: true,
                 ignoreModules: [],
-                doNotSkipUndocumentedDoclets: false,
+                skipUndocumentedDoclets: true,
                 initialIndentation: 0,
                 globalModuleAliases: [],
                 useUnionTypeForStringEnum: false,
@@ -84,50 +85,47 @@ module TsdPlugin {
                 typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
             });
 
-            if (config.ignore) {
-                for (let ignoreType of config.ignore) {
-                    this.config.ignoreTypes[ignoreType] = ignoreType;
+            if (config.ignoreTypes) {
+                for (let ignoreType of config.ignoreTypes) {
+                    this.ignoreTypes.add(ignoreType);
                 }
             }
         }
 
-        private ignoreThisType(fullname: string): boolean {
-            if (this.config.ignoreTypes[fullname])
-                return true;
-            else
-                return false;
+        private shouldIgnoreType(fullname: string): boolean {
+          return this.ignoreTypes.has(fullname);
         }
         
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
-            if (!this.classes[name]) {
+            if (!this.classes.has(name)) {
                 if (factory != null) {
                     var cls = factory();
-                    this.classes[name] = cls;
+                    this.classes.set(name, cls);
                     return cls;
                 } else {
                     return null;
                 }
             } else {
-                return this.classes[name];
+                return this.classes.get(name);
             }
         }
         private ensureTypedef(name: string, factory?: () => TSTypedef): TSTypedef {
-            if (!this.typedefs[name]) {
+            if (!this.typedefs.has(name)) {
                 if (factory != null) {
                     var tdf = factory();
-                    this.typedefs[name] = tdf;
+                    this.typedefs.set(name, tdf);
                     return tdf;
                 } else {
                     return null;
                 }
             } else {
-                return this.typedefs[name];
+                return this.typedefs.get(name);
             }
         }
         
         public registerTypedef(name: string, typedef: TSTypedef): boolean {
-            if (!this.typedefs[name]) {
-                this.typedefs[name] = typedef;
+            if (!this.typedefs.has(name)) {
+                this.typedefs.set(name, typedef);
                 return true;
             }
             return false;
@@ -142,10 +140,10 @@ module TsdPlugin {
         private parseClassesAndTypedefs(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //On ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
                 //TypeScript definition covers a module's *public* API surface, so
@@ -171,18 +169,18 @@ module TsdPlugin {
                         cls.setParentModule(parentModName);
                     if (doclet.params != null)
                         cls.ctor = new TSConstructor(doclet);
-                    this.trackedDoclets[doclet.longname] = doclet;
+                    this.trackedDoclets.set(doclet.longname, doclet);
                 } else if (TsdGenerator.isCallbackType(doclet)) {
-                    if (parentModName != null && this.moduleMembers[parentModName] == null)
-                        this.moduleMembers[parentModName] = [];
+                    if (parentModName != null && !this.moduleMembers.has(parentModName))
+                        this.moduleMembers.set(parentModName, []);
                     let method = new TSMethod(doclet)
                     method.setIsModule(true);
                     method.setIsTypedef(true);
                     if (parentModName != null && !makeGlobal)
-                        this.moduleMembers[parentModName].push(method);
+                        this.moduleMembers.get(parentModName).push(method);
                     else if (makeGlobal)
                         this.globalMembers.push(method);
-                    this.trackedDoclets[doclet.longname] = doclet;
+                    this.trackedDoclets.set(doclet.longname, doclet);
                 } else if (this.isTSInterfaceCandidate(doclet)) {
                     let tdf = null;
                     if (makeGlobal)
@@ -194,7 +192,7 @@ module TsdPlugin {
                         tdf.setParentModule(parentModName);
                     else if (makeGlobal)
                         this.globalMembers.push(tdf);
-                    this.trackedDoclets[doclet.longname] = doclet;
+                    this.trackedDoclets.set(doclet.longname, doclet);
                 } else if (doclet.kind == DocletKind.Function) {
                     let parentModule = doclet.memberof;
                     if (parentModule == null) {
@@ -203,7 +201,7 @@ module TsdPlugin {
                         method.setIsPublic(isPublic);
                         method.setIsTypedef(false);
                         this.globalMembers.push(method);
-                        this.trackedDoclets[doclet.longname] = doclet;
+                        this.trackedDoclets.set(doclet.longname, doclet);
                     }
                 } else if (TypeUtil.isEnumDoclet(doclet)) {
                     let tdf = null;
@@ -216,25 +214,25 @@ module TsdPlugin {
                         tdf.setParentModule(parentModName);
                     else if (makeGlobal)
                         this.globalMembers.push(tdf);
-                    this.trackedDoclets[doclet.longname] = doclet;
+                    this.trackedDoclets.set(doclet.longname, doclet);
                 }
             }
         }
         private parseModules(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
-                if (this.trackedDoclets[doclet.longname] != null)
+                if (this.trackedDoclets.has(doclet.longname))
                     continue;
                 //On ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
                 
                 if (doclet.kind == DocletKind.Module) {
-                    this.moduleDoclets[doclet.name] = doclet;
-                    this.trackedDoclets[doclet.longname] = doclet;
+                    this.moduleDoclets.set(doclet.name, doclet);
+                    this.trackedDoclets.set(doclet.longname, doclet);
                 }
             }
         }
@@ -249,13 +247,13 @@ module TsdPlugin {
         private processTypeMembers(doclets: IDoclet[]): void {
             for (var doclet of doclets) {
                 //Already covered in 1st pass
-                if (this.trackedDoclets[doclet.longname] != null)
+                if (this.trackedDoclets.has(doclet.longname))
                     continue;
                 //On the ignore list
-                if (this.ignoreThisType(doclet.longname))
+                if (this.shouldIgnoreType(doclet.longname))
                     continue;
                 //Undocumented and we're ignoring them
-                if (doclet.undocumented === true && this.config.doNotSkipUndocumentedDoclets === false)
+                if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
                 var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
@@ -283,7 +281,7 @@ module TsdPlugin {
                         parentModule = ModuleUtils.cleanModuleName(parentModule);
                         
                         //HACK-ish: If we found an enum, that this is a member of, skip it if it already exists
-                        let parentDoclet = this.trackedDoclets[doclet.memberof];
+                        let parentDoclet = this.trackedDoclets.get(doclet.memberof);
                         if (parentDoclet != null && TypeUtil.isEnumDoclet(parentDoclet)) {
                             let matches = (parentDoclet.properties || []).filter(prop => prop.name == doclet.name);
                             if (matches.length > 0)
@@ -291,17 +289,17 @@ module TsdPlugin {
                         }
 
                         if (doclet.kind == DocletKind.Function) {
-                            if (this.moduleMembers[parentModule] == null)
-                                this.moduleMembers[parentModule] = [];
+                            if (!this.moduleMembers.has(parentModule))
+                                this.moduleMembers.set(parentModule, []);
                             let method = new TSMethod(doclet)
                             method.setIsModule(true);
-                            this.moduleMembers[parentModule].push(method);
+                            this.moduleMembers.get(parentModule).push(method);
                         } else if (doclet.kind == DocletKind.Constant || doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                            if (this.moduleMembers[parentModule] == null)
-                                this.moduleMembers[parentModule] = [];
+                            if (!this.moduleMembers.has(parentModule))
+                                this.moduleMembers.set(parentModule, []);
                             let prop = new TSProperty(doclet, false);
                             prop.setIsModule(true);
-                            this.moduleMembers[parentModule].push(prop);
+                            this.moduleMembers.get(parentModule).push(prop);
                         }
                         continue;
                     } else {
@@ -346,8 +344,8 @@ module TsdPlugin {
                 }
             }
         }
-        private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Dictionary<IOutputtable> {
-            var publicTypes: Dictionary<IOutputtable> = {}; 
+        private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Map<string, IOutputtable> {
+            var publicTypes = new Map<string, IOutputtable>();
             var context = new TypeVisibilityContext(this);
             
             //First, visit all known public types and collect referenced types
@@ -357,22 +355,19 @@ module TsdPlugin {
             for (let iface of this.userInterfaces) {
                 iface.visit(context, this.config, logger);
             }
-            for (let moduleName in this.moduleMembers) {
-                let members = this.moduleMembers[moduleName];
+            this.moduleMembers.forEach((members, moduleName) => {
                 for (let member of members) {
                     member.visit(context, this.config, logger);
                 }
-            }
-            for (let typeName in this.classes) {
-                let cls = this.classes[typeName];
+            });
+            this.classes.forEach((cls, typeName) => {
                 if (cls.getIsPublic())
                     cls.visit(context, this.config, logger);
-            }
-            for (let typeName in this.typedefs) {
-                let tdf = this.typedefs[typeName];
+            });
+            this.typedefs.forEach((tdf, typeName) => {
                 if (tdf.getIsPublic())
                     tdf.visit(context, this.config, logger);
-            }
+            });
             
             var userTypes = {};
             for (let typedef of this.userTypeAliases) {
@@ -395,8 +390,8 @@ module TsdPlugin {
             //But before we start, auto-hoist any type in the "makePublic" list 
             for (var typeName of this.config.makePublic) {
                 console.log(`Checking if (${typeName}) needs to be hoisted`);
-                if (this.classes[typeName]) {
-                    let cls = this.classes[typeName];
+                if (this.classes.has(typeName)) {
+                    let cls = this.classes.get(typeName);
                     if (!cls.getIsPublic()) {
                         //logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
                         cls.setIsPublic(true);
@@ -404,8 +399,8 @@ module TsdPlugin {
                         //Have to visit to we know what extra types to check for
                         cls.visit(context, this.config, logger);
                     }
-                } else if (this.typedefs[typeName]) {
-                    let tdf = this.typedefs[typeName];
+                } else if (this.typedefs.has(typeName)) {
+                    let tdf = this.typedefs.get(typeName);
                     if (!tdf.getIsPublic()) {
                         //logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
                         tdf.setIsPublic(true);
@@ -424,30 +419,30 @@ module TsdPlugin {
                 //console.log(`Pass ${pass}: ${allTypes.length} types remaining to check`);
                 for (let typeName of allTypes) {
                     //console.log(`Checking type: ${typeName}`);
-                    if (this.classes[typeName]) {
-                        let cls = this.classes[typeName];
+                    if (this.classes.has(typeName)) {
+                        let cls = this.classes.get(typeName);
                         if (!cls.getIsPublic()) {
                             logger.warn(`class (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
                             cls.setIsPublic(true);
                             //Have to visit to we know what extra types to check for
                             cls.visit(context, this.config, logger);
                         } else {
-                            publicTypes[cls.getFullName()] = cls;
+                            publicTypes.set(cls.getFullName(), cls);
                         }
-                    } else if (this.typedefs[typeName]) {
-                        let tdf = this.typedefs[typeName];
+                    } else if (this.typedefs.has(typeName)) {
+                        let tdf = this.typedefs.get(typeName);
                         if (!tdf.getIsPublic()) {
                             logger.warn(`typedef (${typeName}) is referenced in one or more public APIs, but itself is not public. Making this public`);
                             tdf.setIsPublic(true);
                             //Have to visit so we know what extra types to check for
                             tdf.visit(context, this.config, logger);
                         } else {
-                            publicTypes[tdf.getFullName()] = tdf;
+                            publicTypes.set(tdf.getFullName(), tdf);
                         }
                     } else if (userTypes[typeName]) {
                         //If the user defines a type, it means they want said type on
                         //the public API surface already. Nothing to do here.
-                        publicTypes[userTypes[typeName]] = userTypes[typeName];
+                        publicTypes.set(userTypes[typeName], userTypes[typeName]);
                     } else {
                         //TODO: Generate "any" type alias
                         //TODO: But only if it is not a built-in type (eg. A DOM class)
@@ -466,14 +461,14 @@ module TsdPlugin {
             var i = 0;
             for (var name of moduleNameParts) {
                 //Doesn't exist at this level, make it
-                if (!tree.children[name]) {
-                    tree.children[name] = {
-                        isRoot: (i == 0),
-                        children: {},
-                        types: []
-                    }
+                if (!tree.children.has(name)) {
+                    tree.children.set(name, {
+                        isRoot:   (i == 0),
+                        children: new Map(),
+                        types:    []
+                    });
                 }
-                tree = tree.children[name];
+                tree = tree.children.get(name);
                 i++;
             }
             return tree;
@@ -492,7 +487,7 @@ module TsdPlugin {
                 //configured to be ignored, skip it.
                 let bIgnoreThisType = (type.getKind() == TSOutputtableKind.Method || type.getKind() == TSOutputtableKind.Property) &&
                     (
-                        (this.moduleDoclets[moduleNameClean] != null && TypeUtil.isPrivateDoclet(this.moduleDoclets[moduleNameClean], this.config)) ||
+                        (this.moduleDoclets.has(moduleNameClean) && TypeUtil.isPrivateDoclet(this.moduleDoclets.get(moduleNameClean), this.config)) ||
                         (this.config.ignoreModules.indexOf(moduleNameClean) >= 0)
                     );
                 if (bIgnoreThisType) {
@@ -505,14 +500,14 @@ module TsdPlugin {
                 
                 if (ModuleUtils.isAMD(moduleNameClean)) {
                     //No nesting required for AMD modules
-                    if (!root.children[moduleNameClean]) {
-                        root.children[moduleNameClean] = {
-                            isRoot: true,
-                            children: {},
-                            types: []
-                        }
+                    if (!root.children.has(moduleNameClean)) {
+                        root.children.set(moduleNameClean, {
+                            isRoot:   true,
+                            children: new Map(),
+                            types:    []
+                        });
                     }
-                    root.children[moduleNameClean].types.push(type);
+                    root.children.get(moduleNameClean).types.push(type);
                     return true;
                 } else {
                     //Explode this module name and see how many levels we need to go
@@ -528,18 +523,18 @@ module TsdPlugin {
          */
         private assembleModuleTree(): ITSModule {
             let root: ITSModule = {
-                isRoot: null,
-                children: {},
-                types: []
+                isRoot:   null,
+                children: new Map(),
+                types:    []
             };
             for (let typedef of this.userTypeAliases) {
                 let moduleName = typedef.getParentModule();
-                if (this.putDefinitionInTree(typedef, moduleName, root) === true)
+                if (this.putDefinitionInTree(typedef, moduleName, root))
                     this.stats.typedefs.user++;
             }
             for (let iface of this.userInterfaces) {
                 let moduleName = iface.getParentModule();
-                if (this.putDefinitionInTree(iface, moduleName, root) === true)
+                if (this.putDefinitionInTree(iface, moduleName, root))
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
@@ -550,31 +545,28 @@ module TsdPlugin {
                     continue;
                 root.types.push(oType);
             }
-            for (let modName in this.moduleMembers) {
-                let members = this.moduleMembers[modName];
+            this.moduleMembers.forEach((members, modName) => {
                 for (let member of members) {
-                    if (this.putDefinitionInTree(member, modName, root) === true)
+                    if (this.putDefinitionInTree(member, modName, root))
                         this.stats.moduleMembers++;
                 }
-            }
-            for (let typeName in this.classes) {
-                let cls = this.classes[typeName];
+            });
+            this.classes.forEach((cls, typeName) => {
                 if (!cls.getIsPublic())
-                    continue;
+                    return;
                 console.log(`Processing class: ${typeName}`);
                 let moduleName = cls.getParentModule();
-                if (this.putDefinitionInTree(cls, moduleName, root) === true)
+                if (this.putDefinitionInTree(cls, moduleName, root))
                     this.stats.classes++;
-            }
-            for (let typeName in this.typedefs) {
-                let tdf = this.typedefs[typeName];
+            });
+            this.typedefs.forEach((tdf, typeName) => {
                 if (!tdf.getIsPublic())
-                    continue;
+                    return;
                 console.log(`Processing typedef: ${typeName}`);
                 let moduleName = tdf.getParentModule();
-                if (this.putDefinitionInTree(tdf, moduleName, root) === true)
+                if (this.putDefinitionInTree(tdf, moduleName, root))
                     this.stats.typedefs.gen++;
-            }
+            });
             return root;
         }
         
