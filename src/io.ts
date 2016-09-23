@@ -31,10 +31,10 @@ module TsdPlugin {
         }
 
         private indentedText(): string {
-            var pattern = " ";
-            var count = this.indentLevel * 4;
+            let pattern = " ";
+            let count = this.indentLevel * 4;
             if (count < 1) return '';
-            var result = '';
+            let result = '';
             while (count > 1) {
                 if (count & 1) result += pattern;
                 count >>= 1, pattern += pattern;

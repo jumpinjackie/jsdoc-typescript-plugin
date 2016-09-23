@@ -1,8 +1,8 @@
-var fs = require("fs");
-var os = require("os");
-var env = require("jsdoc/env");
-var logger = require("jsdoc/util/logger");
-var tsConf = env.conf.typescript || {};
+let fs = require("fs");
+let os = require("os");
+let env = require("jsdoc/env");
+let logger = require("jsdoc/util/logger");
+let tsConf = env.conf.typescript || {};
 
 exports.handlers = {
     newDoclet(e: jsdoc.IJsDocNewDocletEvent): void {
@@ -11,8 +11,8 @@ exports.handlers = {
         }
     },
     processingComplete(e: jsdoc.IJsDocProcessingCompleteEvent): void {
-        var proc = new TsdPlugin.TsdGenerator(tsConf);
-        var sf = {
+        let proc = new TsdPlugin.TsdGenerator(tsConf);
+        let sf = {
             createStream: (fileName) => fs.createWriteStream(fileName),
             readText: (fileName) => fs.readFileSync(fileName, "utf8"),
             endl: os.EOL

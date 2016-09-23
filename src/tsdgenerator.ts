@@ -97,7 +97,7 @@ module TsdPlugin {
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
             if (!this.classes.has(name)) {
                 if (factory != null) {
-                    var cls = factory();
+                    let cls = factory();
                     this.classes.set(name, cls);
                     return cls;
                 } else {
@@ -111,7 +111,7 @@ module TsdPlugin {
         private ensureTypedef(name: string, factory?: () => TSTypedef): TSTypedef {
             if (!this.typedefs.has(name)) {
                 if (factory != null) {
-                    var tdf = factory();
+                    let tdf = factory();
                     this.typedefs.set(name, tdf);
                     return tdf;
                 } else {
@@ -137,7 +137,7 @@ module TsdPlugin {
         }
         
         private parseClassesAndTypedefs(doclets: jsdoc.IDoclet[]): void {
-            for (var doclet of doclets) {
+            for (let doclet of doclets) {
                 //On ignore list
                 if (this.shouldIgnoreType(doclet.longname))
                     continue;
@@ -219,7 +219,7 @@ module TsdPlugin {
         }
 
         private parseModules(doclets: jsdoc.IDoclet[]): void {
-            for (var doclet of doclets) {
+            for (let doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
@@ -247,7 +247,7 @@ module TsdPlugin {
         }
 
         private processTypeMembers(doclets: jsdoc.IDoclet[]): void {
-            for (var doclet of doclets) {
+            for (let doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
@@ -258,13 +258,13 @@ module TsdPlugin {
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
-                var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
+                let isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
                 //point to it
-                var cls: TSComposable = this.ensureClassDef(doclet.memberof);
-                var isTypedef = false;
-                var isClass = true;
+                let cls: TSComposable = this.ensureClassDef(doclet.memberof);
+                let isTypedef = false;
+                let isClass = true;
                 if (!cls) {
                     isClass = false;
                     //Failing that it would've been registered as a typedef
@@ -310,11 +310,11 @@ module TsdPlugin {
                 }
                 
                 if (doclet.kind == DocletKind.Function) {
-                    var method = new TSMethod(doclet);
+                    let method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
                     cls.addMember(method);
                 } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                    var prop = new TSProperty(doclet, isTypedef);
+                    let prop = new TSProperty(doclet, isTypedef);
                     prop.setIsPublic(isPublic);
                     cls.addMember(prop);
                 }
@@ -324,14 +324,14 @@ module TsdPlugin {
         private processUserDefinedTypes(): void {
             //Output user-injected type aliases
             //global
-            for (var typeAlias in this.config.aliases.global) {
+            for (let typeAlias in this.config.aliases.global) {
                 let typeName = this.config.aliases.global[typeAlias];
                 this.userTypeAliases.push(
                     new TSUserTypeAlias(null, typeAlias, typeName));
             }
             //module
-            for (var moduleName in this.config.aliases.module) {
-                for (var typeAlias in this.config.aliases.module[moduleName]) {
+            for (let moduleName in this.config.aliases.module) {
+                for (let typeAlias in this.config.aliases.module[moduleName]) {
                     let typeName = this.config.aliases.module[moduleName][typeAlias];
                     this.userTypeAliases.push(
                         new TSUserTypeAlias(moduleName, typeAlias, typeName));
@@ -339,15 +339,15 @@ module TsdPlugin {
             }
             //Output user-injected interfaces
             //global
-            for (var typeName in this.config.interfaces.global) {
-                var iface = this.config.interfaces.global[typeName];
+            for (let typeName in this.config.interfaces.global) {
+                let iface = this.config.interfaces.global[typeName];
                 this.userInterfaces.push(
                     new TSUserInterface(null, typeName, iface));
             }
             //module
-            for (var moduleName in this.config.interfaces.module) {
-                for (var typeName in this.config.interfaces.module[moduleName]) {
-                    var iface = this.config.interfaces.module[moduleName][typeName];
+            for (let moduleName in this.config.interfaces.module) {
+                for (let typeName in this.config.interfaces.module[moduleName]) {
+                    let iface = this.config.interfaces.module[moduleName][typeName];
                     this.userInterfaces.push(
                         new TSUserInterface(moduleName, typeName, iface));
                 }
@@ -355,8 +355,8 @@ module TsdPlugin {
         }
 
         private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Map<string, IOutputtable> {
-            var publicTypes = new Map<string, IOutputtable>();
-            var context = new TypeVisibilityContext(this);
+            let publicTypes = new Map<string, IOutputtable>();
+            let context = new TypeVisibilityContext(this);
             
             //First, visit all known public types and collect referenced types
             for (let typedef of this.userTypeAliases) {
@@ -379,7 +379,7 @@ module TsdPlugin {
                     tdf.visit(context, this.config, logger);
             });
             
-            var userTypes = {};
+            let userTypes = {};
             for (let typedef of this.userTypeAliases) {
                 userTypes[typedef.getQualifiedName()] = typedef;
             }
@@ -398,7 +398,7 @@ module TsdPlugin {
             //We repeat this process until the context is empty
             //
             //But before we start, auto-hoist any type in the "makePublic" list 
-            for (var typeName of this.config.makePublic) {
+            for (let typeName of this.config.makePublic) {
                 console.log(`Checking if (${typeName}) needs to be hoisted`);
                 if (this.classes.has(typeName)) {
                     let cls = this.classes.get(typeName);
@@ -421,11 +421,11 @@ module TsdPlugin {
                 }
             }
 
-            var pass = 1;
+            let pass = 1;
             while (!context.isEmpty()) {
                 //NOTE: This is an array copy. Any new types added in this
                 //pass should not affect the iterated array
-                var allTypes = context.getTypes();
+                let allTypes = context.getTypes();
                 //console.log(`Pass ${pass}: ${allTypes.length} types remaining to check`);
                 for (let typeName of allTypes) {
                     //console.log(`Checking type: ${typeName}`);
@@ -468,9 +468,9 @@ module TsdPlugin {
         }
 
         private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
-            var tree: ITSModule = root;
-            var i = 0;
-            for (var name of moduleNameParts) {
+            let tree: ITSModule = root;
+            let i = 0;
+            for (let name of moduleNameParts) {
                 //Doesn't exist at this level, make it
                 if (!tree.children.has(name)) {
                     tree.children.set(name, {
@@ -522,8 +522,8 @@ module TsdPlugin {
                     return true;
                 } else {
                     //Explode this module name and see how many levels we need to go
-                    var moduleNameParts = moduleNameClean.split(".");
-                    var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
+                    let moduleNameParts = moduleNameClean.split(".");
+                    let tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
                     tree.types.push(type);
                     return true;
                 }
@@ -583,10 +583,10 @@ module TsdPlugin {
         }
 
         public dumpDoclets(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory) {
-            var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
+            let fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
+            let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
-            for (var doc of doclets) {
+            for (let doc of doclets) {
                 output.writeln(DumpDoclet(doc));
             }
             
@@ -596,8 +596,8 @@ module TsdPlugin {
         }
 
         public process(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
-            var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
+            let fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
+            let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
@@ -608,16 +608,16 @@ module TsdPlugin {
             //Process user-defined types
             this.processUserDefinedTypes();
             //Raise any non-public types referenced from public types to public
-            var publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
+            let publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
             
             //Write custom header if specified
             if (this.config.headerFile != null) {
-                var header = streamFactory.readText(this.config.headerFile);
+                let header = streamFactory.readText(this.config.headerFile);
                 output.writeln(header);
             }
             
             //Write the main d.ts body
-            var tree = this.assembleModuleTree();
+            let tree = this.assembleModuleTree();
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.indent();
             }
@@ -628,7 +628,7 @@ module TsdPlugin {
             
             //Write custom footer if specified
             if (this.config.headerFile != null) {
-                var footer = streamFactory.readText(this.config.footerFile);
+                let footer = streamFactory.readText(this.config.footerFile);
                 output.writeln(footer);
             }
 

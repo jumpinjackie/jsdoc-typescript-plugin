@@ -15,7 +15,7 @@ module TsdPlugin {
         }
 
         static cleanArg(str: string): string {
-            var clean = str;
+            let clean = str;
             
             if (clean.indexOf("function") < 0)
                 clean = clean.replace("(", "").replace(")", "");
@@ -51,9 +51,9 @@ module TsdPlugin {
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
                     let argNo = 0;
-                    for (var arg of args) {
+                    for (let arg of args) {
                         let typeNames = arg.split("|").map(a => FunctionTypedefRewriter.cleanArg(a).trim());
-                        var param: any = {
+                        let param: any = {
                             type: {
                                 names: typeNames
                             },
@@ -69,7 +69,7 @@ module TsdPlugin {
                                 param.optional = true;
                             }
                         } else {
-                            var anyOptional = typeNames.filter(tn => tn.indexOf("?") >= 0 || tn.indexOf("=") == tn.length - 1);
+                            let anyOptional = typeNames.filter(tn => tn.indexOf("?") >= 0 || tn.indexOf("=") == tn.length - 1);
                             if (anyOptional.length > 0) {
                                 //Clean the type names
                                 param.type.names = typeNames.map(tn => {
@@ -113,9 +113,9 @@ module TsdPlugin {
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
                     let argNo = 0;
-                    for (var arg of args) {
+                    for (let arg of args) {
                         let typeNames = arg.split("|").map(a => FunctionTypedefRewriter.cleanArg(a).trim());
-                        var param: any = {
+                        let param: any = {
                             type: {
                                 names: typeNames
                             },

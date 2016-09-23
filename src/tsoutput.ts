@@ -185,7 +185,7 @@ module TsdPlugin {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
             if (conf != null && conf.publicAnnotation) {
-                var found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
+                let found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
                 if (found.length == 1) //tag found
                     return false;
                 
@@ -222,16 +222,16 @@ module TsdPlugin {
                 //notation
                 
                 //Anonymous function with return type
-                var rgxm = tn.match(/function\((.+)\):\s+(.+)/);
+                let rgxm = tn.match(/function\((.+)\):\s+(.+)/);
                 if (rgxm) {
                     //console.log("is anon function with return type");
-                    var typeArgs = rgxm[1].split(",")
+                    let typeArgs = rgxm[1].split(",")
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
-                    var funcParams = [];
-                    for (var i = 0; i < typeArgs.length; i++) {
-                        var typeArg = typeArgs[i];
+                    let funcParams = [];
+                    for (let i = 0; i < typeArgs.length; i++) {
+                        let typeArg = typeArgs[i];
                         //Check if it's of the form: "param:value"
-                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        let rgxp = typeArg.match(/(.+)\:(.+)/);
                         if (rgxp && rgxp.length == 3) {
                             //TODO: We can keep the param if we can be sure if it is not a reserved keyword
                             funcParams.push("arg" + i + ": " + rgxp[2]);
@@ -245,13 +245,13 @@ module TsdPlugin {
                 rgxm = tn.match(/function\((.+)\)/);
                 if (rgxm) {
                     //console.log("is anon function with no return type");
-                    var typeArgs = rgxm[1].split(",")
+                    let typeArgs = rgxm[1].split(",")
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
-                    var funcParams = [];
-                    for (var i = 0; i < typeArgs.length; i++) {
-                        var typeArg = typeArgs[i];
+                    let funcParams = [];
+                    for (let i = 0; i < typeArgs.length; i++) {
+                        let typeArg = typeArgs[i];
                         //Check if it's of the form: "param:value"
-                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        let rgxp = typeArg.match(/(.+)\:(.+)/);
                         if (rgxp && rgxp.length == 3) {
                             //TODO: We can keep the param if we can be sure if it is not a reserved keyword
                             funcParams.push("arg" + i + ": " + rgxp[2]);
@@ -279,7 +279,7 @@ module TsdPlugin {
                 rgxm = tn.match(/(^Object\.)\<(.+)\,(.+)\>/);
                 if (rgxm) {
                     //console.log("is kvp");
-                    var keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
+                    let keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
                     
                     //Need to ensure this is string or number. In the event we find a string enum
                     //class, we must replace it with string
@@ -352,7 +352,7 @@ module TsdPlugin {
                 if (parsedReturnTypes[i] == "Function") {
                     //console.log(`Parsing function return type for ${doclet.longname} from @return in comments`);
                     //Try to parse return type from comment
-                    var matches = (doclet.comment || "").match(/@return \{(.*)\}/);
+                    let matches = (doclet.comment || "").match(/@return \{(.*)\}/);
                     if (matches && matches.length == 2) {
                         //console.log(`    attempting replacement of ${matches[1]}`);
                         parsedReturnTypes[i] = TypeUtil.getTypeReplacement(matches[1], conf, logger, context);
@@ -367,10 +367,10 @@ module TsdPlugin {
         }
         
         public static parseAndConvertTypes(typeAnno: jsdoc.IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
-            var utypes = [];
+            let utypes = [];
             if (typeAnno.names.length > 0) {
-                for (var anno of typeAnno.names) {
-                    var typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
+                for (let anno of typeAnno.names) {
+                    let typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
                     //This is an optionality hint for TypeScript but in terms of signature, it should not be emitted
                     if (typeName == "undefined" || typeName == "null")
                         continue;
@@ -381,14 +381,14 @@ module TsdPlugin {
         }
         
         public static extractGenericTypesFromDocletTags(tags: jsdoc.IDocletTag[]): string[] {
-            var genericTypes = [];
+            let genericTypes = [];
             //@template is non-standard, but the presence of this annotation conveys
             //generic type information that we should capture
-            var genericTypeTags = (tags || []).filter(tag => tag.originalTitle == "template");
+            let genericTypeTags = (tags || []).filter(tag => tag.originalTitle == "template");
             if (genericTypeTags.length > 0) {
-                for (var genericTypeTag of genericTypeTags) {
-                    var gts = genericTypeTag.value.split(",");
-                    for (var gt of gts) {
+                for (let genericTypeTag of genericTypeTags) {
+                    let gts = genericTypeTag.value.split(",");
+                    for (let gt of gts) {
                         //No TS type replacement here as the value is the generic type placeholder
                         genericTypes.push(gt.trim());
                     }
@@ -477,10 +477,10 @@ module TsdPlugin {
         ): void {
             //Description as comments
             stream.writeln("/**");
-            var desc = this.getDescription();
+            let desc = this.getDescription();
             if (desc != null) {
-                var descParts = desc.split("\n");
-                for (var i = 0; i < descParts.length; i++) {
+                let descParts = desc.split("\n");
+                for (let i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
             } else if (conf.fillUndocumentedDoclets) {
@@ -541,16 +541,16 @@ module TsdPlugin {
             if (this.allowOptional) {
                 //If the argument is a typedef, it will (and should) be the only argument type
                 if (this.doclet.type.names.length == 1) {
-                    var outputtable = publicTypes.get(this.doclet.type.names[0]);
+                    let outputtable = publicTypes.get(this.doclet.type.names[0]);
                     if (outputtable != null) {
-                        var kind = outputtable.getKind();
+                        let kind = outputtable.getKind();
                         if (TSOutputtableKind.Typedef == kind) {
-                            var tdf = <TSTypedef>outputtable;
+                            let tdf = <TSTypedef>outputtable;
                             if (tdf.isOptional())
                                 return true;
                         }
                         if (TSOutputtableKind.UserTypeAlias == kind) {
-                            var utdf = <TSUserTypeAlias>outputtable;
+                            let utdf = <TSUserTypeAlias>outputtable;
                             if (utdf.isOptional())
                                 return true;
                         }
@@ -585,7 +585,7 @@ module TsdPlugin {
                 stream.writeln(memberOv.declaration);
             } else {
                 this.writeDescription("property", stream, conf, logger, publicTypes);
-                var propDecl = "";
+                let propDecl = "";
                 if (this.isModule) {
                     propDecl += "var ";
                 }
@@ -654,24 +654,24 @@ module TsdPlugin {
             //If the argument is a typedef, it will (and should) be the only argument type
             if (arg.type != null && arg.type.names.length > 0) {
                 if (arg.type.names.length == 1) {
-                    var outputtable = publicTypes.get(arg.type.names[0]);
+                    let outputtable = publicTypes.get(arg.type.names[0]);
                     if (outputtable != null) {
-                        var kind = outputtable.getKind();
+                        let kind = outputtable.getKind();
                         if (TSOutputtableKind.Typedef == kind) {
-                            var tdf = <TSTypedef>outputtable;
+                            let tdf = <TSTypedef>outputtable;
                             if (tdf.isOptional())
                                 return true;
                         }
                         if (TSOutputtableKind.UserTypeAlias == kind) {
-                            var utdf = <TSUserTypeAlias>outputtable;
+                            let utdf = <TSUserTypeAlias>outputtable;
                             if (utdf.isOptional())
                                 return true;
                         }
                     }
                 } else {
                     //Any type ending with '=' or starting with '?' denotes optionality to the whole
-                    var matches1 = arg.type.names.filter(t => t.indexOf("=") == t.length - 1);
-                    var matches2 = arg.type.names.filter(t => t.indexOf("?") == 0);
+                    let matches1 = arg.type.names.filter(t => t.indexOf("=") == t.length - 1);
+                    let matches2 = arg.type.names.filter(t => t.indexOf("?") == 0);
                     if (matches1.length > 0 || matches2.length > 0) {
                         return true;
                     }
@@ -693,9 +693,9 @@ module TsdPlugin {
             //annotation is not necessary in the documentation
             let params = this.studyParameters(null, conf, logger);
             if (params.length > 0 && !this.isTypedef) {
-                var forceNullable = false;
-                for (var arg of params) {
-                    var req = "";
+                let forceNullable = false;
+                for (let arg of params) {
+                    let req = "";
                     if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
                         // everything after the nullable argument has to be nullable as well
@@ -704,7 +704,7 @@ module TsdPlugin {
                     } else {
                         req = " (Required)";
                     }
-                    var argDesc = arg.description || "";
+                    let argDesc = arg.description || "";
                     if (argDesc == "" && conf.fillUndocumentedDoclets) {
                         //logger.warn(`Argument (${arg.name}) of ${kind} (${this.doclet.longname}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                         argDesc = "TODO: This parameter has no description. Contact this library author if this parameter should be documented\n";
@@ -782,7 +782,7 @@ module TsdPlugin {
             //we'll loop the original doclet params and pick up the keyed parameter along the way 
             for (let arg of methodParams) {
                 if (arg.type != null) {
-                    var p = paramMap.get(arg.name);
+                    let p = paramMap.get(arg.name);
                     if (p != null) {
                         params.push(p.param);
                         if (p.members.length > 0 && context != null) {
@@ -791,7 +791,7 @@ module TsdPlugin {
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
-                            for (var member of p.members) {
+                            for (let member of p.members) {
                                 //This should be a dotted member. Split it
                                 let parts = member.name.split(".");
                                 let propName = parts[parts.length - 1];
@@ -800,7 +800,7 @@ module TsdPlugin {
                                 memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: ${retType.join("|")}`);
                             }
                             
-                            var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                            let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                             context.registerTypedef(typeName, iface);
                             console.log(`Registered ad-hoc interface type: ${typeName}`);
                             
@@ -839,9 +839,9 @@ module TsdPlugin {
             this.studyParameters(context, conf, logger);
             if (this.outputReturnType()) {
                 if (this.doclet.returns != null) {
-                    for (var retDoc of this.doclet.returns) {
+                    for (let retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            var parsedTypes = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                            let parsedTypes = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
                             TypeUtil.replaceFunctionTypes(parsedTypes, this.doclet, conf, logger, context);
                         }
                     }
@@ -1077,11 +1077,11 @@ module TsdPlugin {
             logger: ILogger
         ): void {
             //Description as comments
-            var desc = this.getDescription();
+            let desc = this.getDescription();
             if (desc != null) {
                 stream.writeln("/**");
-                var descParts = desc.split("\n");
-                for (var i = 0; i < descParts.length; i++) {
+                let descParts = desc.split("\n");
+                for (let i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
                 stream.writeln(" */");
@@ -1130,8 +1130,8 @@ module TsdPlugin {
         }
 
         public findMember(name: string, kind: string): TSMember {
-            var matches = this.members.filter(m => {
-                var doclet = m.getDoclet();
+            let matches = this.members.filter(m => {
+                let doclet = m.getDoclet();
                 return doclet.name == name && doclet.kind == kind;
             });
             if (matches.length == 1)
@@ -1257,7 +1257,7 @@ module TsdPlugin {
                                         memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: ${retType.join("|")}`);
                                     }
                                     
-                                    var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                                    let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                                     context.registerTypedef(typeName, iface);
                                     console.log(`Registered ad-hoc interface type: ${typeName}`);
                                     
@@ -1285,14 +1285,14 @@ module TsdPlugin {
          * Finds a matching member from any of the current member's types inheritance hierarchy that doesn't inherit documentation
          */
         public getInheritedMember(memberDoclet: jsdoc.IDoclet, parents: string[], publicTypes: Map<string, IOutputtable>): TSMemberResult {
-            for (var parentTypeName of parents) {
-                var type = publicTypes.get(parentTypeName);
+            for (let parentTypeName of parents) {
+                let type = publicTypes.get(parentTypeName);
                 //Parent type is a known TSComposable
                 if (type != null && (type.getKind() == TSOutputtableKind.Class || type.getKind() == TSOutputtableKind.Typedef)) {
-                    var comp = <TSComposable>type;
+                    let comp = <TSComposable>type;
                     //console.log(`Checking if ${comp.getFullName()} has member ${memberDoclet.name} (${memberDoclet.kind})`);
-                    var member = comp.findMember(memberDoclet.name, memberDoclet.kind);
-                    var parentTypeNames = comp.getParentTypeNames() || [];
+                    let member = comp.findMember(memberDoclet.name, memberDoclet.kind);
+                    let parentTypeNames = comp.getParentTypeNames() || [];
                     //Found a member
                     if (member != null) {
                         //console.log(`   found member`);
@@ -1335,7 +1335,7 @@ module TsdPlugin {
             if (this.enumType != TSEnumType.Invalid &&
                 this.doclet.isEnum === true &&
                 (this.doclet.properties || []).length > 0) {
-                for (var prop of this.doclet.properties) {
+                for (let prop of this.doclet.properties) {
                     if (!TypeUtil.isPrivateDoclet(prop))
                         this.addMember(new TSProperty(prop, false));
                 }
@@ -1380,7 +1380,7 @@ module TsdPlugin {
         }
 
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.doclet.name;
             else
@@ -1520,7 +1520,7 @@ module TsdPlugin {
         }
         
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.doclet.name;
             else
@@ -1541,7 +1541,7 @@ module TsdPlugin {
             if (this.ctor != null)
                 this.ctor.visit(context, conf, logger);
             let members = this.studyMembers(context, conf, logger);
-            for (var member of members) {
+            for (let member of members) {
                 if (member.getIsPublic() || member.inheritsDoc())
                     member.visit(context, conf, logger);
             }
@@ -1561,13 +1561,13 @@ module TsdPlugin {
             
             this.writeDescription(DocletKind.Class, stream, conf, logger);
             
-            var clsDecl = "";
+            let clsDecl = "";
             //If un-parented, the emitted class will be global and must be declared as a result
             if (this.getParentModule() == null && conf.declareTopLevelElements) {
                 clsDecl = "declare ";
             }
             clsDecl += "class " + this.doclet.name;
-            var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
+            let genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
             //Class generic parameters
             if (genericTypes.length > 0) {
                 //As these are generic placeholders, they don't go through the
@@ -1576,7 +1576,7 @@ module TsdPlugin {
             }
             //Inheritance
             if (this.doclet.augments != null) {
-                var parents = this.doclet
+                let parents = this.doclet
                                   .augments
                                   .map(p => TypeUtil.getTypeReplacement(p, conf, logger, null))
                                   .join(",");
@@ -1589,11 +1589,11 @@ module TsdPlugin {
                 this.ctor.output(stream, conf, logger, publicTypes);
             }
             let members = this.studyMembers(null, conf, logger);
-            for (var member of members) {
+            for (let member of members) {
                 //NOTE: inheritsDoc() is tested first before public visibility as it may inherit off of something that
                 //has public visibility
                 if (member.inheritsDoc()) {
-                    var inheritedQuery = this.getInheritedMember(member.getDoclet(), this.doclet.augments, publicTypes);
+                    let inheritedQuery = this.getInheritedMember(member.getDoclet(), this.doclet.augments, publicTypes);
                     if (inheritedQuery != null) {
                         //As long as this member or the inherited member is public, it needs to be output
                         if (member.getIsPublic() || inheritedQuery.isPublic) {
@@ -1660,10 +1660,10 @@ module TsdPlugin {
         ): void {
             stream.writeln(`interface ${this.name} {`);
             stream.indent();
-            for (var member of this.adhocMembers) {
-                var lines = member.split("\n");
+            for (let member of this.adhocMembers) {
+                let lines = member.split("\n");
                 lines[lines.length - 1] += ";";
-                for (var line of lines) {
+                for (let line of lines) {
                     stream.writeln(line);
                 }
             }
@@ -1672,7 +1672,7 @@ module TsdPlugin {
         }
 
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.name;
             else
@@ -1707,7 +1707,7 @@ module TsdPlugin {
         }
 
         public isOptional(): boolean {
-            var types = this.type.split("|").map(t => t.trim());
+            let types = this.type.split("|").map(t => t.trim());
             return types.indexOf("undefined") >= 0;
         }
 
@@ -1735,7 +1735,7 @@ module TsdPlugin {
         }
 
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.typeAlias;
             else
