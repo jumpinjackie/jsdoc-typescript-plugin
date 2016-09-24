@@ -4,7 +4,8 @@ module TsdPlugin {
      * A helper class to rewrite @typedef based function annotations into the @callback form
      */
     export class FunctionTypedefRewriter {
-        private static isFunctionTypedef(doclet: IDoclet): boolean {
+
+        private static isFunctionTypedef(doclet: jsdoc.IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef &&
                    doclet.type != null &&
                    doclet.type.names != null &&
@@ -12,8 +13,9 @@ module TsdPlugin {
                    doclet.type.names.indexOf("function") >= 0 &&
                    doclet.comment.indexOf("@callback") < 0;
         }
+
         static cleanArg(str: string): string {
-            var clean = str;
+            let clean = str;
             
             if (clean.indexOf("function") < 0)
                 clean = clean.replace("(", "").replace(")", "");
@@ -23,10 +25,12 @@ module TsdPlugin {
             
             return clean;
         }
+
         static isContextualParameter(str: string): boolean {
             return str.indexOf(":") >= 0;
         }
-        public static rewrite(doclet: IDoclet): void {
+
+        public static rewrite(doclet: jsdoc.IDoclet): void {
             if (FunctionTypedefRewriter.isFunctionTypedef(doclet)) {
                 // The meat that makes this possible is the @typedef annotation in the comments
                 // Use regex to test for common patterns
@@ -47,9 +51,9 @@ module TsdPlugin {
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
                     let argNo = 0;
-                    for (var arg of args) {
+                    for (let arg of args) {
                         let typeNames = arg.split("|").map(a => FunctionTypedefRewriter.cleanArg(a).trim());
-                        var param: any = {
+                        let param: any = {
                             type: {
                                 names: typeNames
                             },
@@ -65,7 +69,7 @@ module TsdPlugin {
                                 param.optional = true;
                             }
                         } else {
-                            var anyOptional = typeNames.filter(tn => tn.indexOf("?") >= 0 || tn.indexOf("=") == tn.length - 1);
+                            let anyOptional = typeNames.filter(tn => tn.indexOf("?") >= 0 || tn.indexOf("=") == tn.length - 1);
                             if (anyOptional.length > 0) {
                                 //Clean the type names
                                 param.type.names = typeNames.map(tn => {
@@ -109,9 +113,9 @@ module TsdPlugin {
                     //NOTE: As the typedef does not carry parameter name information, we have to fall back
                     //to the not very useful argN parameter name format. Also there will be no parameter information
                     let argNo = 0;
-                    for (var arg of args) {
+                    for (let arg of args) {
                         let typeNames = arg.split("|").map(a => FunctionTypedefRewriter.cleanArg(a).trim());
-                        var param: any = {
+                        let param: any = {
                             type: {
                                 names: typeNames
                             },

@@ -29,7 +29,7 @@ module TsdPlugin {
         return value; 
     }
     
-    export function DumpDoclet(doclet: IDoclet) {
+    export function DumpDoclet(doclet: jsdoc.IDoclet) {
         return JSON.stringify(doclet, JsDocletStringifyFilter, 4);
         //return JSON.stringify(doclet, null, 4);
     }
@@ -37,7 +37,7 @@ module TsdPlugin {
     /**
      * Allows for additional typedefs to be registered during the pre-processing phase
      */
-    export interface IAdhocTypeRegistration {
+    export interface ITypeRegistrar {
         registerTypedef(name: string, item: IOutputtable): boolean;
     }
     
@@ -56,7 +56,7 @@ module TsdPlugin {
             "Boolean"
         ]);
 
-        constructor(private reg: IAdhocTypeRegistration) {}
+        constructor(private reg: ITypeRegistrar) {}
         public registerTypedef(name: string, typedef: IOutputtable): string {
             let registeredName = name;
             if (this.reg != null) {
@@ -73,13 +73,13 @@ module TsdPlugin {
         public hasType(typeName: string): boolean {
             return this.types.has(typeName);
         }
-        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {
+        public addType(typeName: string, conf: IPluginConfig, logger: ILogger) {
             this.addTypes([ typeName ], conf, logger);
         }
         private shouldIgnoreType(typeName: string): boolean {
             return this.ignore.has(typeName);
         }
-        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {
+        public addTypes(typeNames: string[], conf: IPluginConfig, logger: ILogger) {
             for (let type of typeNames) {
                 if (!this.shouldIgnoreType(type)) {
                     this.types.add(type);
@@ -96,15 +96,15 @@ module TsdPlugin {
     
     class ReadOnlyTypeVisibilityContext extends TypeVisibilityContext {
         private publicTypes: Map<string, IOutputtable>;
-        constructor(reg: IAdhocTypeRegistration, publicTypes: Map<string, IOutputtable>) {
+        constructor(reg: ITypeRegistrar, publicTypes: Map<string, IOutputtable>) {
             super(reg);
             this.publicTypes = publicTypes;
         }
-        public fixEnumTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration): void {
+        public fixEnumTypes(typeNames: string[], conf: IPluginConfig): void {
             TypeUtil.fixEnumTypes(typeNames, this.publicTypes, conf);
         }
-        public addTypes(typeNames: string[], conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
-        public addType(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger) {}
+        public addTypes(typeNames: string[], conf: IPluginConfig, logger: ILogger) {}
+        public addType(typeName: string, conf: IPluginConfig, logger: ILogger) {}
     }
     
     export class TypeUtil {
@@ -132,7 +132,7 @@ module TsdPlugin {
             return false;
         }
         
-        public static isEnumDoclet(doclet: IDoclet): boolean {
+        public static isEnumDoclet(doclet: jsdoc.IDoclet): boolean {
             return (doclet.kind == DocletKind.Member &&
                    doclet.isEnum === true &&
                    (doclet.properties || []).length > 0) || (doclet.comment || "").indexOf("@enum") >= 0;
@@ -143,7 +143,7 @@ module TsdPlugin {
          */
         public static fixEnumTypeReferences(
           typeNames: string[],
-          conf:      ITypeScriptPluginConfiguration
+          conf:      IPluginConfig
         ): string[] {
             return typeNames.map(rt => {
                 if (conf.processAsEnums.classes[rt]) {
@@ -157,7 +157,7 @@ module TsdPlugin {
           typeNames:   string[],
           publicTypes: Map<string,
           IOutputtable>,
-          conf:        ITypeScriptPluginConfiguration
+          conf:        IPluginConfig
         ): void {
             //If we encounter any string enum typedefs, replace type with 'string'
             for (let i = 0; i < typeNames.length; i++) {
@@ -181,11 +181,11 @@ module TsdPlugin {
             }
         }
         
-        public static isPrivateDoclet(doclet: IDoclet, conf: ITypeScriptPluginConfiguration = null): boolean {
+        public static isPrivateDoclet(doclet: jsdoc.IDoclet, conf: IPluginConfig = null): boolean {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
             if (conf != null && conf.publicAnnotation) {
-                var found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
+                let found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
                 if (found.length == 1) //tag found
                     return false;
                 
@@ -205,7 +205,7 @@ module TsdPlugin {
             return part.trim();
         }
         
-        public static getTypeReplacement(typeName: string, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string {
+        public static getTypeReplacement(typeName: string, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string {
             let tn = typeName;
             //Strip off nullability qualifier if it exists
             if (tn.charAt(0) == "!")
@@ -222,16 +222,16 @@ module TsdPlugin {
                 //notation
                 
                 //Anonymous function with return type
-                var rgxm = tn.match(/function\((.+)\):\s+(.+)/);
+                let rgxm = tn.match(/function\((.+)\):\s+(.+)/);
                 if (rgxm) {
                     //console.log("is anon function with return type");
-                    var typeArgs = rgxm[1].split(",")
+                    let typeArgs = rgxm[1].split(",")
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
-                    var funcParams = [];
-                    for (var i = 0; i < typeArgs.length; i++) {
-                        var typeArg = typeArgs[i];
+                    let funcParams = [];
+                    for (let i = 0; i < typeArgs.length; i++) {
+                        let typeArg = typeArgs[i];
                         //Check if it's of the form: "param:value"
-                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        let rgxp = typeArg.match(/(.+)\:(.+)/);
                         if (rgxp && rgxp.length == 3) {
                             //TODO: We can keep the param if we can be sure if it is not a reserved keyword
                             funcParams.push("arg" + i + ": " + rgxp[2]);
@@ -245,13 +245,13 @@ module TsdPlugin {
                 rgxm = tn.match(/function\((.+)\)/);
                 if (rgxm) {
                     //console.log("is anon function with no return type");
-                    var typeArgs = rgxm[1].split(",")
+                    let typeArgs = rgxm[1].split(",")
                                           .map(tn => TypeUtil.getTypeReplacement(tn.trim(), conf, logger, context));
-                    var funcParams = [];
-                    for (var i = 0; i < typeArgs.length; i++) {
-                        var typeArg = typeArgs[i];
+                    let funcParams = [];
+                    for (let i = 0; i < typeArgs.length; i++) {
+                        let typeArg = typeArgs[i];
                         //Check if it's of the form: "param:value"
-                        var rgxp = typeArg.match(/(.+)\:(.+)/);
+                        let rgxp = typeArg.match(/(.+)\:(.+)/);
                         if (rgxp && rgxp.length == 3) {
                             //TODO: We can keep the param if we can be sure if it is not a reserved keyword
                             funcParams.push("arg" + i + ": " + rgxp[2]);
@@ -279,7 +279,7 @@ module TsdPlugin {
                 rgxm = tn.match(/(^Object\.)\<(.+)\,(.+)\>/);
                 if (rgxm) {
                     //console.log("is kvp");
-                    var keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
+                    let keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
                     
                     //Need to ensure this is string or number. In the event we find a string enum
                     //class, we must replace it with string
@@ -347,12 +347,12 @@ module TsdPlugin {
             }
         }
         
-        public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: IDoclet, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): void {
+        public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: jsdoc.IDoclet, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): void {
             for (let i = 0; i < parsedReturnTypes.length; i++) {
                 if (parsedReturnTypes[i] == "Function") {
                     //console.log(`Parsing function return type for ${doclet.longname} from @return in comments`);
                     //Try to parse return type from comment
-                    var matches = (doclet.comment || "").match(/@return \{(.*)\}/);
+                    let matches = (doclet.comment || "").match(/@return \{(.*)\}/);
                     if (matches && matches.length == 2) {
                         //console.log(`    attempting replacement of ${matches[1]}`);
                         parsedReturnTypes[i] = TypeUtil.getTypeReplacement(matches[1], conf, logger, context);
@@ -366,11 +366,11 @@ module TsdPlugin {
             }
         }
         
-        public static parseAndConvertTypes(typeAnno: IDocletType, conf: ITypeScriptPluginConfiguration, logger: ILogger, context?: TypeVisibilityContext): string[] {
-            var utypes = [];
+        public static parseAndConvertTypes(typeAnno: jsdoc.IType, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string[] {
+            let utypes = [];
             if (typeAnno.names.length > 0) {
-                for (var anno of typeAnno.names) {
-                    var typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
+                for (let anno of typeAnno.names) {
+                    let typeName = TypeUtil.getTypeReplacement(anno, conf, logger, context);
                     //This is an optionality hint for TypeScript but in terms of signature, it should not be emitted
                     if (typeName == "undefined" || typeName == "null")
                         continue;
@@ -380,15 +380,15 @@ module TsdPlugin {
             return utypes;
         }
         
-        public static extractGenericTypesFromDocletTags(tags: IDocletTag[]): string[] {
-            var genericTypes = [];
+        public static extractGenericTypesFromDocletTags(tags: jsdoc.ITag[]): string[] {
+            let genericTypes = [];
             //@template is non-standard, but the presence of this annotation conveys
             //generic type information that we should capture
-            var genericTypeTags = (tags || []).filter(tag => tag.originalTitle == "template");
+            let genericTypeTags = (tags || []).filter(tag => tag.originalTitle == "template");
             if (genericTypeTags.length > 0) {
-                for (var genericTypeTag of genericTypeTags) {
-                    var gts = genericTypeTag.value.split(",");
-                    for (var gt of gts) {
+                for (let genericTypeTag of genericTypeTags) {
+                    let gts = genericTypeTag.value.split(",");
+                    for (let gt of gts) {
                         //No TS type replacement here as the value is the generic type placeholder
                         genericTypes.push(gt.trim());
                     }
@@ -401,26 +401,26 @@ module TsdPlugin {
     export interface IOutputtable {
         getFullName(): string;
         getKind(): TSOutputtableKind;
-        getDoclet(): IDoclet;
+        getDoclet(): jsdoc.IDoclet;
         output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void;
         visit(
           context: TypeVisibilityContext,
-          conf:    ITypeScriptPluginConfiguration,
+          conf:    IPluginConfig,
           logger:  ILogger
         ): void;
     }
 
     export abstract class TSMember implements IOutputtable {
-        protected doclet: IDoclet;
+        protected doclet: jsdoc.IDoclet;
         protected isPublic: boolean;
         protected ovReturnType: string;
 
-        constructor(doclet: IDoclet) {
+        constructor(doclet: jsdoc.IDoclet) {
             this.doclet = doclet;
             this.isPublic = true;
             this.ovReturnType = null;
@@ -430,43 +430,57 @@ module TsdPlugin {
             this.ovReturnType = typeName;
         }
         
-        public isStatic(): boolean { return this.doclet.scope == "static"; }
+        public isStatic(): boolean {
+            return this.doclet.scope == "static";
+        }
         
-        public getDoclet(): IDoclet { return this.doclet; }
+        public getDoclet(): jsdoc.IDoclet {
+            return this.doclet;
+        }
         
-        public inheritsDoc(): boolean { return this.doclet.inheritdoc === true; }
+        public inheritsDoc(): boolean {
+            return this.doclet.inheritdoc === true;
+        }
         
-        public setIsPublic(value: boolean): void { this.isPublic = value; }
+        public setIsPublic(value: boolean): void {
+            this.isPublic = value;
+        }
         
-        public getIsPublic(): boolean { return this.isPublic; }
+        public getIsPublic(): boolean {
+            return this.isPublic;
+        }
         
-        public getFullName(): string { return this.doclet.longname; }
+        public getFullName(): string {
+            return this.doclet.longname;
+        }
         
         public abstract getKind(): TSOutputtableKind;
         
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void { }
         
-        protected getDescription(): string { return this.doclet.description; }
+        protected getDescription(): string {
+            return this.doclet.description;
+        }
         
         protected writeDescription(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
             //Description as comments
             stream.writeln("/**");
-            var desc = this.getDescription();
+            let desc = this.getDescription();
             if (desc != null) {
-                var descParts = desc.split("\n");
-                for (var i = 0; i < descParts.length; i++) {
+                let descParts = desc.split("\n");
+                for (let i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
             } else if (conf.fillUndocumentedDoclets) {
@@ -479,14 +493,14 @@ module TsdPlugin {
         
         public abstract output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void;
         
         public abstract visit(
           context: TypeVisibilityContext,
-          conf:    ITypeScriptPluginConfiguration,
+          conf:    IPluginConfig,
           logger:  ILogger
         ): void;
     }
@@ -500,13 +514,15 @@ module TsdPlugin {
     export class TSProperty extends TSMember {
         private isModule: boolean;
         private allowOptional: boolean;
-        constructor(doclet: IDoclet, allowOptional: boolean) {
+        constructor(doclet: jsdoc.IDoclet, allowOptional: boolean) {
             super(doclet);
             this.isModule = false;
             this.allowOptional = allowOptional;
         }
 
-        public getKind(): TSOutputtableKind { return TSOutputtableKind.Property; }
+        public getKind(): TSOutputtableKind {
+            return TSOutputtableKind.Property;
+        }
 
         public setIsModule(value: boolean): void {
             this.isModule = value;
@@ -525,16 +541,16 @@ module TsdPlugin {
             if (this.allowOptional) {
                 //If the argument is a typedef, it will (and should) be the only argument type
                 if (this.doclet.type.names.length == 1) {
-                    var outputtable = publicTypes.get(this.doclet.type.names[0]);
+                    let outputtable = publicTypes.get(this.doclet.type.names[0]);
                     if (outputtable != null) {
-                        var kind = outputtable.getKind();
+                        let kind = outputtable.getKind();
                         if (TSOutputtableKind.Typedef == kind) {
-                            var tdf = <TSTypedef>outputtable;
+                            let tdf = <TSTypedef>outputtable;
                             if (tdf.isOptional())
                                 return true;
                         }
                         if (TSOutputtableKind.UserTypeAlias == kind) {
-                            var utdf = <TSUserTypeAlias>outputtable;
+                            let utdf = <TSUserTypeAlias>outputtable;
                             if (utdf.isOptional())
                                 return true;
                         }
@@ -548,7 +564,7 @@ module TsdPlugin {
 
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -569,7 +585,7 @@ module TsdPlugin {
                 stream.writeln(memberOv.declaration);
             } else {
                 this.writeDescription("property", stream, conf, logger, publicTypes);
-                var propDecl = "";
+                let propDecl = "";
                 if (this.isModule) {
                     propDecl += "var ";
                 }
@@ -600,21 +616,27 @@ module TsdPlugin {
             }
         }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             if (this.doclet.type != null) {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
     }
     
-    interface IDocletParameterContainer { members: IDocletParameter[], param: IDocletParameter }
+    interface IParameterContainer {
+      members: jsdoc.IParameter[];
+      param:   jsdoc.IParameter;
+    }
     
-    interface ITsMemberContainer { members: TSMember[], member: TSMember }
+    interface ITsMemberContainer {
+      members: TSMember[];
+      member:  TSMember;
+    }
 
     export class TSMethod extends TSMember {
         private isModule: boolean;
         private isTypedef: boolean;
-        constructor(doclet: IDoclet) {
+        constructor(doclet: jsdoc.IDoclet) {
             super(doclet);
             this.isModule = false;
             this.isTypedef = false;
@@ -634,28 +656,28 @@ module TsdPlugin {
         
         protected getMethodName(): string { return this.doclet.name; }
         
-        private isArgOptional(arg: IDocletParameter, publicTypes: Map<string, IOutputtable>): boolean {
+        private isArgOptional(arg: jsdoc.IParameter, publicTypes: Map<string, IOutputtable>): boolean {
             //If the argument is a typedef, it will (and should) be the only argument type
             if (arg.type != null && arg.type.names.length > 0) {
                 if (arg.type.names.length == 1) {
-                    var outputtable = publicTypes.get(arg.type.names[0]);
+                    let outputtable = publicTypes.get(arg.type.names[0]);
                     if (outputtable != null) {
-                        var kind = outputtable.getKind();
+                        let kind = outputtable.getKind();
                         if (TSOutputtableKind.Typedef == kind) {
-                            var tdf = <TSTypedef>outputtable;
+                            let tdf = <TSTypedef>outputtable;
                             if (tdf.isOptional())
                                 return true;
                         }
                         if (TSOutputtableKind.UserTypeAlias == kind) {
-                            var utdf = <TSUserTypeAlias>outputtable;
+                            let utdf = <TSUserTypeAlias>outputtable;
                             if (utdf.isOptional())
                                 return true;
                         }
                     }
                 } else {
                     //Any type ending with '=' or starting with '?' denotes optionality to the whole
-                    var matches1 = arg.type.names.filter(t => t.indexOf("=") == t.length - 1);
-                    var matches2 = arg.type.names.filter(t => t.indexOf("?") == 0);
+                    let matches1 = arg.type.names.filter(t => t.indexOf("=") == t.length - 1);
+                    let matches2 = arg.type.names.filter(t => t.indexOf("?") == 0);
                     if (matches1.length > 0 || matches2.length > 0) {
                         return true;
                     }
@@ -669,7 +691,7 @@ module TsdPlugin {
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -677,9 +699,9 @@ module TsdPlugin {
             //annotation is not necessary in the documentation
             let params = this.studyParameters(null, conf, logger);
             if (params.length > 0 && !this.isTypedef) {
-                var forceNullable = false;
-                for (var arg of params) {
-                    var req = "";
+                let forceNullable = false;
+                for (let arg of params) {
+                    let req = "";
                     if (forceNullable || this.isArgOptional(arg, publicTypes)) {
                         // You can't have non-nullable arguments after a nullable argument. So by definition
                         // everything after the nullable argument has to be nullable as well
@@ -688,7 +710,7 @@ module TsdPlugin {
                     } else {
                         req = " (Required)";
                     }
-                    var argDesc = arg.description || "";
+                    let argDesc = arg.description || "";
                     if (argDesc == "" && conf.fillUndocumentedDoclets) {
                         //logger.warn(`Argument (${arg.name}) of ${kind} (${this.doclet.longname}) has no description. If fillUndocumentedDoclets = true, boilerplate documentation will be inserted`);
                         argDesc = "TODO: This parameter has no description. Contact this library author if this parameter should be documented\n";
@@ -698,18 +720,22 @@ module TsdPlugin {
             }
         }
         
-        protected outputScope(): boolean { return true; }
+        protected outputScope(): boolean {
+            return true;
+        }
         
-        protected outputGenericTypes(): boolean { return true; }
+        protected outputGenericTypes(): boolean {
+            return true;
+        }
         
         /**
          * Studies the doclet parameters and returns a normalized set.
          * 
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
-        private studyParameters(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): IDocletParameter[] {
-            let params: IDocletParameter[] = [];
-            let paramMap = new Map<string, IDocletParameterContainer>();
+        private studyParameters(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): jsdoc.IParameter[] {
+            let params: jsdoc.IParameter[] = [];
+            let paramMap = new Map<string, IParameterContainer>();
             
             let methodParams = this.doclet.params || [];
             let processedArgs = new Map<string, string>();
@@ -762,7 +788,7 @@ module TsdPlugin {
             //we'll loop the original doclet params and pick up the keyed parameter along the way 
             for (let arg of methodParams) {
                 if (arg.type != null) {
-                    var p = paramMap.get(arg.name);
+                    let p = paramMap.get(arg.name);
                     if (p != null) {
                         params.push(p.param);
                         if (p.members.length > 0 && context != null) {
@@ -771,7 +797,7 @@ module TsdPlugin {
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
-                            for (var member of p.members) {
+                            for (let member of p.members) {
                                 //This should be a dotted member. Split it
                                 let parts = member.name.split(".");
                                 let propName = parts[parts.length - 1];
@@ -780,7 +806,7 @@ module TsdPlugin {
                                 memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: ${retType.join("|")}`);
                             }
                             
-                            var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                            let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                             context.registerTypedef(typeName, iface);
                             console.log(`Registered ad-hoc interface type: ${typeName}`);
                             
@@ -796,7 +822,7 @@ module TsdPlugin {
             return params;
         }
         
-        private generateOptionsInterfaceName(conf: ITypeScriptPluginConfiguration): string {
+        private generateOptionsInterfaceName(conf: IPluginConfig): string {
             let methodNameCamelCase = this.getMethodName();
             if (methodNameCamelCase == "constructor") {
                 //This should be the class name
@@ -815,13 +841,13 @@ module TsdPlugin {
             return `I${methodNameCamelCase}Options`;
         }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             this.studyParameters(context, conf, logger);
             if (this.outputReturnType()) {
                 if (this.doclet.returns != null) {
-                    for (var retDoc of this.doclet.returns) {
+                    for (let retDoc of this.doclet.returns) {
                         if (retDoc.type != null) {
-                            var parsedTypes = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
+                            let parsedTypes = TypeUtil.parseAndConvertTypes(retDoc.type, conf, logger, context);
                             TypeUtil.replaceFunctionTypes(parsedTypes, this.doclet, conf, logger, context);
                         }
                     }
@@ -831,7 +857,7 @@ module TsdPlugin {
         
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -966,29 +992,41 @@ module TsdPlugin {
     }
 
     export class TSConstructor extends TSMethod {
-        constructor(doclet: IDoclet) {
+        constructor(doclet: jsdoc.IDoclet) {
             super(doclet);
         }
         
         // We're re-using the class doclet here, so any generic types would've
         // already been written out
-        protected outputGenericTypes(): boolean { return false; }
+        protected outputGenericTypes(): boolean {
+            return false;
+        }
         
         // There is no need to specify scope of constructors
-        protected outputScope(): boolean { return false; }
+        protected outputScope(): boolean {
+            return false;
+        }
         
         // Constructors need not specify a return type
-        protected outputReturnType(): boolean { return false; }
+        protected outputReturnType(): boolean {
+            return false;
+        }
         
-        protected getMethodName(): string { return "constructor"; }
+        protected getMethodName(): string {
+            return "constructor";
+        }
         
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        public visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void {
             super.visit(context, conf, logger);
         }
         
         public output(
           stream:      IndentedOutputStream,
-          conf:        ITypeScriptPluginConfiguration,
+          conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void {
@@ -1001,15 +1039,15 @@ module TsdPlugin {
      */
     export abstract class TSChildElement {
         protected parentModule: string;
-        constructor() {
-            
-        }
+
         public setParentModule(module: string): void {
             this.parentModule = module;
         }
+
         public getParentModule(): string {
             return this.parentModule;
         }
+
         public abstract getQualifiedName(): string;
     }
 
@@ -1017,27 +1055,39 @@ module TsdPlugin {
      * A TS type that resides within a module that can output its representation
      */
     export abstract class TSOutputtable extends TSChildElement implements IOutputtable {
-        protected doclet: IDoclet;
-        constructor(doclet: IDoclet) {
+        protected doclet: jsdoc.IDoclet;
+
+        constructor(doclet: jsdoc.IDoclet) {
             super();
             this.doclet = doclet;
         }
         
-        public getDoclet(): IDoclet { return this.doclet; }
+        public getDoclet(): jsdoc.IDoclet {
+            return this.doclet;
+        }
         
-        public getFullName(): string { return this.doclet.longname; }
+        public getFullName(): string {
+            return this.doclet.longname;
+        }
         
         public abstract getKind(): TSOutputtableKind;
         
-        protected getDescription(): string { return this.doclet.description; }
+        protected getDescription(): string {
+            return this.doclet.description;
+        }
         
-        protected writeDescription(kind: string, stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+        protected writeDescription(
+            kind:   string,
+            stream: IndentedOutputStream,
+            conf:   IPluginConfig,
+            logger: ILogger
+        ): void {
             //Description as comments
-            var desc = this.getDescription();
+            let desc = this.getDescription();
             if (desc != null) {
                 stream.writeln("/**");
-                var descParts = desc.split("\n");
-                for (var i = 0; i < descParts.length; i++) {
+                let descParts = desc.split("\n");
+                for (let i = 0; i < descParts.length; i++) {
                     stream.writeln(" * " + descParts[i]);
                 }
                 stream.writeln(" */");
@@ -1049,9 +1099,18 @@ module TsdPlugin {
             }
         }
         
-        public abstract output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Map<string, IOutputtable>): void;
+        public abstract output(
+            stream:      IndentedOutputStream,
+            conf:        IPluginConfig,
+            logger:      ILogger,
+            publicTypes: Map<string, IOutputtable>
+        ): void;
         
-        public abstract visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void;
+        public abstract visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void;
     }
 
     interface TSMemberResult {
@@ -1065,17 +1124,20 @@ module TsdPlugin {
     export abstract class TSComposable extends TSOutputtable {
         protected members: TSMember[];
         protected isPublic: boolean;
-        constructor(doclet: IDoclet) {
+
+        constructor(doclet: jsdoc.IDoclet) {
             super(doclet);
             this.members = [];
             this.isPublic = false;
         }
+
         public addMember(member: TSMember): void {
             this.members.push(member);
         }
+
         public findMember(name: string, kind: string): TSMember {
-            var matches = this.members.filter(m => {
-                var doclet = m.getDoclet();
+            let matches = this.members.filter(m => {
+                let doclet = m.getDoclet();
                 return doclet.name == name && doclet.kind == kind;
             });
             if (matches.length == 1)
@@ -1083,7 +1145,8 @@ module TsdPlugin {
             else
                 return null;
         }
-        private getDottedMemberName(doclet: IDoclet): string {
+
+        private getDottedMemberName(doclet: jsdoc.IDoclet): string {
             if (doclet.name.indexOf(".") >= 0)
                 return doclet.name;
 
@@ -1094,12 +1157,17 @@ module TsdPlugin {
 
             return null;
         }
+
         /**
          * Studies the members of this doclet and returns a normalized set.
          * 
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
-        protected studyMembers(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): TSMember[] {
+        protected studyMembers(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): TSMember[] {
             let studiedMembers: TSMember[] = [];
             let staticMemberMap = new Map<string, ITsMemberContainer>();
             let instanceMemberMap = new Map<string, ITsMemberContainer>();
@@ -1195,7 +1263,7 @@ module TsdPlugin {
                                         memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: ${retType.join("|")}`);
                                     }
                                     
-                                    var iface = new TSUserInterface(moduleName, typeName, memberDefs);
+                                    let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                                     context.registerTypedef(typeName, iface);
                                     console.log(`Registered ad-hoc interface type: ${typeName}`);
                                     
@@ -1215,19 +1283,22 @@ module TsdPlugin {
             return `I${methodNameCamelCase}Options`;
         }
         
-        public getParentTypeNames(): string[] { return this.doclet.augments; }
+        public getParentTypeNames(): string[] {
+            return this.doclet.augments;
+        }
+
         /**
          * Finds a matching member from any of the current member's types inheritance hierarchy that doesn't inherit documentation
          */
-        public getInheritedMember(memberDoclet: IDoclet, parents: string[], publicTypes: Map<string, IOutputtable>): TSMemberResult {
-            for (var parentTypeName of parents) {
-                var type = publicTypes.get(parentTypeName);
+        public getInheritedMember(memberDoclet: jsdoc.IDoclet, parents: string[], publicTypes: Map<string, IOutputtable>): TSMemberResult {
+            for (let parentTypeName of parents) {
+                let type = publicTypes.get(parentTypeName);
                 //Parent type is a known TSComposable
                 if (type != null && (type.getKind() == TSOutputtableKind.Class || type.getKind() == TSOutputtableKind.Typedef)) {
-                    var comp = <TSComposable>type;
+                    let comp = <TSComposable>type;
                     //console.log(`Checking if ${comp.getFullName()} has member ${memberDoclet.name} (${memberDoclet.kind})`);
-                    var member = comp.findMember(memberDoclet.name, memberDoclet.kind);
-                    var parentTypeNames = comp.getParentTypeNames() || [];
+                    let member = comp.findMember(memberDoclet.name, memberDoclet.kind);
+                    let parentTypeNames = comp.getParentTypeNames() || [];
                     //Found a member
                     if (member != null) {
                         //console.log(`   found member`);
@@ -1245,9 +1316,11 @@ module TsdPlugin {
             }
             return null;
         }
+
         public setIsPublic(isPublic: boolean): void {
             this.isPublic = isPublic;
         }
+
         public getIsPublic(): boolean {
             return this.isPublic;
         }
@@ -1259,7 +1332,8 @@ module TsdPlugin {
     export class TSTypedef extends TSComposable {
         private enumType: TSEnumType;
         private alreadyAddedEnumMembers: boolean;
-        constructor(doclet: IDoclet) {
+
+        constructor(doclet: jsdoc.IDoclet) {
             super(doclet);
             this.enumType = this.determineEnumType();
             this.alreadyAddedEnumMembers = false;
@@ -1267,13 +1341,14 @@ module TsdPlugin {
             if (this.enumType != TSEnumType.Invalid &&
                 this.doclet.isEnum === true &&
                 (this.doclet.properties || []).length > 0) {
-                for (var prop of this.doclet.properties) {
+                for (let prop of this.doclet.properties) {
                     if (!TypeUtil.isPrivateDoclet(prop))
                         this.addMember(new TSProperty(prop, false));
                 }
                 this.alreadyAddedEnumMembers = true;
             }
         }
+
         public addMember(member: TSMember): void {
             if (this.enumType != TSEnumType.Invalid && this.alreadyAddedEnumMembers == true) {
                 console.log(`Skip adding member ${member.getDoclet().name} as the parent enum ${this.doclet.name} already has its members added`);
@@ -1281,6 +1356,7 @@ module TsdPlugin {
             }
             super.addMember(member);
         }
+
         private determineEnumType(): TSEnumType {
             let eType = TSEnumType.Invalid;
             let matches = (this.doclet.comment || "").match(/@enum \{(.*)\}/);
@@ -1293,22 +1369,35 @@ module TsdPlugin {
             }
             return eType;
         }
-        public getEnumType(): TSEnumType { return this.enumType; }
-        public getKind(): TSOutputtableKind { return TSOutputtableKind.Typedef; }
+
+        public getEnumType(): TSEnumType {
+            return this.enumType;
+        }
+
+        public getKind(): TSOutputtableKind {
+            return TSOutputtableKind.Typedef;
+        }
+
         public isOptional(): boolean {
             return this.members.length == 0 //Must be a type-alias typedef
                 && this.doclet.type != null
                 && this.doclet.type.names != null
                 && this.doclet.type.names.indexOf("undefined") >= 0;
         }
+
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.doclet.name;
             else
                 return `${mod}.${this.doclet.name}`;
         }
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
             let members = this.studyMembers(context, conf, logger);
             for (let member of members) {
@@ -1319,7 +1408,12 @@ module TsdPlugin {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Map<string, IOutputtable>): void {
+
+        public output(
+            stream: IndentedOutputStream,
+            conf:   IPluginConfig,
+            logger: ILogger, publicTypes: Map<string, IOutputtable>
+        ): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for typedef");
                 stream.writeln(DumpDoclet(this.doclet));
@@ -1422,22 +1516,28 @@ module TsdPlugin {
      */
     export class TSClass extends TSComposable {
         public ctor: TSConstructor;
-        constructor(doclet: IDoclet) {
-            super(doclet);
+        
+        public getKind(): TSOutputtableKind {
+            return TSOutputtableKind.Class;
         }
         
-        public getKind(): TSOutputtableKind { return TSOutputtableKind.Class; }
-        
-        protected getDescription(): string { return this.doclet.classdesc || this.doclet.description; }
+        protected getDescription(): string {
+            return this.doclet.classdesc || this.doclet.description;
+        }
         
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.doclet.name;
             else
                 return `${mod}.${this.doclet.name}`;
         }
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
             if (this.doclet.augments != null) {
                 for (let t of this.doclet.augments) {
@@ -1447,12 +1547,18 @@ module TsdPlugin {
             if (this.ctor != null)
                 this.ctor.visit(context, conf, logger);
             let members = this.studyMembers(context, conf, logger);
-            for (var member of members) {
+            for (let member of members) {
                 if (member.getIsPublic() || member.inheritsDoc())
                     member.visit(context, conf, logger);
             }
         }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger, publicTypes: Map<string, IOutputtable>): void {
+
+        public output(
+            stream:      IndentedOutputStream,
+            conf:        IPluginConfig,
+            logger:      ILogger,
+            publicTypes: Map<string, IOutputtable>
+        ): void {
             if (conf.outputDocletDefs) {
                 stream.writeln("/* doclet for class");
                 stream.writeln(DumpDoclet(this.doclet));
@@ -1461,13 +1567,13 @@ module TsdPlugin {
             
             this.writeDescription(DocletKind.Class, stream, conf, logger);
             
-            var clsDecl = "";
+            let clsDecl = "";
             //If un-parented, the emitted class will be global and must be declared as a result
             if (this.getParentModule() == null && conf.declareTopLevelElements) {
                 clsDecl = "declare ";
             }
             clsDecl += "class " + this.doclet.name;
-            var genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
+            let genericTypes = TypeUtil.extractGenericTypesFromDocletTags(this.doclet.tags);
             //Class generic parameters
             if (genericTypes.length > 0) {
                 //As these are generic placeholders, they don't go through the
@@ -1476,7 +1582,7 @@ module TsdPlugin {
             }
             //Inheritance
             if (this.doclet.augments != null) {
-                var parents = this.doclet
+                let parents = this.doclet
                                   .augments
                                   .map(p => TypeUtil.getTypeReplacement(p, conf, logger, null))
                                   .join(",");
@@ -1489,11 +1595,11 @@ module TsdPlugin {
                 this.ctor.output(stream, conf, logger, publicTypes);
             }
             let members = this.studyMembers(null, conf, logger);
-            for (var member of members) {
+            for (let member of members) {
                 //NOTE: inheritsDoc() is tested first before public visibility as it may inherit off of something that
                 //has public visibility
                 if (member.inheritsDoc()) {
-                    var inheritedQuery = this.getInheritedMember(member.getDoclet(), this.doclet.augments, publicTypes);
+                    let inheritedQuery = this.getInheritedMember(member.getDoclet(), this.doclet.augments, publicTypes);
                     if (inheritedQuery != null) {
                         //As long as this member or the inherited member is public, it needs to be output
                         if (member.getIsPublic() || inheritedQuery.isPublic) {
@@ -1529,6 +1635,7 @@ module TsdPlugin {
     export class TSUserInterface extends TSTypedef implements IOutputtableChildElement {
         private name: string;
         private adhocMembers: string[];
+
         constructor(moduleName: string, name: string, members: string[]) {
             super({
                 description: "",
@@ -1543,29 +1650,46 @@ module TsdPlugin {
             this.name = name;
             this.adhocMembers = members;
         }
-        public getFullName(): string { return this.getQualifiedName(); }
-        public getKind(): TSOutputtableKind { return TSOutputtableKind.UserInterface; }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public getFullName(): string {
+            return this.getQualifiedName();
+        }
+
+        public getKind(): TSOutputtableKind {
+            return TSOutputtableKind.UserInterface;
+        }
+
+        public output(
+            stream: IndentedOutputStream,
+            conf:   IPluginConfig,
+            logger: ILogger
+        ): void {
             stream.writeln(`interface ${this.name} {`);
             stream.indent();
-            for (var member of this.adhocMembers) {
-                var lines = member.split("\n");
+            for (let member of this.adhocMembers) {
+                let lines = member.split("\n");
                 lines[lines.length - 1] += ";";
-                for (var line of lines) {
+                for (let line of lines) {
                     stream.writeln(line);
                 }
             }
             stream.unindent();
             stream.writeln("}");
         }
+
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.name;
             else
                 return `${mod}.${this.name}`;
         }
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
         }
     }
@@ -1576,36 +1700,59 @@ module TsdPlugin {
     export class TSUserTypeAlias extends TSChildElement implements IOutputtableChildElement {
         private typeAlias: string;
         private type: string;
+
         constructor(moduleName: string, typeAlias: string, type: string) {
             super();
             this.setParentModule(moduleName);
             this.typeAlias = typeAlias;
             this.type = type;
         }
-        public getDoclet(): IDoclet { return null; }
+
+        public getDoclet(): jsdoc.IDoclet {
+            return null;
+        }
+
         public isOptional(): boolean {
-            var types = this.type.split("|").map(t => t.trim());
+            let types = this.type.split("|").map(t => t.trim());
             return types.indexOf("undefined") >= 0;
         }
-        public getFullName(): string { return this.getQualifiedName(); }
-        public getKind(): TSOutputtableKind { return TSOutputtableKind.UserTypeAlias; }
+
+        public getFullName(): string {
+            return this.getQualifiedName();
+        }
+
+        public getKind(): TSOutputtableKind {
+            return TSOutputtableKind.UserTypeAlias;
+        }
+
         private outputDecl(stream: IndentedOutputStream): void {
             if (this.getParentModule() == null)
                 stream.writeln(`declare type ${this.typeAlias} = ${this.type};`);
             else
                 stream.writeln(`type ${this.typeAlias} = ${this.type};`);
         }
-        public output(stream: IndentedOutputStream, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public output(
+            stream: IndentedOutputStream,
+            conf:   IPluginConfig,
+            logger: ILogger
+        ): void {
             this.outputDecl(stream);
         }
+
         public getQualifiedName(): string {
-            var mod = this.getParentModule();
+            let mod = this.getParentModule();
             if (mod == null)
                 return this.typeAlias;
             else
                 return `${mod}.${this.typeAlias}`;
         }
-        public visit(context: TypeVisibilityContext, conf: ITypeScriptPluginConfiguration, logger: ILogger): void {
+
+        public visit(
+            context: TypeVisibilityContext,
+            conf:    IPluginConfig,
+            logger:  ILogger
+        ): void {
             TypeUtil.getTypeReplacement(this.getQualifiedName(), conf, logger, context);
         }
     }
@@ -1618,10 +1765,12 @@ module TsdPlugin {
          * Indicates if this is the root module (true = root, false = child, unspecified = global)
          */
         isRoot?: boolean;
+
         /**
          * Child modules
          */
         children: Map<string, ITSModule>;
+
         /**
          * Types/vars/functions defined at this level
          */

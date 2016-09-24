@@ -14,13 +14,13 @@ module TsdPlugin {
     /**
      * The class that does all the grunt work
      */
-    export class TsdGenerator implements IAdhocTypeRegistration {
+    export class TsdGenerator implements ITypeRegistrar {
         private moduleMembers = new Map<string, TSMember[]>();
         private globalMembers = new Array<TSMember>();
-        private moduleDoclets = new Map<string, IDoclet>();
+        private moduleDoclets = new Map<string, jsdoc.IDoclet>();
         private classes = new Map<string, TSClass>();
         private typedefs = new Map<string, TSTypedef>();
-        private trackedDoclets = new Map<string, IDoclet>();
+        private trackedDoclets = new Map<string, jsdoc.IDoclet>();
         private userTypeAliases = new Array<TSUserTypeAlias>();
         private userInterfaces = new Array<TSUserInterface>();
         private ignoreTypes = new Set<string>();
@@ -35,11 +35,11 @@ module TsdPlugin {
             classes: 0
         };
         
-        private config: ITypeScriptPluginConfiguration;
+        private config: IPluginConfig;
 
-        constructor(config: ITypeScriptPluginConfiguration) {
+        constructor(config: IPluginConfig) {
 
-            const defaults: ITypeScriptPluginConfiguration = {
+            const defaults: IPluginConfig = {
                 rootModuleName: "generated",
                 outDir: ".",
                 typeReplacements: {
@@ -79,16 +79,14 @@ module TsdPlugin {
             };
 
             this.config = Object.assign(defaults, config, {
-                aliases: Object.assign(defaults.aliases, config.aliases),
-                interfaces: Object.assign(defaults.interfaces, config.interfaces),
-                processAsEnums: Object.assign(defaults.processAsEnums, config.processAsEnums),
+                aliases:          Object.assign(defaults.aliases, config.aliases),
+                interfaces:       Object.assign(defaults.interfaces, config.interfaces),
+                processAsEnums:   Object.assign(defaults.processAsEnums, config.processAsEnums),
                 typeReplacements: Object.assign(defaults.typeReplacements, config.typeReplacements)
             });
 
-            if (config.ignoreTypes) {
-                for (let ignoreType of config.ignoreTypes) {
-                    this.ignoreTypes.add(ignoreType);
-                }
+            for (let ignoreType of this.config.ignoreTypes) {
+                this.ignoreTypes.add(ignoreType);
             }
         }
 
@@ -99,7 +97,7 @@ module TsdPlugin {
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
             if (!this.classes.has(name)) {
                 if (factory != null) {
-                    var cls = factory();
+                    let cls = factory();
                     this.classes.set(name, cls);
                     return cls;
                 } else {
@@ -109,10 +107,11 @@ module TsdPlugin {
                 return this.classes.get(name);
             }
         }
+
         private ensureTypedef(name: string, factory?: () => TSTypedef): TSTypedef {
             if (!this.typedefs.has(name)) {
                 if (factory != null) {
-                    var tdf = factory();
+                    let tdf = factory();
                     this.typedefs.set(name, tdf);
                     return tdf;
                 } else {
@@ -131,14 +130,14 @@ module TsdPlugin {
             return false;
         }
         
-        private isTSInterfaceCandidate(doclet: IDoclet): boolean {
+        private isTSInterfaceCandidate(doclet: jsdoc.IDoclet): boolean {
             return !TsdGenerator.isCallbackType(doclet) && //Because callback types could also be through typedefs
                    (doclet.kind == DocletKind.Typedef ||
                    (doclet.comment || "").indexOf("@record") >= 0); 
         }
         
-        private parseClassesAndTypedefs(doclets: IDoclet[]): void {
-            for (var doclet of doclets) {
+        private parseClassesAndTypedefs(doclets: jsdoc.IDoclet[]): void {
+            for (let doclet of doclets) {
                 //On ignore list
                 if (this.shouldIgnoreType(doclet.longname))
                     continue;
@@ -218,8 +217,9 @@ module TsdPlugin {
                 }
             }
         }
-        private parseModules(doclets: IDoclet[]): void {
-            for (var doclet of doclets) {
+
+        private parseModules(doclets: jsdoc.IDoclet[]): void {
+            for (let doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
@@ -236,7 +236,8 @@ module TsdPlugin {
                 }
             }
         }
-        private static isCallbackType(doclet: IDoclet): boolean {
+
+        private static isCallbackType(doclet: jsdoc.IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef && 
                    doclet.type != null &&
                    doclet.type.names != null &&
@@ -244,8 +245,9 @@ module TsdPlugin {
                    //This is to check that the function type was documented using @callback instead of @typedef
                    (doclet.comment || "").indexOf("@callback") >= 0;
         }
-        private processTypeMembers(doclets: IDoclet[]): void {
-            for (var doclet of doclets) {
+
+        private processTypeMembers(doclets: jsdoc.IDoclet[]): void {
+            for (let doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
                     continue;
@@ -256,13 +258,13 @@ module TsdPlugin {
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
 
-                var isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
+                let isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
                 //point to it
-                var cls: TSComposable = this.ensureClassDef(doclet.memberof);
-                var isTypedef = false;
-                var isClass = true;
+                let cls: TSComposable = this.ensureClassDef(doclet.memberof);
+                let isTypedef = false;
+                let isClass = true;
                 if (!cls) {
                     isClass = false;
                     //Failing that it would've been registered as a typedef
@@ -308,45 +310,53 @@ module TsdPlugin {
                 }
                 
                 if (doclet.kind == DocletKind.Function) {
-                    var method = new TSMethod(doclet);
+                    let method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
                     cls.addMember(method);
                 } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                    var prop = new TSProperty(doclet, isTypedef);
+                    let prop = new TSProperty(doclet, isTypedef);
                     prop.setIsPublic(isPublic);
                     cls.addMember(prop);
                 }
             }
         }
+
         private processUserDefinedTypes(): void {
             //Output user-injected type aliases
             //global
-            for (var typeAlias in this.config.aliases.global) {
-                this.userTypeAliases.push(new TSUserTypeAlias(null, typeAlias, this.config.aliases.global[typeAlias]));
+            for (let typeAlias in this.config.aliases.global) {
+                let typeName = this.config.aliases.global[typeAlias];
+                this.userTypeAliases.push(
+                    new TSUserTypeAlias(null, typeAlias, typeName));
             }
             //module
-            for (var moduleName in this.config.aliases.module) {
-                for (var typeAlias in this.config.aliases.module[moduleName]) {
-                    this.userTypeAliases.push(new TSUserTypeAlias(moduleName, typeAlias, this.config.aliases.module[moduleName][typeAlias]));
+            for (let moduleName in this.config.aliases.module) {
+                for (let typeAlias in this.config.aliases.module[moduleName]) {
+                    let typeName = this.config.aliases.module[moduleName][typeAlias];
+                    this.userTypeAliases.push(
+                        new TSUserTypeAlias(moduleName, typeAlias, typeName));
                 }
             }
             //Output user-injected interfaces
             //global
-            for (var typeName in this.config.interfaces.global) {
-                var iface = this.config.interfaces.global[typeName];
-                this.userInterfaces.push(new TSUserInterface(null, typeName, iface));
+            for (let typeName in this.config.interfaces.global) {
+                let iface = this.config.interfaces.global[typeName];
+                this.userInterfaces.push(
+                    new TSUserInterface(null, typeName, iface));
             }
             //module
-            for (var moduleName in this.config.interfaces.module) {
-                for (var typeName in this.config.interfaces.module[moduleName]) {
-                    var iface = this.config.interfaces.module[moduleName][typeName];
-                    this.userInterfaces.push(new TSUserInterface(moduleName, typeName, iface));
+            for (let moduleName in this.config.interfaces.module) {
+                for (let typeName in this.config.interfaces.module[moduleName]) {
+                    let iface = this.config.interfaces.module[moduleName][typeName];
+                    this.userInterfaces.push(
+                        new TSUserInterface(moduleName, typeName, iface));
                 }
             }
         }
+
         private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Map<string, IOutputtable> {
-            var publicTypes = new Map<string, IOutputtable>();
-            var context = new TypeVisibilityContext(this);
+            let publicTypes = new Map<string, IOutputtable>();
+            let context = new TypeVisibilityContext(this);
             
             //First, visit all known public types and collect referenced types
             for (let typedef of this.userTypeAliases) {
@@ -369,7 +379,7 @@ module TsdPlugin {
                     tdf.visit(context, this.config, logger);
             });
             
-            var userTypes = {};
+            let userTypes = {};
             for (let typedef of this.userTypeAliases) {
                 userTypes[typedef.getQualifiedName()] = typedef;
             }
@@ -388,7 +398,7 @@ module TsdPlugin {
             //We repeat this process until the context is empty
             //
             //But before we start, auto-hoist any type in the "makePublic" list 
-            for (var typeName of this.config.makePublic) {
+            for (let typeName of this.config.makePublic) {
                 console.log(`Checking if (${typeName}) needs to be hoisted`);
                 if (this.classes.has(typeName)) {
                     let cls = this.classes.get(typeName);
@@ -410,12 +420,12 @@ module TsdPlugin {
                     }
                 }
             }
-            
-            var pass = 1;
+
+            let pass = 1;
             while (!context.isEmpty()) {
                 //NOTE: This is an array copy. Any new types added in this
                 //pass should not affect the iterated array
-                var allTypes = context.getTypes();
+                let allTypes = context.getTypes();
                 //console.log(`Pass ${pass}: ${allTypes.length} types remaining to check`);
                 for (let typeName of allTypes) {
                     //console.log(`Checking type: ${typeName}`);
@@ -456,10 +466,11 @@ module TsdPlugin {
             
             return publicTypes;
         }
-        private static ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
-            var tree: ITSModule = root;
-            var i = 0;
-            for (var name of moduleNameParts) {
+
+        private ensureModuleTree(root: ITSModule, moduleNameParts: string[]): ITSModule {
+            let tree: ITSModule = root;
+            for (let i = 0; i < moduleNameParts.length; i++) {
+                let name = moduleNameParts[i];
                 //Doesn't exist at this level, make it
                 if (!tree.children.has(name)) {
                     tree.children.set(name, {
@@ -469,11 +480,10 @@ module TsdPlugin {
                     });
                 }
                 tree = tree.children.get(name);
-                i++;
             }
             return tree;
         }
-        
+
         private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
             if (moduleName == null) {
                 if (TypeUtil.isTsElementNotPublic(type)) {
@@ -511,13 +521,14 @@ module TsdPlugin {
                     return true;
                 } else {
                     //Explode this module name and see how many levels we need to go
-                    var moduleNameParts = moduleNameClean.split(".");
-                    var tree = TsdGenerator.ensureModuleTree(root, moduleNameParts);
+                    let moduleNameParts = moduleNameClean.split(".");
+                    let tree = this.ensureModuleTree(root, moduleNameParts);
                     tree.types.push(type);
                     return true;
                 }
             }
         }
+
         /**
          * This method groups all of our collected TS types according to their parent module
          */
@@ -569,12 +580,12 @@ module TsdPlugin {
             });
             return root;
         }
-        
-        public dumpDoclets(doclets: IDoclet[], streamFactory: IFileStreamFactory) {
-            var fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
+
+        public dumpDoclets(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory) {
+            let fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
+            let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
-            for (var doc of doclets) {
+            for (let doc of doclets) {
                 output.writeln(DumpDoclet(doc));
             }
             
@@ -582,10 +593,10 @@ module TsdPlugin {
                 console.log(`Saved dumped doclets to: ${fileName}`);
             });
         }
-        
-        public process(doclets: IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
-            var fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
-            var output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
+
+        public process(doclets: jsdoc.IDoclet[], streamFactory: IFileStreamFactory, logger: ILogger): void {
+            let fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
+            let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
             
             //1st pass
             this.parseClassesAndTypedefs(doclets);
@@ -596,16 +607,16 @@ module TsdPlugin {
             //Process user-defined types
             this.processUserDefinedTypes();
             //Raise any non-public types referenced from public types to public
-            var publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
+            let publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
             
             //Write custom header if specified
             if (this.config.headerFile != null) {
-                var header = streamFactory.readText(this.config.headerFile);
+                let header = streamFactory.readText(this.config.headerFile);
                 output.writeln(header);
             }
             
             //Write the main d.ts body
-            var tree = this.assembleModuleTree();
+            let tree = this.assembleModuleTree();
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.indent();
             }
@@ -616,10 +627,10 @@ module TsdPlugin {
             
             //Write custom footer if specified
             if (this.config.headerFile != null) {
-                var footer = streamFactory.readText(this.config.footerFile);
+                let footer = streamFactory.readText(this.config.footerFile);
                 output.writeln(footer);
             }
-            
+
             output.close(() => {
                 console.log("Wrote:");
                 console.log(`  ${this.stats.typedefs.user} user-specified typedefs`);

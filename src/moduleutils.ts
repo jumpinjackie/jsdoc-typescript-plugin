@@ -27,7 +27,7 @@ module TsdPlugin {
         public static outputTsd(
             module:      ITSModule,
             stream:      IndentedOutputStream,
-            conf:        ITypeScriptPluginConfiguration,
+            conf:        IPluginConfig,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>
         ): void {

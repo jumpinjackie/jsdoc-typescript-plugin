@@ -1,18 +1,18 @@
-var fs = require("fs");
-var os = require("os");
-var env = require("jsdoc/env");
-var logger = require("jsdoc/util/logger");
-var tsConf = env.conf.typescript || {};
+let fs = require("fs");
+let os = require("os");
+let env = require("jsdoc/env");
+let logger = require("jsdoc/util/logger");
+let tsConf = env.conf.typescript || {};
 
 exports.handlers = {
-    newDoclet(e: TsdPlugin.IJsDocNewDocletEvent): void {
+    newDoclet(e: jsdoc.INewDocletEvent): void {
         if (tsConf.rewriteFunctionTypedefs === true) {
             TsdPlugin.FunctionTypedefRewriter.rewrite(e.doclet);
         }
     },
-    processingComplete(e: TsdPlugin.IJsDocProcessingCompleteEvent): void {
-        var proc = new TsdPlugin.TsdGenerator(tsConf);
-        var sf = {
+    processingComplete(e: jsdoc.IProcessingCompleteEvent): void {
+        let proc = new TsdPlugin.TsdGenerator(tsConf);
+        let sf = {
             createStream: (fileName) => fs.createWriteStream(fileName),
             readText: (fileName) => fs.readFileSync(fileName, "utf8"),
             endl: os.EOL
