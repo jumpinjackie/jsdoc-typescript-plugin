@@ -9,7 +9,7 @@
     "cesium-doc": "jsdoc -c ./jsdoc.cesium.json -d ./docs/cesium",
     "misc-doc": "jsdoc -c ./jsdoc.misc.json -d ./docs/misc",
     "bad-doc": "jsdoc -c ./jsdoc.bad.json -d ./docs/bad",
-    "test": "tsc ./typings/openlayers.d.ts && tsc ./typings/cesium.d.ts"
+    "test": "npm run ol-doc && tsc ./typings/openlayers.d.ts"
   },
   "repository": {
     "type": "git",
@@ -26,9 +26,9 @@
   },
   "homepage": "https://github.com/jumpinjackie/jsdoc-typescript-plugin#readme",
   "devDependencies": {
-    "cesium": "^1.17.0",
+    "cesium": "^1.25.0",
     "jsdoc": "^3.4.0",
-    "openlayers": "^3.18.1",
+    "openlayers": "^3.18.2",
     "typescript": "^2.0.3"
   }
 }

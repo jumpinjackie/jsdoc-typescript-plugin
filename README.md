@@ -1,5 +1,7 @@
 # jsdoc-typescript-plugin
 
+[![Build Status](https://travis-ci.org/jumpinjackie/jsdoc-typescript-plugin.svg)](https://travis-ci.org/jumpinjackie/jsdoc-typescript-plugin)
+
 JSDoc plugin to automatically generate TypeScript Definitions from annotated source
 
 # Building
