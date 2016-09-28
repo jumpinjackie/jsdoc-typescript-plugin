@@ -20,3 +20,15 @@ Optionable = function(options) { };
  * @param {String=} options.arg An optional string argument
  */
 ImproperlyDocumentedOptionable = function(options) { };
+
+/**
+ * @constructor
+ * @classdesc 
+ * A class that takes an options array argument
+ * @param {Object[]} employees - The employees who are responsible for the project.
+ * @param {string} employees[].name - The name of an employee.
+ * @param {string} employees[].department - The employee's department.
+ */
+ArrayOptionable = function(employees) {
+    // ...
+};

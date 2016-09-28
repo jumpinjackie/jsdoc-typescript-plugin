@@ -740,6 +740,8 @@ module TsdPlugin {
             let methodParams = (this.doclet.params || []).slice(0); //Clone, because we may modify, and we want to modify the clone
             let processedArgs = new Map<string, string>();
             let argCounter = 1;
+
+            let arrayParents = new Map<string, string>();
             
             if (methodParams.length > 0) {
                 //Let's be graceful here. If we find dotted members but no common parent identifier, make
@@ -749,7 +751,13 @@ module TsdPlugin {
                 for (let arg of methodParams) {
                     if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
                         let parts = arg.name.split(".");
-                        scanned.set(parts[0], parts[0]);
+                        if (parts[0].endsWith("[]")) {
+                            const fixedName = parts[0].substring(0, parts[0].length - 2);
+                            scanned.set(fixedName, fixedName);
+                            arrayParents.set(fixedName);
+                        } else {
+                            scanned.set(parts[0], parts[0]);
+                        }
                     } else {
                         paramMap.set(arg.name, {
                             members: [],
@@ -768,6 +776,9 @@ module TsdPlugin {
                             logger.warn(`In method ${this.doclet.longname}: Identifier '${k}' was referenced amongst dotted parameters found, but this identifier could not be found amongst the processed arguments. The plugin will assume this identifier is an object parameter with the dotted members as its members`);
                         }
                         let typeName = this.generateOptionsInterfaceName(conf);
+                        if (arrayParents.has(k)) {
+                            typeName += "[]";
+                        }
                         const argDoc: jsdoc.IParameter = {
                             name: k,
                             type: {
@@ -806,12 +817,17 @@ module TsdPlugin {
                         TypeUtil.parseAndConvertTypes(arg.type, conf, logger, context);
                         if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
                             let parts = arg.name.split(".");
-                            let parm = paramMap.get(parts[0]);
+                            let parentObjRef = parts[0];
+                            if (parentObjRef.endsWith("[]")) {
+                                parentObjRef = parentObjRef.substring(0, parentObjRef.length - 2);
+                            }
+
+                            let parm = paramMap.get(parentObjRef);
                             //If we get 'foo.bar', we should have already processed argument 'foo'
                             if (parm == null) {
                                 //Only want to error when not visiting (ie. context is null)
                                 if (context == null) {
-                                    logger.error(`In method ${this.doclet.longname}: Argument (${arg.name}) is a dotted member of argument (${parts[0]}) that either does not exist, or does not precede this argument`);
+                                    logger.error(`In method ${this.doclet.longname}: Argument (${arg.name}) is a dotted member of argument (${parentObjRef}) that either does not exist, or does not precede this argument`);
                                 }
                             } else {
                                 parm.members.push(arg);
@@ -850,7 +866,7 @@ module TsdPlugin {
                             
                             //TODO: Hmmm, should we be modifying doclets given by JSDoc?
                             p.param.type.names = [
-                                typeName
+                                `${typeName}${arrayParents.has(arg.name) ? "[]" : ""}`
                             ];
                         }
                     }
