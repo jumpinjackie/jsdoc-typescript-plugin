@@ -33,23 +33,13 @@
             "global": {
                 "proj4": "any",
                 "EsriJSONGeometry": "any",
-                "GeoJSONObject": "any",
                 "GeoJSONFeature": "any",
                 "GeoJSONFeatureCollection": "any",
                 "GeoJSONGeometry": "any",
                 "GeoJSONGeometryCollection": "any",
                 "TileJSON": "any"
             },
-            "module": {
-                "goog.events": {
-                    "EventLike": "any",
-                    "Key": "any",
-                    "BrowserEvent": "any"
-                },
-                "goog.vec.Mat4": {
-                    "Number": "any"
-                }
-            }
+            "module": {}
         },
         "interfaces": {
             "global": {
