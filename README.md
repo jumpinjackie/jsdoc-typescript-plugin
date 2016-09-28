@@ -16,7 +16,7 @@ The compiled plugin will reside under `plugins/typescript.js`
 Add the following snippet to your JSDoc configuration
 
 ```json
-{ "plugins": [ "plugins/typescript.js" ] }
+{ "plugins": [ "plugins/typescript" ] }
 ```
 
 Refer to configuration for plugin configuration options
