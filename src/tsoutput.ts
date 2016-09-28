@@ -803,7 +803,7 @@ module TsdPlugin {
                                 let propName = parts[parts.length - 1];
                                 let retType = TypeUtil.parseAndConvertTypes(member.type, conf, logger);
                                 
-                                memberDefs.push(`/**\n * ${member.description}\n */\n${propName}: ${retType.join("|")}`);
+                                memberDefs.push(`/**\n * ${member.description}\n */\n${propName}${member.optional ? "?:" : ":"} ${retType.join("|")}`);
                             }
                             
                             let iface = new TSUserInterface(moduleName, typeName, memberDefs);
