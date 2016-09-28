@@ -737,11 +737,54 @@ module TsdPlugin {
             let params: jsdoc.IParameter[] = [];
             let paramMap = new Map<string, IParameterContainer>();
             
-            let methodParams = this.doclet.params || [];
+            let methodParams = (this.doclet.params || []).slice(0); //Clone, because we may modify, and we want to modify the clone
             let processedArgs = new Map<string, string>();
             let argCounter = 1;
             
             if (methodParams.length > 0) {
+                //Let's be graceful here. If we find dotted members but no common parent identifier, make
+                //an ad-hoc parent doclet and warn about this fact (it's a documentation error)
+                const scanned = new Map<string, string>();
+                const processed = new Map<string, any>();
+                for (let arg of methodParams) {
+                    if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
+                        let parts = arg.name.split(".");
+                        scanned.set(parts[0], parts[0]);
+                    } else {
+                        paramMap.set(arg.name, {
+                            members: [],
+                            param: arg
+                        });
+                        processed.set(arg.name, arg);
+                    }
+                }
+                
+                // Now find out what scanned ones weren't processed. These are the ones we have to make ad-hoc
+                // parent doclets and warn about
+                scanned.forEach((v, k, m) => {
+                    if (!processed.has(k)) {
+                        //This will be called twice, so log once
+                        if (context != null) {
+                            logger.warn(`In method ${this.doclet.longname}: Identifier '${k}' was referenced amongst dotted parameters found, but this identifier could not be found amongst the processed arguments. The plugin will assume this identifier is an object parameter with the dotted members as its members`);
+                        }
+                        let typeName = this.generateOptionsInterfaceName(conf);
+                        const argDoc: jsdoc.IParameter = {
+                            name: k,
+                            type: {
+                                names: [typeName]
+                            },
+                            description: "An object with the following properties"
+                        };
+                        paramMap.set(k, {
+                            members: [],
+                            param: argDoc
+                        });
+                        processed.set(k, argDoc);
+                        methodParams.unshift(argDoc);
+                    }
+                });
+
+                // 2nd pass: Register actual members
                 for (let arg of methodParams) {
                     //Are we visiting?
                     if (context != null) {
@@ -773,11 +816,6 @@ module TsdPlugin {
                             } else {
                                 parm.members.push(arg);
                             }
-                        } else {
-                            paramMap.set(arg.name, {
-                                members: [],
-                                param: arg
-                            });
                         }
                     }
                 }
