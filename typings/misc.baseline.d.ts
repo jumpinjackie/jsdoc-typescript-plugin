@@ -53,6 +53,24 @@ declare class Optionable {
      */
     constructor(options: IOptionableOptions);
 }
+/**
+ * A class that takes an options argument
+ */
+declare class ImproperlyDocumentedOptionable {
+    /**
+     * @param options  (Required) An object with the following properties
+     */
+    constructor(options: IImproperlyDocumentedOptionableOptions);
+}
+/**
+ * A class that takes an options array argument
+ */
+declare class ArrayOptionable {
+    /**
+     * @param employees  (Required) The employees who are responsible for the project.
+     */
+    constructor(employees: IArrayOptionableOptions[]);
+}
 declare class ClassWithOptionProperty {
     /**
      */
@@ -74,11 +92,43 @@ interface IOptionableOptions {
     /**
      * The authorization token to use to connect to the service.
      */
-    token: String;
+    token?: String;
     /**
      * A proxy to use for requests. This object is expected to have a getURL function which returns the proxied URL, if needed.
      */
-    proxy: any;
+    proxy?: any;
+    /**
+     * An optional string argument
+     */
+    arg?: String;
+}
+interface IImproperlyDocumentedOptionableOptions {
+    /**
+     * The URL of the service.
+     */
+    url: String;
+    /**
+     * The authorization token to use to connect to the service.
+     */
+    token?: String;
+    /**
+     * A proxy to use for requests. This object is expected to have a getURL function which returns the proxied URL, if needed.
+     */
+    proxy?: any;
+    /**
+     * An optional string argument
+     */
+    arg?: String;
+}
+interface IArrayOptionableOptions {
+    /**
+     * The name of an employee.
+     */
+    name: string;
+    /**
+     * The employee's department.
+     */
+    department: string;
 }
 interface IClassWithOptionPropertyOptions {
     /**
