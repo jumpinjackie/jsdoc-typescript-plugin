@@ -1,5 +1,7 @@
 /// <reference path="../typings/openlayers.d.ts" />
 
+// Current baseline: OpenLayers 3.18.2
+
 // Basic type variables for test functions
 var voidValue: void;
 var numberValue: number;
@@ -50,7 +52,7 @@ var simpleGeometry: ol.geom.SimpleGeometry;
 var tilegrid: ol.tilegrid.TileGrid;
 var vector: ol.source.Vector;
 var projection: ol.proj.Projection;
-var projectionLike: ol.proj.ProjectionLike;
+var projectionLike: ol.ProjectionLike;
 var transformFn: ol.TransformFunction;
 
 //
@@ -367,7 +369,7 @@ var view: ol.View = new ol.View({
 // ol.layer.Tile
 //
 var tileLayer: ol.layer.Tile = new ol.layer.Tile({
-    source: new ol.source.MapQuest({ layer: 'osm' })
+    source: new ol.source.OSM()
 });
 
 //
