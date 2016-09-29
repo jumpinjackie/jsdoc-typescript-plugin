@@ -140,19 +140,6 @@ interface IClassWithOptionPropertyOptions {
      */
     foo: number;
 }
-declare module coolmodule {
-    /**
-     * Lorem ipsum
-     * @param params  (Required) Blub
-     */
-    function doFoo(params: ICoolmoduleDoFooOptions): any;
-    interface ICoolmoduleDoFooOptions {
-        /**
-         * The ID
-         */
-        id: string;
-    }
-}
 declare module olx {
     module foo {
         interface Bar {
@@ -164,4 +151,17 @@ declare module olx {
             b: number;
         }
     }
+}
+declare module coolmodule {
+    interface ICoolmoduleDoFooOptions {
+        /**
+         * The ID
+         */
+        id: string;
+    }
+    /**
+     * Lorem ipsum
+     * @param params  (Required) Blub
+     */
+    function doFoo(params: coolmodule.ICoolmoduleDoFooOptions): any;
 }
