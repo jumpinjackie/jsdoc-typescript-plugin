@@ -887,8 +887,8 @@ module TsdPlugin {
                                 //This should be a dotted member. Split it
                                 let parts = member.name.split(".");
                                 let propName = parts[parts.length - 1];
-                                let retType = TypeUtil.parseAndConvertTypes(member.type, conf, logger);
-                                
+                                let retType = TypeUtil.parseAndConvertTypes(member.type, conf, logger, context);
+                                retType = TypeUtil.fixEnumTypeReferences(retType, conf);
                                 memberDefs.push(`/**\n * ${member.description}\n */\n${propName}${member.optional ? "?:" : ":"} ${retType.join("|")}`);
                             }
                             
@@ -1356,7 +1356,7 @@ module TsdPlugin {
                                         let parts = memberDoclet.name.split(".");
                                         let propName = parts[parts.length - 1];
                                         let retType = TypeUtil.parseAndConvertTypes(memberDoclet.type, conf, logger, context);
-                                        
+                                        retType = TypeUtil.fixEnumTypeReferences(retType, conf);
                                         memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: ${retType.join("|")}`);
                                     }
                                     
