@@ -847,7 +847,7 @@ module TsdPlugin {
                         params.push(p.param);
                         if (p.members.length > 0 && context != null) {
                             //Define a new options interface and register it with the context
-                            let moduleName = null;
+                            let moduleName = this.doclet.memberof;
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
@@ -1303,7 +1303,7 @@ module TsdPlugin {
                                 studiedMembers.push(p.member);
                                 if (p.members.length > 0 && context != null) {
                                     //Define a new options interface and register it with the context
-                                    let moduleName = null;
+                                    let moduleName = this.getParentModule();
                                     let typeName = this.generateOptionsInterfaceName();
                                     let memberDefs = [];
                                     

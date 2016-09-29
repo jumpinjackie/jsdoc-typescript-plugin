@@ -32,3 +32,13 @@ ImproperlyDocumentedOptionable = function(options) { };
 ArrayOptionable = function(employees) {
     // ...
 };
+
+/**
+ * Lorem ipsum
+ * @func
+ * @name doFoo
+ * @memberof coolmodule
+ * @param {Object} params - Blub
+ * @param {string} params.id - The ID
+ */
+function doFoo(params) { }
