@@ -848,6 +848,9 @@ module TsdPlugin {
                         if (p.members.length > 0 && context != null) {
                             //Define a new options interface and register it with the context
                             let moduleName = this.doclet.memberof;
+                            if (conf.globalModuleAliases.indexOf(moduleName) >= 0) {
+                                moduleName = null;
+                            }
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
@@ -1189,11 +1192,16 @@ module TsdPlugin {
             this.members.push(member);
         }
 
-        public findMember(name: string, kind: string): TSMember {
-            let matches = this.members.filter(m => {
-                let doclet = m.getDoclet();
-                return doclet.name == name && doclet.kind == kind;
-            });
+        public findMember(name: string, kind?: string): TSMember {
+            let matches: TSMember[];
+            if (kind != null) {
+                matches = this.members.filter(m => {
+                    let doclet = m.getDoclet();
+                    return doclet.name == name && doclet.kind == kind;
+                });
+            } else {
+                matches = this.members.filter(m => m.getDoclet().name == name);
+            }
             if (matches.length == 1)
                 return matches[0];
             else
@@ -1304,6 +1312,9 @@ module TsdPlugin {
                                 if (p.members.length > 0 && context != null) {
                                     //Define a new options interface and register it with the context
                                     let moduleName = this.getParentModule();
+                                    if (conf.globalModuleAliases.indexOf(moduleName) >= 0) {
+                                        moduleName = null;
+                                    }
                                     let typeName = this.generateOptionsInterfaceName();
                                     let memberDefs = [];
                                     

@@ -484,7 +484,35 @@ module TsdPlugin {
             return tree;
         }
 
-        private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule): boolean {
+        private resolveType(tree: ITSModule, typeNameParts: string[]): TSComposable|ITSModule {
+            if (typeNameParts.length == 0) {
+                return null;
+            }
+            if (typeNameParts.length == 1) {
+                let matches = tree.types.filter(t => t.getDoclet().name == typeNameParts[0]);
+                if (matches.length == 0) {
+                    if (tree.children.has(typeNameParts[0])) {
+                        return tree.children.get(typeNameParts[0]);
+                    }
+                }
+
+                if (matches.length == 1) {
+                    const match = matches[0];
+                    const kind = match.getKind();
+                    if (match instanceof TSComposable) {
+                        return match;
+                    }
+                }
+            } else {
+                if (tree.children.has(typeNameParts[0])) {
+                    const childTree = tree.children.get(typeNameParts[0]);
+                    return this.resolveType(childTree, typeNameParts.slice(1));
+                }
+            }
+            return null;
+        }
+
+        private putDefinitionInTree(type: IOutputtable, moduleName: string, root: ITSModule, logger: ILogger): boolean {
             if (moduleName == null) {
                 if (TypeUtil.isTsElementNotPublic(type)) {
                     return false;
@@ -493,38 +521,72 @@ module TsdPlugin {
                 return true;
             } else {
                 let moduleNameClean = ModuleUtils.cleanModuleName(moduleName);
-                //Before we put the definition in, if it is a function or constant and its parent module is private or
-                //configured to be ignored, skip it.
-                let bIgnoreThisType = (type.getKind() == TSOutputtableKind.Method || type.getKind() == TSOutputtableKind.Property) &&
-                    (
-                        (this.moduleDoclets.has(moduleNameClean) && TypeUtil.isPrivateDoclet(this.moduleDoclets.get(moduleNameClean), this.config)) ||
-                        (this.config.ignoreModules.indexOf(moduleNameClean) >= 0)
-                    );
-                if (bIgnoreThisType) {
-                    return false;
-                }
-                
-                if (TypeUtil.isTsElementNotPublic(type)) {
-                    return false;
-                }
-                
-                if (ModuleUtils.isAMD(moduleNameClean)) {
-                    //No nesting required for AMD modules
-                    if (!root.children.has(moduleNameClean)) {
-                        root.children.set(moduleNameClean, {
-                            isRoot:   true,
-                            children: new Map(),
-                            types:    []
-                        });
+                if (moduleNameClean.indexOf("#") >= 0) {
+                    //This is an illegal module name and most likely the result of parsing an inner object property
+                    //from within an AMD module (or it could be bad JSDoc documentation)
+                    //
+                    //NOTE: This ultimately doesn't actually do anyting at the moment. All returns will be false and 
+                    //this type won't be added, but it should at least log something useful along the way
+                    const parts = moduleNameClean.split("#");
+                    const parentName = parts[0];
+                    const memberName = parts[1];
+                    const resolvedType = this.resolveType(root, parentName.split("."));
+                    if (resolvedType == null) {
+                        return false;
                     }
-                    root.children.get(moduleNameClean).types.push(type);
-                    return true;
+                    if (resolvedType instanceof TSComposable) {
+                        const resolvedMember = resolvedType.findMember(memberName);
+                        if (resolvedMember == null) {
+                            logger.warn(`Type or member (${type.getFullName()}) has a parent of (${moduleNameClean}) which doesn't resolve to any processed type. Skipping this type`);
+                            return false;
+                        } else {
+                            logger.warn(`Type or member (${type.getFullName()}) has a parent of (${moduleNameClean}) which resolves to a known member, but this plugin doesn't know how to process this type yet. Skipping`);
+                            return false;
+                        }
+                    } else { //module
+                        const matchingMembers = resolvedType.types.filter(t => t.getDoclet().name == memberName);;
+                        if (matchingMembers.length == 1) {
+                            logger.warn(`Type or member (${type.getFullName()}) has a parent of (${moduleNameClean}) which doesn't resolve to any processed type. Skipping this type`);
+                            return false;
+                        } else {
+                            logger.warn(`Type or member (${type.getFullName()}) has a parent of (${moduleNameClean}) which resolves to a known module member, but this plugin doesn't know how to process this type yet. Skipping`);
+                            return false;
+                        }
+                    }
                 } else {
-                    //Explode this module name and see how many levels we need to go
-                    let moduleNameParts = moduleNameClean.split(".");
-                    let tree = this.ensureModuleTree(root, moduleNameParts);
-                    tree.types.push(type);
-                    return true;
+                    //Before we put the definition in, if it is a function or constant and its parent module is private or
+                    //configured to be ignored, skip it.
+                    let bIgnoreThisType = (type.getKind() == TSOutputtableKind.Method || type.getKind() == TSOutputtableKind.Property) &&
+                        (
+                            (this.moduleDoclets.has(moduleNameClean) && TypeUtil.isPrivateDoclet(this.moduleDoclets.get(moduleNameClean), this.config)) ||
+                            (this.config.ignoreModules.indexOf(moduleNameClean) >= 0)
+                        );
+                    if (bIgnoreThisType) {
+                        return false;
+                    }
+                    
+                    if (TypeUtil.isTsElementNotPublic(type)) {
+                        return false;
+                    }
+                    
+                    if (ModuleUtils.isAMD(moduleNameClean)) {
+                        //No nesting required for AMD modules
+                        if (!root.children.has(moduleNameClean)) {
+                            root.children.set(moduleNameClean, {
+                                isRoot:   true,
+                                children: new Map(),
+                                types:    []
+                            });
+                        }
+                        root.children.get(moduleNameClean).types.push(type);
+                        return true;
+                    } else {
+                        //Explode this module name and see how many levels we need to go
+                        let moduleNameParts = moduleNameClean.split(".");
+                        let tree = this.ensureModuleTree(root, moduleNameParts);
+                        tree.types.push(type);
+                        return true;
+                    }
                 }
             }
         }
@@ -532,7 +594,7 @@ module TsdPlugin {
         /**
          * This method groups all of our collected TS types according to their parent module
          */
-        private assembleModuleTree(): ITSModule {
+        private assembleModuleTree(logger: ILogger): ITSModule {
             let root: ITSModule = {
                 isRoot:   null,
                 children: new Map(),
@@ -540,12 +602,12 @@ module TsdPlugin {
             };
             for (let typedef of this.userTypeAliases) {
                 let moduleName = typedef.getParentModule();
-                if (this.putDefinitionInTree(typedef, moduleName, root))
+                if (this.putDefinitionInTree(typedef, moduleName, root, logger))
                     this.stats.typedefs.user++;
             }
             for (let iface of this.userInterfaces) {
                 let moduleName = iface.getParentModule();
-                if (this.putDefinitionInTree(iface, moduleName, root))
+                if (this.putDefinitionInTree(iface, moduleName, root, logger))
                     this.stats.ifaces++;
             }
             for (let oType of this.globalMembers) {
@@ -556,18 +618,12 @@ module TsdPlugin {
                     continue;
                 root.types.push(oType);
             }
-            this.moduleMembers.forEach((members, modName) => {
-                for (let member of members) {
-                    if (this.putDefinitionInTree(member, modName, root))
-                        this.stats.moduleMembers++;
-                }
-            });
             this.classes.forEach((cls, typeName) => {
                 if (!cls.getIsPublic())
                     return;
                 console.log(`Processing class: ${typeName}`);
                 let moduleName = cls.getParentModule();
-                if (this.putDefinitionInTree(cls, moduleName, root))
+                if (this.putDefinitionInTree(cls, moduleName, root, logger))
                     this.stats.classes++;
             });
             this.typedefs.forEach((tdf, typeName) => {
@@ -575,8 +631,14 @@ module TsdPlugin {
                     return;
                 console.log(`Processing typedef: ${typeName}`);
                 let moduleName = tdf.getParentModule();
-                if (this.putDefinitionInTree(tdf, moduleName, root))
+                if (this.putDefinitionInTree(tdf, moduleName, root, logger))
                     this.stats.typedefs.gen++;
+            });
+            this.moduleMembers.forEach((members, modName) => {
+                for (let member of members) {
+                    if (this.putDefinitionInTree(member, modName, root, logger))
+                        this.stats.moduleMembers++;
+                }
             });
             return root;
         }
@@ -616,7 +678,7 @@ module TsdPlugin {
             }
             
             //Write the main d.ts body
-            let tree = this.assembleModuleTree();
+            let tree = this.assembleModuleTree(logger);
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.indent();
             }
