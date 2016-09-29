@@ -9,7 +9,10 @@
     "cesium-doc": "jsdoc -c ./jsdoc.cesium.json -d ./docs/cesium",
     "misc-doc": "jsdoc -c ./jsdoc.misc.json -d ./docs/misc",
     "bad-doc": "jsdoc -c ./jsdoc.bad.json -d ./docs/bad",
-    "test": "npm run build && npm run ol-doc && npm run misc-doc && tsc ./typings/misc.d.ts && tsc ./typings/openlayers.d.ts && tsc test/openlayers-tests.ts"
+    "test:misc": "npm run misc-doc && tsc ./typings/misc.d.ts",
+    "test:cesium": "npm run cesium-doc && tsc ./typings/cesium.d.ts",
+    "test:ol": "npm run ol-doc && tsc ./typings/openlayers.d.ts && tsc test/openlayers-tests.ts",
+    "test": "npm run build && npm run test:misc && npm run test:ol"
   },
   "repository": {
     "type": "git",
