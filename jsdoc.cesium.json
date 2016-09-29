@@ -61,6 +61,16 @@
                 "TimeStandard": "number"
             }
         },
+        "memberReplacements": {
+            "Viewer#flyTo": {
+                "description": "Flies the camera to the provided target",
+                "declaration": "flyTo(target: any, options?: Viewer.IViewerFlyToOptions): Promise<Boolean>;"
+            },
+            "Viewer#zoomTo": {
+                "description": "Asynchronously sets the camera to view the provided target",
+                "declaration": "zoomTo(target: any, offset?: HeadingPitchRange): Promise<Boolean>;"
+            }
+        },
         "ignoreModules": [
             "<anonymous>"
         ],
@@ -69,7 +79,9 @@
         ],
         "typeReplacements": {
             "Image": "HTMLImageElement",
-            "Canvas": "HTMLCanvasElement"
+            "Canvas": "HTMLCanvasElement",
+            "String": "string",
+            "Any": "any"
         }
     },
     "templates": {
