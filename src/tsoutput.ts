@@ -108,7 +108,40 @@ module TsdPlugin {
     }
     
     export class TypeUtil {
-        
+        /**
+         * Normalizes the given module name
+         * 
+         * @static
+         * @param {string} modName
+         * @param {string[]} globalModuleAliases
+         * @returns {string}
+         * 
+         * @memberOf TypeUtil
+         */
+        public static normalizeModuleName(modName: string, globalModuleAliases: string[]): string {
+            //Define a new options interface and register it with the context
+            let moduleName = modName;
+            if (globalModuleAliases.indexOf(moduleName) >= 0) {
+                moduleName = null;
+            }
+            //Check if it's dotted and whether the first part is a global module alias
+            //If so, omit that part
+            if (moduleName != null && moduleName.indexOf(".") >= 0) {
+                const parts = moduleName.split(".");
+                if (globalModuleAliases.indexOf(parts[0]) >= 0) {
+                    moduleName = parts.slice(1).join(".");
+                }
+            }
+            //Check if it's tildefied and whether the first part is a global module alias
+            //If so omit that part
+            if (moduleName != null && moduleName.indexOf("~") >= 0) {
+                const parts = moduleName.split("~");
+                if (globalModuleAliases.indexOf(parts[0]) >= 0) {
+                    moduleName = parts.slice(1).join("~");
+                }
+            }
+            return moduleName;
+        }
         /**
          * Returns a clean version of the given type name, stripped of whatever JSDoc-isms
          */
@@ -846,11 +879,7 @@ module TsdPlugin {
                     if (p != null) {
                         params.push(p.param);
                         if (p.members.length > 0 && context != null) {
-                            //Define a new options interface and register it with the context
-                            let moduleName = this.doclet.memberof;
-                            if (conf.globalModuleAliases.indexOf(moduleName) >= 0) {
-                                moduleName = null;
-                            }
+                            let moduleName = TypeUtil.normalizeModuleName(this.doclet.memberof, conf.globalModuleAliases);
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
                             
@@ -865,7 +894,7 @@ module TsdPlugin {
                             
                             let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                             context.registerTypedef(typeName, iface);
-                            console.log(`Registered ad-hoc interface type: ${typeName}`);
+                            console.log(`Registered ad-hoc interface type: ${typeName} (module: ${moduleName})`);
                             
                             //TODO: Hmmm, should we be modifying doclets given by JSDoc?
                             if (moduleName != null) {
@@ -1317,10 +1346,7 @@ module TsdPlugin {
                                 studiedMembers.push(p.member);
                                 if (p.members.length > 0 && context != null) {
                                     //Define a new options interface and register it with the context
-                                    let moduleName = this.getParentModule();
-                                    if (conf.globalModuleAliases.indexOf(moduleName) >= 0) {
-                                        moduleName = null;
-                                    }
+                                    let moduleName = TypeUtil.normalizeModuleName(this.getParentModule(), conf.globalModuleAliases);
                                     let typeName = this.generateOptionsInterfaceName();
                                     let memberDefs = [];
                                     
