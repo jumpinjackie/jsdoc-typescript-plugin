@@ -868,9 +868,15 @@ module TsdPlugin {
                             console.log(`Registered ad-hoc interface type: ${typeName}`);
                             
                             //TODO: Hmmm, should we be modifying doclets given by JSDoc?
-                            p.param.type.names = [
-                                `${typeName}${arrayParents.has(arg.name) ? "[]" : ""}`
-                            ];
+                            if (moduleName != null) {
+                                p.param.type.names = [
+                                    `${moduleName}.${typeName}${arrayParents.has(arg.name) ? "[]" : ""}`
+                                ];
+                            } else {
+                                p.param.type.names = [
+                                    `${typeName}${arrayParents.has(arg.name) ? "[]" : ""}`
+                                ];
+                            }
                         }
                     }
                 }
