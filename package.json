@@ -12,7 +12,7 @@
     "test:misc": "npm run misc-doc && tsc ./typings/misc.d.ts",
     "test:cesium": "npm run cesium-doc && tsc ./typings/cesium.d.ts",
     "test:ol": "npm run ol-doc && tsc ./typings/openlayers.d.ts && tsc test/openlayers-tests.ts",
-    "test": "npm run build && npm run test:misc && npm run test:ol"
+    "test": "npm run build && npm run test:misc && npm run test:ol && npm run test:cesium"
   },
   "repository": {
     "type": "git",
