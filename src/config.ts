@@ -58,6 +58,30 @@ module TsdPlugin {
     }
 
     /**
+     * Describes a class type augmentation. You can have a class extend another class or implement extra interfaces 
+     * 
+     * @export
+     * @interface IClassTypeAugmentation
+     */
+    export interface IClassTypeAugmentation {
+        /**
+         * The class this generated class should be extending. Only applies if when generating, the class has been
+         * determined to not be inheriting from any other class
+         * 
+         * @type {string}
+         * @memberOf IClassTypeAugmentation
+         */
+        extends?: string;
+        /**
+         * An array of interfaces that this generated class should be implementing
+         * 
+         * @type {string[]}
+         * @memberOf IClassTypeAugmentation
+         */
+        implements?: string[];
+    }
+
+    /**
      * Defines the root plugin configuration section of the JSDoc configuration
      */
     export interface IPluginConfig {
@@ -188,5 +212,12 @@ module TsdPlugin {
          * Used to instruct the plugin to configure the given types as enums regardless of what the processed doclet may suggest it is
          */
         processAsEnums?: IEnumConfiguration;
+        /**
+         * Used to add type augmentations for any generated classes. 
+         * 
+         * @type {Dictionary<IClassTypeAugmentation>}
+         * @memberOf IPluginConfig
+         */
+        classTypeAugmentations?: Dictionary<IClassTypeAugmentation>;
     }
 }

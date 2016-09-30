@@ -1677,6 +1677,7 @@ module TsdPlugin {
                 //type replacer
                 clsDecl += "<" + genericTypes.join(", ") + ">";
             }
+            const aug = conf.classTypeAugmentations[this.doclet.name];
             //Inheritance
             if (this.doclet.augments != null) {
                 let parents = this.doclet
@@ -1684,6 +1685,11 @@ module TsdPlugin {
                                   .map(p => TypeUtil.getTypeReplacement(p, conf, logger, null))
                                   .join(",");
                 clsDecl += " extends " + parents;
+            } else if (aug && aug.extends) {
+                clsDecl += ` extends ${aug.extends}`;
+            }
+            if (aug && aug.implements && aug.implements.length > 0) {
+                clsDecl += ` implements ${aug.implements.join(", ")}`;
             }
             clsDecl += " {";
             stream.writeln(clsDecl);

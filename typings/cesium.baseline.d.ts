@@ -7436,7 +7436,7 @@ declare module __Cesium {
     /**
      * A {@link DataSource} implementation which can be used to manually manage a group of entities.
      */
-    class CustomDataSource {
+    class CustomDataSource extends DataSource {
         /**
          * A {@link DataSource} implementation which can be used to manually manage a group of entities.
          * @param name  (Optional) A human-readable name for this instance.
@@ -7650,7 +7650,7 @@ declare module __Cesium {
     /**
      * A {@link DataSource} which processes {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/CZML-Guide|CZML}.
      */
-    class CzmlDataSource {
+    class CzmlDataSource extends DataSource {
         /**
          * A {@link DataSource} which processes {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/CZML-Guide|CZML}.
          * @param name  (Optional) An optional name for the data source.  This value will be overwritten if a loaded document contains a name.
@@ -8592,7 +8592,7 @@ declare module __Cesium {
     /**
      * A {@link DataSource} which processes both{@link http://www.geojson.org/|GeoJSON} and {@link https://github.com/mbostock/topojson|TopoJSON} data.{@link https://github.com/mapbox/simplestyle-spec|simplestyle-spec} properties will also be used if theyare present.
      */
-    class GeoJsonDataSource {
+    class GeoJsonDataSource extends DataSource {
         /**
          * A {@link DataSource} which processes both{@link http://www.geojson.org/|GeoJSON} and {@link https://github.com/mbostock/topojson|TopoJSON} data.{@link https://github.com/mapbox/simplestyle-spec|simplestyle-spec} properties will also be used if theyare present.
          * @param name  (Optional) The name of this data source.  If undefined, a name will be taken from                       the name of the GeoJSON file.
@@ -8911,7 +8911,7 @@ declare module __Cesium {
     /**
      * A {@link DataSource} which processes Keyhole Markup Language 2.2 (KML).<p>KML support in Cesium is incomplete, but a large amount of the standard,as well as Google's <code>gx</code> extension namespace, is supported. See Github issue{@link https://github.com/AnalyticalGraphicsInc/cesium/issues/873|#873} for adetailed list of what is and isn't support. Cesium will also write information to theconsole when it encounters most unsupported features.</p><p>Non visual feature data, such as <code>atom:author</code> and <code>ExtendedData</code>is exposed via an instance of {@link KmlFeatureData}, which is added to each {@link Entity}under the <code>kml</code> property.</p>
      */
-    class KmlDataSource {
+    class KmlDataSource extends DataSource {
         /**
          * A {@link DataSource} which processes Keyhole Markup Language 2.2 (KML).<p>KML support in Cesium is incomplete, but a large amount of the standard,as well as Google's <code>gx</code> extension namespace, is supported. See Github issue{@link https://github.com/AnalyticalGraphicsInc/cesium/issues/873|#873} for adetailed list of what is and isn't support. Cesium will also write information to theconsole when it encounters most unsupported features.</p><p>Non visual feature data, such as <code>atom:author</code> and <code>ExtendedData</code>is exposed via an instance of {@link KmlFeatureData}, which is added to each {@link Entity}under the <code>kml</code> property.</p>
          * @param options  (Required) An object with the following properties

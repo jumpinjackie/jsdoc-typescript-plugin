@@ -75,7 +75,8 @@ module TsdPlugin {
                 processAsEnums: {
                     //native: [],
                     classes: {}
-                }
+                },
+                classTypeAugmentations: {}
             };
 
             this.config = Object.assign(defaults, config, {

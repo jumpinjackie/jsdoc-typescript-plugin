@@ -105,6 +105,20 @@
             "Canvas": "HTMLCanvasElement",
             "String": "string",
             "Any": "any"
+        },
+        "classTypeAugmentations": {
+            "GeoJsonDataSource": {
+                "extends": "DataSource"
+            },
+            "KmlDataSource": {
+                "extends": "DataSource"
+            },
+            "CzmlDataSource": {
+                "extends": "DataSource"
+            },
+            "CustomDataSource": {
+                "extends": "DataSource"
+            }
         }
     },
     "templates": {
