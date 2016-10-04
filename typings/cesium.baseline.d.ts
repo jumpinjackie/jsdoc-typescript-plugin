@@ -1,4 +1,4 @@
-// Type definitions for Cesium v1.25
+// Type definitions for Cesium v1.26
 // Project: https://cesiumjs.org
 // Definitions by: Jackie Ng <https://github.com/jumpinjackie>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -11,6 +11,15 @@
 //
 
 declare module __Cesium {
+    /**
+     * Cesium's internal copy of knockout.js
+     */
+    const knockout: any; //TODO: Should probably link to knockout d.ts 
+    /**
+     * Cesium's internal copy of when.js
+     */
+    const when: any; //TODO: If there's a typings for this, we should be linking against it
+
     /**
      * Type alias for a promise
      */
@@ -2194,6 +2203,85 @@ declare module __Cesium {
          * The stack trace of this exception, if available.
          */
         stack: string;
+    }
+    /**
+     * Determines visibility based on the distance to the camera.
+     */
+    class DistanceDisplayCondition {
+        /**
+         * Determines visibility based on the distance to the camera.
+         * @param near  (Optional) The smallest distance in the interval where the object is visible.
+         * @param far  (Optional) The largest distance in the interval where the object is visible.
+         */
+        constructor(near?: Number, far?: Number);
+        /**
+         * The smallest distance in the interval where the object is visible.
+         */
+        near: Number;
+        /**
+         * The largest distance in the interval where the object is visible.
+         */
+        far: Number;
+        /**
+         * Determines if two distance display conditions are equal.
+         * @param left  (Required) A distance display condition.
+         * @param right  (Required) Another distance display condition.
+         */
+        static equals(left: DistanceDisplayCondition, right: DistanceDisplayCondition): Boolean;
+        /**
+         * Duplicates a distance display condition instance.
+         * @param value  (Optional) The distance display condition to duplicate.
+         * @param result  (Optional) The result onto which to store the result.
+         */
+        static clone(value?: DistanceDisplayCondition, result?: DistanceDisplayCondition): DistanceDisplayCondition;
+        /**
+         * Duplicates this instance.
+         * @param result  (Optional) The result onto which to store the result.
+         */
+        clone(result?: DistanceDisplayCondition): DistanceDisplayCondition;
+        /**
+         * Determines if this distance display condition is equal to another.
+         * @param other  (Required) Another distance display condition.
+         */
+        equals(other: DistanceDisplayCondition): Boolean;
+    }
+    /**
+     * Value and type information for per-instance geometry attribute that determines if the geometry instance has a distance display condition.
+     */
+    class DistanceDisplayConditionGeometryInstanceAttribute {
+        /**
+         * Value and type information for per-instance geometry attribute that determines if the geometry instance has a distance display condition.
+         * @param near  (Optional) The near distance.
+         * @param far  (Optional) The far distance.
+         */
+        constructor(near?: Number, far?: Number);
+        /**
+         * The values for the attributes stored in a typed array.
+         */
+        value: Float32Array;
+        /**
+         * The datatype of each component in the attribute, e.g., individual elements in{@link DistanceDisplayConditionGeometryInstanceAttribute#value}.
+         */
+        componentDatatype: number;
+        /**
+         * The number of components in the attributes, i.e., {@link DistanceDisplayConditionGeometryInstanceAttribute#value}.
+         */
+        componentsPerAttribute: Number;
+        /**
+         * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.
+         */
+        normalize: Boolean;
+        /**
+         * Creates a new {@link DistanceDisplayConditionGeometryInstanceAttribute} instance given the provided an enabled flag and {@link DistanceDisplayCondition}.
+         * @param distanceDisplayCondition  (Required) The distance display condition.
+         */
+        static fromDistanceDisplayCondition(distanceDisplayCondition: DistanceDisplayCondition): DistanceDisplayConditionGeometryInstanceAttribute;
+        /**
+         * Converts a distance display condition to a typed array that can be used to assign a distance display condition attribute.
+         * @param distanceDisplayCondition  (Required) The distance display condition value.
+         * @param result  (Optional) The array to store the result in, if undefined a new instance will be created.
+         */
+        static toValue(distanceDisplayCondition: DistanceDisplayCondition, result?: Float32Array): Float32Array;
     }
     /**
      * A description of an ellipse on an ellipsoid. Ellipse geometry can be rendered with both {@link Primitive} and {@link GroundPrimitive}.
@@ -6646,6 +6734,10 @@ declare module __Cesium {
          */
         sizeInMeters: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this billboard will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -6662,10 +6754,10 @@ declare module __Cesium {
     class BillboardVisualizer {
         /**
          * A {@link Visualizer} which maps {@link Entity#billboard} to a {@link Billboard}.
-         * @param scene  (Required) The scene the primitives will be rendered in.
+         * @param entityCluster  (Required) The entity cluster to manage the collection of billboards and optionally cluster with other entities.
          * @param entityCollection  (Required) The entityCollection to visualize.
          */
-        constructor(scene: Scene, entityCollection: EntityCollection);
+        constructor(entityCluster: EntityCluster, entityCollection: EntityCollection);
         /**
          * Updates the primitives created by this visualizer to match theirEntity counterpart at the given time.
          * @param time  (Required) The time to update to.
@@ -6734,6 +6826,10 @@ declare module __Cesium {
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
         shadowsProperty: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
         /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
@@ -6825,6 +6921,10 @@ declare module __Cesium {
          * Get or sets the enum Property specifying whether the boxcasts or receives shadows from each light source.
          */
         shadows: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this box will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -7308,6 +7408,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -7423,6 +7527,10 @@ declare module __Cesium {
          */
         shadows: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this corridor will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -7474,6 +7582,10 @@ declare module __Cesium {
          * Gets whether or not this data source should be displayed.
          */
         show: Boolean;
+        /**
+         * Gets or sets the clustering options for this data source. This object can be shared between multiple data sources.
+         */
+        clustering: EntityCluster;
     }
     /**
      * A {@link GeometryUpdater} for cylinders.Clients do not normally create this class directly, but instead rely on {@link DataSourceDisplay}.
@@ -7529,6 +7641,10 @@ declare module __Cesium {
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
         shadowsProperty: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
         /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
@@ -7637,6 +7753,10 @@ declare module __Cesium {
          */
         shadows: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this cylinder will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -7694,6 +7814,10 @@ declare module __Cesium {
          * Gets whether or not this data source should be displayed.
          */
         show: Boolean;
+        /**
+         * Gets or sets the clustering options for this data source. This object can be shared between multiple data sources.
+         */
+        clustering: EntityCluster;
         /**
          * Gets the array of CZML processing functions.
          */
@@ -7782,6 +7906,10 @@ declare module __Cesium {
          * Gets whether or not this data source should be displayed.
          */
         show: Boolean;
+        /**
+         * Gets or sets the clustering options for this data source. This object can be shared between multiple data sources.
+         */
+        clustering: EntityCluster;
         /**
          * Updates the data source to the provided time.  This function is optional andis not required to be implemented.  It is provided for data sources whichretrieve data based on the current animation time or scene state.If implemented, update will be called by {@link DataSourceDisplay} once a frame.
          * @param time  (Required) The simulation time.
@@ -8024,6 +8152,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -8147,6 +8279,10 @@ declare module __Cesium {
          */
         shadows: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this ellipse will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -8211,6 +8347,10 @@ declare module __Cesium {
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
         shadowsProperty: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
         /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
@@ -8314,6 +8454,10 @@ declare module __Cesium {
          * Get or sets the enum Property specifying whether the ellipsoidcasts or receives shadows from each light source.
          */
         shadows: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this ellipsoid will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -8466,6 +8610,36 @@ declare module __Cesium {
          * @param source  (Required) The object to be merged into this object.
          */
         merge(source: Entity): void;
+    }
+    /**
+     * Defines how screen space objects (billboards, points, labels) are clustered.
+     */
+    class EntityCluster {
+        /**
+         * Defines how screen space objects (billboards, points, labels) are clustered.
+         * @param options  (Optional) An object with the following properties:
+         */
+        constructor(options?: IEntityClusterOptions);
+        /**
+         * Gets or sets whether clustering is enabled.
+         */
+        enabled: Boolean;
+        /**
+         * Gets or sets the pixel range to extend the screen space bounding box.
+         */
+        pixelRange: Number;
+        /**
+         * Gets or sets the minimum number of screen space objects that can be clustered.
+         */
+        minimumClusterSize: Number;
+        /**
+         * Gets the event that will be raised when a new cluster will be displayed. The signature of the event listener is {@link EntityCluster~newClusterCallback}.
+         */
+        clusterEvent: Event;
+        /**
+         * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministicrelease of WebGL resources, instead of relying on the garbage collector to destroy this object.<p>Unlike other objects that use WebGL resources, this object can be reused. For example, if a data source is removedfrom a data source collection and added to another.</p>
+         */
+        destroy(): void;
     }
     /**
      * An observable collection of {@link Entity} instances where each entity has a unique id.
@@ -8676,6 +8850,10 @@ declare module __Cesium {
          * Gets whether or not this data source should be displayed.
          */
         show: Boolean;
+        /**
+         * Gets or sets the clustering options for this data source. This object can be shared between multiple data sources.
+         */
+        clustering: EntityCluster;
         /**
          * Asynchronously loads the provided GeoJSON or TopoJSON data, replacing any existing data.
          * @param data  (Required) A url, GeoJSON object, or TopoJSON object to be loaded.
@@ -8964,6 +9142,10 @@ declare module __Cesium {
          */
         show: Boolean;
         /**
+         * Gets or sets the clustering options for this data source. This object can be shared between multiple data sources.
+         */
+        clustering: EntityCluster;
+        /**
          * Asynchronously loads the provided KML data, replacing any existing data.
          * @param data  (Required) A url, parsed KML document, or Blob containing binary KMZ data or a parsed KML document.
          * @param options  (Optional) An object with the following properties:
@@ -9082,6 +9264,10 @@ declare module __Cesium {
          */
         pixelOffsetScaleByDistance: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this label will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -9098,10 +9284,10 @@ declare module __Cesium {
     class LabelVisualizer {
         /**
          * A {@link Visualizer} which maps the {@link LabelGraphics} instancein {@link Entity#label} to a {@link Label}.
-         * @param scene  (Required) The scene the primitives will be rendered in.
+         * @param entityCluster  (Required) The entity cluster to manage the collection of billboards and optionally cluster with other entities.
          * @param entityCollection  (Required) The entityCollection to visualize.
          */
-        constructor(scene: Scene, entityCollection: EntityCollection);
+        constructor(entityCluster: EntityCluster, entityCollection: EntityCollection);
         /**
          * Updates the primitives created by this visualizer to match theirEntity counterpart at the given time.
          * @param time  (Required) The time to update to.
@@ -9183,14 +9369,6 @@ declare module __Cesium {
          */
         incrementallyLoadTextures: Property;
         /**
-         * Get or sets the boolean Property specifying whether the modelcasts shadows from each light source.
-         */
-        castShadows: Property;
-        /**
-         * Get or sets the boolean Property specifying whether the modelreceives shadows from shadow casters in the scene.
-         */
-        receiveShadows: Property;
-        /**
          * Get or sets the enum Property specifying whether the modelcasts or receives shadows from each light source.
          */
         shadows: Property;
@@ -9210,6 +9388,10 @@ declare module __Cesium {
          * Gets or sets the Property specifying the {@link HeightReference}.
          */
         heightReference: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this model will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -9324,6 +9506,10 @@ declare module __Cesium {
          */
         trailTime: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this path will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -9404,6 +9590,10 @@ declare module __Cesium {
          */
         heightReference: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this point will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -9420,10 +9610,10 @@ declare module __Cesium {
     class PointVisualizer {
         /**
          * A {@link Visualizer} which maps {@link Entity#point} to a {@link PointPrimitive}.
-         * @param scene  (Required) The scene the primitives will be rendered in.
+         * @param entityCluster  (Required) The entity cluster to manage the collection of billboards and optionally cluster with other entities.
          * @param entityCollection  (Required) The entityCollection to visualize.
          */
-        constructor(scene: Scene, entityCollection: EntityCollection);
+        constructor(entityCluster: EntityCluster, entityCollection: EntityCollection);
         /**
          * Updates the primitives created by this visualizer to match theirEntity counterpart at the given time.
          * @param time  (Required) The time to update to.
@@ -9492,6 +9682,10 @@ declare module __Cesium {
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
         shadowsProperty: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
         /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
@@ -9715,6 +9909,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -9844,6 +10042,10 @@ declare module __Cesium {
          */
         shadows: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this polyline will be displayed.
+         */
+        distanceDisplayCondition: Property;
+        /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
          */
@@ -9955,6 +10157,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -10057,6 +10263,10 @@ declare module __Cesium {
          * Get or sets the enum Property specifying whether the volumecasts or receives shadows from each light source.
          */
         shadows: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this volume will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -10327,6 +10537,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -10448,6 +10662,10 @@ declare module __Cesium {
          * Get or sets the enum Property specifying whether the rectanglecasts or receives shadows from each light source.
          */
         shadows: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this rectangle will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -10994,6 +11212,10 @@ declare module __Cesium {
          */
         shadowsProperty: Property;
         /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this geometry will be displayed.
+         */
+        distanceDisplayConditionProperty: Property;
+        /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
         isDynamic: Boolean;
@@ -11096,6 +11318,10 @@ declare module __Cesium {
          * Get or sets the enum Property specifying whether the wallcasts or receives shadows from each light source.
          */
         shadows: Property;
+        /**
+         * Gets or sets the {@link DistanceDisplayCondition} Property specifying at what distance from the camera that this wall will be displayed.
+         */
+        distanceDisplayCondition: Property;
         /**
          * Duplicates this instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -11331,6 +11557,10 @@ declare module __Cesium {
          */
         sizeInMeters: Boolean;
         /**
+         * Gets or sets the condition specifying at what distance from the camera that this billboard will be displayed.
+         */
+        distanceDisplayCondition: DistanceDisplayCondition;
+        /**
          * Gets or sets the user-defined object returned when the billboard is picked.
          */
         id: any;
@@ -11434,7 +11664,7 @@ declare module __Cesium {
          */
         constructor(options: IBingMapsImageryProviderOptions);
         /**
-         * The default {@link ImageryLayer#gamma} to use for imagery layers created for this provider.By default, this is set to 1.3 for the "aerial" and "aerial with labels" map styles and 1.0 forall others.  Changing this value after creating an {@link ImageryLayer} for this provider will haveno effect.  Instead, set the layer's {@link ImageryLayer#gamma} property.
+         * The default {@link ImageryLayer#gamma} to use for imagery layers created for this provider.Changing this value after creating an {@link ImageryLayer} for this provider will haveno effect.  Instead, set the layer's {@link ImageryLayer#gamma} property.
          */
         defaultGamma: Number;
         /**
@@ -12095,6 +12325,32 @@ declare module __Cesium {
         getRenderState(): any;
     }
     /**
+     * Draws the outline of the camera's view frustum.
+     */
+    class DebugCameraPrimitive {
+        /**
+         * Draws the outline of the camera's view frustum.
+         * @param options  (Required) Object with the following properties:
+         */
+        constructor(options: IDebugCameraPrimitiveOptions);
+        /**
+         * Determines if this primitive will be shown.
+         */
+        show: Boolean;
+        /**
+         * User-defined object returned when the primitive is picked.
+         */
+        id: any;
+        /**
+         * Returns true if this object was destroyed; otherwise, false.<p>If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.</p>
+         */
+        isDestroyed(): Boolean;
+        /**
+         * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministicrelease of WebGL resources, instead of relying on the garbage collector to destroy this object.<p>Once an object is destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.  Therefore,assign the return value (<code>undefined</code>) to the object as done in the example.</p>
+         */
+        destroy(): void;
+    }
+    /**
      * Draws the axes of a reference frame defined by a matrix that transforms to worldcoordinates, i.e., Earth's WGS84 coordinates.  The most prominent example isa primitives <code>modelMatrix</code>.<p>The X axis is red; Y is green; and Z is blue.</p><p>This is for debugging only; it is not optimized for production use.</p>
      */
     class DebugModelMatrixPrimitive {
@@ -12460,14 +12716,6 @@ declare module __Cesium {
          * Gets an event that's raised when the length of the tile load queue has changed since the last render frame.  When the load queue is empty,all terrain and imagery for the current view have been loaded.  The event passes the new length of the tile load queue.
          */
         tileLoadProgressEvent: Event;
-        /**
-         * Determines whether the globe casts shadows from each light source.
-         */
-        castShadows: Boolean;
-        /**
-         * Determines whether the globe receives shadows from shadow casters in the scene.
-         */
-        receiveShadows: Boolean;
         /**
          * Find an intersection between a ray and the globe surface that was rendered. The ray must be given in world coordinates.
          * @param ray  (Required) The ray to test for intersection.
@@ -13185,6 +13433,10 @@ declare module __Cesium {
          */
         scale: Number;
         /**
+         * Gets or sets the condition specifying at what distance from the camera that this label will be displayed.
+         */
+        distanceDisplayCondition: DistanceDisplayCondition;
+        /**
          * Gets or sets the user-defined object returned when the label is picked.
          */
         id: any;
@@ -13623,13 +13875,9 @@ declare module __Cesium {
          */
         pendingTextureLoads: Number;
         /**
-         * Determines whether the model casts shadows from each light source.
+         * Gets or sets the condition specifying at what distance from the camera that this model will be displayed.
          */
-        castShadows: Boolean;
-        /**
-         * Determines whether the model receives shadows from shadow casters in the scene.
-         */
-        receiveShadows: Boolean;
+        distanceDisplayCondition: DistanceDisplayCondition;
         /**
          * <p>Creates a model from a glTF asset.  When the model is ready to render, i.e., when the external binary, image,and shader files are downloaded and the WebGL resources are created, the {@link Model#readyPromise} is resolved.</p><p>The model can be a traditional glTF asset with a .gltf extension or a Binary glTF using theKHR_binary_glTF extension with a .glb extension.</p><p>For high-precision rendering, Cesium supports the CESIUM_RTC extension, which introduces theCESIUM_RTC_MODELVIEW parameter semantic that says the node is in WGS84 coordinates translatedrelative to a local origin.</p>
          * @param options  (Required) Object with the following properties:
@@ -14189,6 +14437,10 @@ declare module __Cesium {
          */
         outlineWidth: Number;
         /**
+         * Gets or sets the condition specifying at what distance from the camera that this point will be displayed.
+         */
+        distanceDisplayCondition: DistanceDisplayCondition;
+        /**
          * Gets or sets the user-defined object returned when the point is picked.
          */
         id: any;
@@ -14291,6 +14543,10 @@ declare module __Cesium {
          * Gets or sets the user-defined object returned when the polyline is picked.
          */
         id: any;
+        /**
+         * Gets or sets the condition specifying at what distance from the camera that this polyline will be displayed.
+         */
+        distanceDisplayCondition: DistanceDisplayCondition;
     }
     /**
      * A renderable collection of polylines.<br /><br /><div align="center"><img src="images/Polyline.png" width="400" height="300" /><br />Example polylines</div><br /><br />Polylines are added and removed from the collection using {@link PolylineCollection#add}and {@link PolylineCollection#remove}.
@@ -14337,6 +14593,10 @@ declare module __Cesium {
          * @param index  (Required) The zero-based index of the polyline.
          */
         get(index: Number): Polyline;
+        /**
+         * Called when {@link Viewer} or {@link CesiumWidget} render the scene toget the draw commands needed to render this primitive.<p>Do not call this function directly.  This is documented just tolist the exceptions that may be propagated when the scene is rendered:</p>
+         */
+        update(): void;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -14515,14 +14775,6 @@ declare module __Cesium {
          * Gets a promise that resolves when the primitive is ready to render.
          */
         readyPromise: Promise<Primitive>;
-        /**
-         * Determines whether the primitive casts shadows from each light source.
-         */
-        castShadows: Boolean;
-        /**
-         * Determines whether the primitive receives shadows from shadow casters in the scene.
-         */
-        receiveShadows: Boolean;
         /**
          * Called when {@link Viewer} or {@link CesiumWidget} render the scene toget the draw commands needed to render this primitive.<p>Do not call this function directly.  This is documented just tolist the exceptions that may be propagated when the scene is rendered:</p>
          */
@@ -17161,7 +17413,15 @@ declare module __Cesium {
         /**
          * The stroke width.
          */
-        strokeWidth?: number;
+        strokeWidth?: Number;
+        /**
+         * The background color of the canvas.
+         */
+        backgroundColor?: number;
+        /**
+         * The pixel size of the padding to add around the text.
+         */
+        padding?: Number;
     }
     interface IArcGisImageServerTerrainProviderOptions {
         /**
@@ -17724,6 +17984,14 @@ declare module __Cesium {
          * Indicates endianness of the elements in the buffer when the                 stride property is greater than 1.  If this property is false, the first element is the                 low-order element.  If it is true, the first element is the high-order element.
          */
         isBigEndian?: Boolean;
+        /**
+         * The lowest value that can be stored in the height buffer.  Any heights that are lower                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be 0 because a `Uint16Array` cannot store negative numbers.  If this parameter is                not specified, no minimum value is enforced.
+         */
+        lowestEncodedHeight?: Number;
+        /**
+         * The highest value that can be stored in the height buffer.  Any heights that are higher                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be `256 * 256 - 1` or 65535 because a `Uint16Array` cannot store numbers larger                than 65535.  If this parameter is not specified, no maximum value is enforced.
+         */
+        highestEncodedHeight?: Number;
         /**
          * True if this instance was created by upsampling another instance;                 otherwise, false.
          */
@@ -18338,6 +18606,10 @@ declare module __Cesium {
          * A Property specifying what the height is relative to.
          */
         heightReference?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this billboard will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IBoxGraphicsOptions {
         /**
@@ -18372,6 +18644,10 @@ declare module __Cesium {
          * An enum Property specifying whether the box casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this box will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface ICheckerboardMaterialPropertyOptions {
         /**
@@ -18440,6 +18716,10 @@ declare module __Cesium {
          * An enum Property specifying whether the corridor casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this corridor will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface ICylinderGraphicsOptions {
         /**
@@ -18490,6 +18770,10 @@ declare module __Cesium {
          * An enum Property specifying whether the cylinder casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this cylinder will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IDataSourceDisplayOptions {
         /**
@@ -18566,6 +18850,10 @@ declare module __Cesium {
          * An enum Property specifying whether the ellipse casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this ellipse will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IEllipsoidGraphicsOptions {
         /**
@@ -18612,6 +18900,10 @@ declare module __Cesium {
          * An enum Property specifying whether the ellipsoid casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this ellipsoid will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IEntityOptions {
         /**
@@ -18710,6 +19002,20 @@ declare module __Cesium {
          * A wall to associate with this entity.
          */
         wall?: WallGraphics;
+    }
+    interface IEntityClusterOptions {
+        /**
+         * Whether or not to enable clustering.
+         */
+        enabled?: Boolean;
+        /**
+         * The pixel range to extend the screen space bounding box.
+         */
+        pixelRange?: Number;
+        /**
+         * The minimum number of screen space objects that can be clustered.
+         */
+        minimumClusterSize?: Number;
     }
     interface IGridMaterialPropertyOptions {
         /**
@@ -18840,6 +19146,10 @@ declare module __Cesium {
          * A Property specifying what the height is relative to.
          */
         heightReference?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this label will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IModelGraphicsOptions {
         /**
@@ -18875,14 +19185,6 @@ declare module __Cesium {
          */
         nodeTransformations?: Property;
         /**
-         * Deprecated, use options.shadows instead. A boolean Property specifying whether the model casts shadows from each light source.
-         */
-        castShadows?: Property;
-        /**
-         * Deprecated, use options.shadows instead. A boolean Property specifying whether the model receives shadows from shadow casters in the scene.
-         */
-        receiveShadows?: Property;
-        /**
          * An enum Property specifying whether the model casts or receives shadows from each light source.
          */
         shadows?: Property;
@@ -18890,6 +19192,10 @@ declare module __Cesium {
          * A Property specifying what the height is relative to.
          */
         heightReference?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this model will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface INodeTransformationPropertyOptions {
         /**
@@ -18930,6 +19236,10 @@ declare module __Cesium {
          * A numeric Property specifying the maximum number of seconds to step when sampling the position.
          */
         resolution?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this path will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IPointGraphicsOptions {
         /**
@@ -18960,6 +19270,14 @@ declare module __Cesium {
          * A {@link NearFarScalar} Property used to set translucency based on distance from the camera.
          */
         translucencyByDistance?: Property;
+        /**
+         * A Property specifying what the height is relative to.
+         */
+        heightReference?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this point will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IPolygonGraphicsOptions {
         /**
@@ -19022,6 +19340,10 @@ declare module __Cesium {
          * An enum Property specifying whether the polygon casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this polygon will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IPolylineGlowMaterialPropertyOptions {
         /**
@@ -19062,6 +19384,10 @@ declare module __Cesium {
          * An enum Property specifying whether the polyline casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this polyline will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IPolylineOutlineMaterialPropertyOptions {
         /**
@@ -19122,6 +19448,10 @@ declare module __Cesium {
          * An enum Property specifying whether the volume casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this volume will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IRectangleGraphicsOptions {
         /**
@@ -19184,6 +19514,10 @@ declare module __Cesium {
          * An enum Property specifying whether the rectangle casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this rectangle will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IStripeMaterialPropertyOptions {
         /**
@@ -19252,6 +19586,10 @@ declare module __Cesium {
          * An enum Property specifying whether the wall casts or receives shadows from each light source.
          */
         shadows?: Property;
+        /**
+         * A Property specifying at what distance from the camera that this wall will be displayed.
+         */
+        distanceDisplayCondition?: Property;
     }
     interface IAppearanceOptions {
         /**
@@ -19387,6 +19725,10 @@ declare module __Cesium {
          */
         attributeName: string;
         /**
+         * Boolean that determines whether this attribute is a per-instance geometry attribute.
+         */
+        perInstanceAttribute: Boolean;
+        /**
          * The GLSL datatype of the attribute.  Supported datatypes are <code>float</code>, <code>vec2</code>, <code>vec3</code>, and <code>vec4</code>.
          */
         glslDatatype?: string;
@@ -19402,6 +19744,28 @@ declare module __Cesium {
          * Optional render state to override the default render state.
          */
         renderState?: number;
+    }
+    interface IDebugCameraPrimitiveOptions {
+        /**
+         * The camera.
+         */
+        camera: Camera;
+        /**
+         * The color of the debug outline.
+         */
+        color?: number;
+        /**
+         * Whether the primitive updates when the underlying camera changes.
+         */
+        updateOnChange?: Boolean;
+        /**
+         * Determines if this primitive will be shown.
+         */
+        show?: Boolean;
+        /**
+         * A user-defined object to return when the instance is picked with {@link Scene#pick}.
+         */
+        id?: any;
     }
     interface IDebugModelMatrixPrimitiveOptions {
         /**
@@ -19809,14 +20173,6 @@ declare module __Cesium {
          */
         asynchronous?: Boolean;
         /**
-         * Deprecated, use options.shadows instead. Determines whether the model casts shadows from each light source.
-         */
-        castShadows?: Boolean;
-        /**
-         * Deprecated, use options.shadows instead. Determines whether the model receives shadows from shadow casters in the scene.
-         */
-        receiveShadows?: Boolean;
-        /**
          * Determines whether the model casts or receives shadows from each light source.
          */
         shadows?: number;
@@ -19836,6 +20192,10 @@ declare module __Cesium {
          * Must be passed in for models that use the height reference property.
          */
         scene?: Scene;
+        /**
+         * The condition specifying at what distance from the camera that this model will be displayed.
+         */
+        istanceDisplayCondition?: DistanceDisplayCondition;
     }
     interface IMoonOptions {
         /**
@@ -19920,6 +20280,10 @@ declare module __Cesium {
          * The user-defined object to be returned when this polyline is picked.
          */
         id?: any;
+        /**
+         * The condition specifying at what distance from the camera that this polyline will be displayed.
+         */
+        distanceDisplayCondition?: DistanceDisplayCondition;
     }
     interface IPolylineCollectionOptions {
         /**
@@ -20020,14 +20384,6 @@ declare module __Cesium {
          * For debugging only. Determines if this primitive's commands' bounding spheres are shown.
          */
         debugShowBoundingVolume?: Boolean;
-        /**
-         * Deprecated, use options.shadows instead. Determines whether the primitive casts shadows from each light source.
-         */
-        castShadows?: Boolean;
-        /**
-         * Deprecated, use options.shadows instead. Determines whether the primitive receives shadows from shadow casters in the scene.
-         */
-        receiveShadows?: Boolean;
         /**
          * Determines whether this primitive casts or receives shadows from each light source.
          */
@@ -20823,6 +21179,14 @@ declare module __Cesium {
              * The multiplier used to compute the height value when the                stride property is greater than 1.  For example, if the stride is 4 and the strideMultiplier                is 256, the height is computed as follows:                `height = buffer[index] + buffer[index + 1] * 256 + buffer[index + 2] * 256 * 256 + buffer[index + 3] * 256 * 256 * 256`                This is assuming that the isBigEndian property is false.  If it is true, the order of the                elements is reversed.
              */
             elementMultiplier?: Number;
+            /**
+             * The lowest value that can be stored in the height buffer.  Any heights that are lower                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be 0 because a `Uint16Array` cannot store negative numbers.  If this parameter is                not specified, no minimum value is enforced.
+             */
+            lowestEncodedHeight?: Number;
+            /**
+             * The highest value that can be stored in the height buffer.  Any heights that are higher                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be `256 * 256 - 1` or 65535 because a `Uint16Array` cannot store numbers larger                than 65535.  If this parameter is not specified, no maximum value is enforced.
+             */
+            highestEncodedHeight?: Number;
             /**
              * Indicates endianness of the elements in the buffer when the                 stride property is greater than 1.  If this property is false, the first element is the                 low-order element.  If it is true, the first element is the high-order element.
              */
@@ -21768,6 +22132,22 @@ declare module __Cesium {
          */
         type VisualizersCallback = (scene: Scene, dataSource: DataSource) => Visualizer[];
     }
+    module EntityCluster {
+        /**
+         * A event listener function used to style clusters.
+         */
+        type newClusterCallback = (clusteredEntities: Entity[], cluster: any) => void;
+    }
+    module BatchTable {
+        /**
+         * A callback for updating uniform maps.
+         */
+        type updateUniformMapCallback = (uniformMap: any) => any;
+        /**
+         * A callback for updating a vertex shader source.
+         */
+        type updateVertexShaderSourceCallback = (vertexShaderSource: string) => string;
+    }
     module Billboard {
         /**
          * A function that creates an image.
@@ -22593,6 +22973,11 @@ declare module __Cesium {
          */
         function convertLongitudeRange(angle: Number): Number;
         /**
+         * Convenience function that clamps a latitude value, in radians, to the range [<code>-Math.PI/2</code>, <code>Math.PI/2</code>).Useful for sanitizing data before use in objects requiring correct range.
+         * @param angle  (Required) The latitude value, in radians, to clamp to the range [<code>-Math.PI/2</code>, <code>Math.PI/2</code>).
+         */
+        function clampToLatitudeRange(angle: Number): Number;
+        /**
          * Produces an angle in the range -Pi <= angle <= Pi which is equivalent to the provided angle.
          * @param angle  (Required) in radians
          */
@@ -23059,6 +23444,29 @@ declare module __Cesium {
          * @param right  (Required) An array of Cartesians with length <code>n</code> that is the right side of the system of equations.
          */
         function solve(diagonal: Number[], lower: Number[], upper: Number[], right: Cartesian3[]): Cartesian3[];
+    }
+    module TrustedServers {
+        /**
+         * Adds a trusted server to the registry
+         * @param host  (Required) The host to be added.
+         * @param port  (Required) The port used to access the host.
+         */
+        function add(host: string, port: Number): void;
+        /**
+         * Removes a trusted server from the registry
+         * @param host  (Required) The host to be removed.
+         * @param port  (Required) The port used to access the host.
+         */
+        function remove(host: string, port: Number): void;
+        /**
+         * Tests whether a server is trusted or not. The server must have been added with the port if it is included in the url.
+         * @param url  (Required) The url to be tested against the trusted list
+         */
+        function contains(url: string): boolean;
+        /**
+         * Clears the registry
+         */
+        function clear(): void;
     }
     module Visibility {
         /**

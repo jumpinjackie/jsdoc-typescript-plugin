@@ -1,4 +1,4 @@
-// Type definitions for Cesium v1.25
+// Type definitions for Cesium v1.26
 // Project: https://cesiumjs.org
 // Definitions by: Jackie Ng <https://github.com/jumpinjackie>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
