@@ -247,7 +247,7 @@ module TsdPlugin {
                    (doclet.comment || "").indexOf("@callback") >= 0;
         }
 
-        private processTypeMembers(doclets: jsdoc.IDoclet[]): void {
+        private processTypeMembers(doclets: jsdoc.IDoclet[], logger: ILogger): void {
             for (let doclet of doclets) {
                 //Already covered in 1st pass
                 if (this.trackedDoclets.has(doclet.longname))
@@ -313,11 +313,11 @@ module TsdPlugin {
                 if (doclet.kind == DocletKind.Function) {
                     let method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
-                    cls.addMember(method);
+                    cls.addMember(method, logger);
                 } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
                     let prop = new TSProperty(doclet, isTypedef);
                     prop.setIsPublic(isPublic);
-                    cls.addMember(prop);
+                    cls.addMember(prop, logger);
                 }
             }
         }
@@ -536,7 +536,7 @@ module TsdPlugin {
                         return false;
                     }
                     if (resolvedType instanceof TSComposable) {
-                        const resolvedMember = resolvedType.findMember(memberName);
+                        const resolvedMember = resolvedType.findMember(memberName, false /* # implies instance member */);
                         if (resolvedMember == null) {
                             logger.warn(`Type or member (${type.getFullName()}) has a parent of (${moduleNameClean}) which doesn't resolve to any processed type. Skipping this type`);
                             return false;
@@ -666,7 +666,7 @@ module TsdPlugin {
             //2nd pass. We process modules in this pass instead of the 1st so that enums do not get double-registered as modules as well
             this.parseModules(doclets);
             //3rd pass
-            this.processTypeMembers(doclets);
+            this.processTypeMembers(doclets, logger);
             //Process user-defined types
             this.processUserDefinedTypes();
             //Raise any non-public types referenced from public types to public

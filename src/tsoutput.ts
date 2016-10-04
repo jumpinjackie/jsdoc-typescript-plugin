@@ -1223,19 +1223,36 @@ module TsdPlugin {
             this.isPublic = false;
         }
 
-        public addMember(member: TSMember): void {
-            this.members.push(member);
+        public addMember(member: TSMember, logger?: ILogger): void {
+            const doclet = member.getDoclet();
+            const name = doclet.name;
+            const kind = doclet.kind;
+            const isStatic = doclet.scope == "static";
+            const existing = this.findMember(name, isStatic, kind);
+            if (existing == null) {
+                this.members.push(member);
+            } else if (logger) {
+                logger.warn(`Attempted to add member (${name}, ${kind}, ${doclet.scope}) to type (${this.getQualifiedName()}) which is a duplicate`);
+            }
         }
 
-        public findMember(name: string, kind?: string): TSMember {
+        public findMember(name: string, isStatic: boolean, kind?: string): TSMember {
             let matches: TSMember[];
             if (kind != null) {
                 matches = this.members.filter(m => {
                     let doclet = m.getDoclet();
-                    return doclet.name == name && doclet.kind == kind;
+                    if (isStatic) {
+                        return doclet.name == name && doclet.scope == "static" && doclet.kind == kind;
+                    } else {
+                        return doclet.name == name && doclet.scope != "static" && doclet.kind == kind;
+                    }
                 });
             } else {
-                matches = this.members.filter(m => m.getDoclet().name == name);
+                if (isStatic) {
+                    matches = this.members.filter(m => m.getDoclet().name == name && m.getDoclet().scope == "static");
+                } else {
+                    matches = this.members.filter(m => m.getDoclet().name == name && m.getDoclet().scope != "static");
+                }
             }
             if (matches.length == 1)
                 return matches[0];
@@ -1394,7 +1411,7 @@ module TsdPlugin {
                 if (type != null && (type.getKind() == TSOutputtableKind.Class || type.getKind() == TSOutputtableKind.Typedef)) {
                     let comp = <TSComposable>type;
                     //console.log(`Checking if ${comp.getFullName()} has member ${memberDoclet.name} (${memberDoclet.kind})`);
-                    let member = comp.findMember(memberDoclet.name, memberDoclet.kind);
+                    let member = comp.findMember(memberDoclet.name, memberDoclet.scope == "static", memberDoclet.kind);
                     let parentTypeNames = comp.getParentTypeNames() || [];
                     //Found a member
                     if (member != null) {
@@ -1446,12 +1463,12 @@ module TsdPlugin {
             }
         }
 
-        public addMember(member: TSMember): void {
+        public addMember(member: TSMember, logger?: ILogger): void {
             if (this.enumType != TSEnumType.Invalid && this.alreadyAddedEnumMembers == true) {
                 console.log(`Skip adding member ${member.getDoclet().name} as the parent enum ${this.doclet.name} already has its members added`);
                 return;
             }
-            super.addMember(member);
+            super.addMember(member, logger);
         }
 
         private determineEnumType(): TSEnumType {
