@@ -1223,7 +1223,7 @@ module TsdPlugin {
             this.isPublic = false;
         }
 
-        public addMember(member: TSMember, logger?: ILogger): void {
+        protected addMemberInternal(member: TSMember, logger?: ILogger): void {
             const doclet = member.getDoclet();
             const name = doclet.name;
             const kind = doclet.kind;
@@ -1232,8 +1232,16 @@ module TsdPlugin {
             if (existing == null) {
                 this.members.push(member);
             } else if (logger) {
-                logger.warn(`Attempted to add member (${name}, ${kind}, ${doclet.scope}) to type (${this.getQualifiedName()}) which is a duplicate`);
+                logger.warn(`Attempted to add member (${doclet.longname}, ${kind}, ${doclet.scope}) to type (${this.getQualifiedName()}) which is a duplicate`);
             }
+        }
+
+        public addMember(member: TSMember, logger?: ILogger): void {
+            const doclet = member.getDoclet();
+            if (TypeUtil.isPrivateDoclet(doclet)) {
+                return;
+            }
+            this.addMemberInternal(member, logger);
         }
 
         public findMember(name: string, isStatic: boolean, kind?: string): TSMember {
@@ -1468,7 +1476,13 @@ module TsdPlugin {
                 console.log(`Skip adding member ${member.getDoclet().name} as the parent enum ${this.doclet.name} already has its members added`);
                 return;
             }
-            super.addMember(member, logger);
+
+            if (this.enumType != TSEnumType.Invalid) {
+                //This bypasses visibility checks on the member
+                super.addMemberInternal(member, logger);
+            } else {
+                super.addMember(member, logger);
+            }
         }
 
         private determineEnumType(): TSEnumType {
