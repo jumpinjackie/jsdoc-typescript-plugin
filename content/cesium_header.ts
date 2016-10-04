@@ -12,6 +12,15 @@
 
 declare module __Cesium {
     /**
+     * Cesium's internal copy of knockout.js
+     */
+    const knockout: any; //TODO: Should probably link to knockout d.ts 
+    /**
+     * Cesium's internal copy of when.js
+     */
+    const when: any; //TODO: If there's a typings for this, we should be linking against it
+
+    /**
      * Type alias for a promise
      */
     type Promise<T> = PromiseLike<T>;
