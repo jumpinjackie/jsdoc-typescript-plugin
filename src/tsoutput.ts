@@ -1000,13 +1000,18 @@ module TsdPlugin {
                 let params = this.studyParameters(null, conf, logger);
                 if (params.length > 0) {
                     let forceNullable = false;
+                    let wroteRestParam = false;
                     for (let arg of params) {
+                        if (wroteRestParam === true) {
+                            logger.error(`Argument '${arg.name}' of method (${this.doclet.longname}) follows a rest (...) parameter. This is illegal in TypeScript`);
+                            continue;
+                        }
                         let argStr = "";
                         if (arg.variable) {
                             argStr += "...";
                         }
                         argStr += arg.name;
-                        if (forceNullable || this.isArgOptional(arg, publicTypes)) {
+                        if (!arg.variable && (forceNullable || this.isArgOptional(arg, publicTypes))) {
                             // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
                             // So by definition everything after the nullable argument has to be nullable as well
                             forceNullable = true;
@@ -1031,6 +1036,10 @@ module TsdPlugin {
                             argStr += "any";
                         }
                         argVals.push(argStr);
+
+                        if (arg.variable) {
+                            wroteRestParam = true;
+                        }
                     }
                 }
                 methodDecl += argVals.join(", ") + ")";
