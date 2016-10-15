@@ -18,6 +18,7 @@
     "typescript": {
         "rootModuleName": "openlayers",
         "outDir": "./typings",
+        "outputDocletDefs": false,
         "fillUndocumentedDoclets": true,
         "rewriteFunctionTypedefs": true,
         "ignoreTypes": [
@@ -63,10 +64,6 @@
             "ol.layer.VectorTile#getSource": {
                 "description": "Return the associated source of the layer (NOTE: TypeScript currently prevents us from returning the intended type of ol.source.VectorTile, you will have to manually cast the returned value to this type)",
                 "declaration": "getSource(): any;"
-            },
-            "olx.control.OverviewMapOptions#layers": {
-                "description": "Layers for the overview map. If not set, then all maps layers are used instead",
-                "declaration": "layers: ol.layer.Layer[]|ol.Collection<ol.layer.Layer>"
             }
         }
     },

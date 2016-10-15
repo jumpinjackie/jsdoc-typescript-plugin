@@ -17756,9 +17756,10 @@ declare module olx {
              */
             label?: string|Node;
             /**
-             * Layers for the overview map. If not set, then all maps layers are used instead
+             * Layers for the overview map. If not set, then all main map layers are used
+             * instead.
              */
-            layers: ol.layer.Layer[]|ol.Collection<ol.layer.Layer>
+            layers?: ol.layer.Layer[]|ol.Collection<ol.layer.Layer>;
             /**
              * Function called when the control should be re-rendered. This is called
              * in a requestAnimationFrame callback.
