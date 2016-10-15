@@ -7,6 +7,7 @@
     "example-doc": "jsdoc ./examples/jsdoc3-examples -r -c ./configs/jsdoc.json -d ./docs/example",
     "ol-doc": "jsdoc -c ./configs/jsdoc.ol.json -d ./docs/ol",
     "cesium-doc": "jsdoc -c ./configs/jsdoc.cesium.json -d ./docs/cesium",
+    "falcor-doc": "jsdoc -r -c ./configs/jsdoc.falcor.json -d ./docs/falcor",
     "misc-doc": "jsdoc -c ./configs/jsdoc.misc.json -d ./docs/misc",
     "bad-doc": "jsdoc -c ./configs/jsdoc.bad.json -d ./docs/bad",
     "test:misc": "npm run misc-doc && tsc ./typings/misc.d.ts",
@@ -30,6 +31,7 @@
   "homepage": "https://github.com/jumpinjackie/jsdoc-typescript-plugin#readme",
   "devDependencies": {
     "cesium": "1.26.0",
+    "falcor": "^0.1.17",
     "jsdoc": "^3.4.0",
     "openlayers": "3.18.2",
     "typescript": "^2.0.3"
