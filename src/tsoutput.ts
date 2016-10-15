@@ -602,7 +602,7 @@ module TsdPlugin {
           publicTypes: Map<string, IOutputtable>
         ): void {
             if (conf.outputDocletDefs) {
-                stream.writeln("/* doclet for typedef");
+                stream.writeln(`/* doclet for ${TSOutputtableKind[this.getKind()]}`);
                 stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
