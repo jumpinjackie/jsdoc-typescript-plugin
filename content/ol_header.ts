@@ -10,6 +10,11 @@
 // augment and customize the content of this generated file
 //
 
+/**
+ * This is an alias for the HTML5 geolocation position options
+ */
+type GeolocationPositionOptions = PositionOptions;
+
 // These types normally resolve to number[] by the plugin, which is fine, but TypeScript lets us define
 // tuple types (ie. Arrays of specific size and item types) which is much more expressive 
 // and clearer than what the plugin generates

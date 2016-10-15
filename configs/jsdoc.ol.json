@@ -42,15 +42,7 @@
             },
             "module": {}
         },
-        "interfaces": {
-            "global": {
-                "GeolocationPositionOptions": [
-                    "enableHighAccuracy: boolean",
-                    "maximumAge: number",
-                    "timeout: number"
-                ]
-            }
-        },
+        "interfaces": {},
         "typeReplacements": {
             "Image": "HTMLImageElement"
         },
