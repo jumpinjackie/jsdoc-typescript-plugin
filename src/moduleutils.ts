@@ -29,13 +29,32 @@ module TsdPlugin {
             stream:      IndentedOutputStream,
             conf:        IPluginConfig,
             logger:      ILogger,
-            publicTypes: Map<string, IOutputtable>
+            publicTypes: Map<string, IOutputtable>,
+            isTopLevel:  boolean = true
         ): void {
             for (let type of module.types) {
                 //console.log(`Outputting type: ${type.getFullName()}`);
                 type.output(stream, conf, logger, publicTypes);
             }
-            module.children.forEach((child, moduleName) => {
+            let childModules = module.children;
+            if (isTopLevel && conf.globalModuleAliases.length > 0) {
+                //For any modules declared as global aliases, output them
+                //without the module declaration
+                for (const modName of conf.globalModuleAliases) {
+                    if (childModules.has(modName)) {
+                        const mod = childModules.get(modName);
+                        ModuleUtils.outputTsd(mod, stream, conf, logger, publicTypes, false);
+                    }
+                }
+            }
+            childModules.forEach((child, moduleName) => {
+                //Skip over any modules declared as global aliases
+                if (isTopLevel) {
+                    const matches = conf.globalModuleAliases.filter(gm => gm === moduleName);
+                    if (matches.length > 0) {
+                        return;
+                    }
+                }
                 //Root modules have to be declared
                 let decl = ((child.isRoot === true && conf.declareTopLevelElements) ? "declare " : "");
                 //Write module decl
@@ -48,7 +67,7 @@ module TsdPlugin {
                     stream.writeln(`${decl}module ${modName} {`);
                 }
                 stream.indent();
-                ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes);
+                ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes, false);
                 stream.unindent();
                 stream.writeln("}");
             });
