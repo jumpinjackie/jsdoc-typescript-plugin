@@ -3092,6 +3092,73 @@ declare module __Cesium {
         static clone(hpr: HeadingPitchRange, result?: HeadingPitchRange): HeadingPitchRange;
     }
     /**
+     * A rotation expressed as a heading, pitch, and roll. Heading is the rotation about thenegative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation aboutthe positive x axis.
+     */
+    class HeadingPitchRoll {
+        /**
+         * A rotation expressed as a heading, pitch, and roll. Heading is the rotation about thenegative z axis. Pitch is the rotation about the negative y axis. Roll is the rotation aboutthe positive x axis.
+         * @param heading  (Optional) The heading component in radians.
+         * @param pitch  (Optional) The pitch component in radians.
+         * @param roll  (Optional) The roll component in radians.
+         */
+        constructor(heading?: Number, pitch?: Number, roll?: Number);
+        /**
+         * Computes the heading, pitch and roll from a quaternion (see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles )
+         * @param quaternion  (Required) The quaternion from which to retrieve heading, pitch, and roll, all expressed in radians.
+         * @param result  (Optional) The object in which to store the result. If not provided, a new instance is created and returned.
+         */
+        static fromQuaternion(quaternion: Quaternion, result?: Quaternion): HeadingPitchRoll;
+        /**
+         * Returns a new HeadingPitchRoll instance from angles given in degrees.
+         * @param heading  (Required) the heading in degrees
+         * @param pitch  (Required) the pitch in degrees
+         * @param roll  (Required) the heading in degrees
+         * @param result  (Optional) The object in which to store the result. If not provided, a new instance is created and returned.
+         */
+        static fromDegrees(heading: Number, pitch: Number, roll: Number, result?: HeadingPitchRoll): HeadingPitchRoll;
+        /**
+         * Duplicates a HeadingPitchRoll instance.
+         * @param headingPitchRoll  (Required) The HeadingPitchRoll to duplicate.
+         * @param result  (Optional) The object onto which to store the result.
+         */
+        static clone(headingPitchRoll: HeadingPitchRoll, result?: HeadingPitchRoll): HeadingPitchRoll;
+        /**
+         * Compares the provided HeadingPitchRolls componentwise and returns<code>true</code> if they are equal, <code>false</code> otherwise.
+         * @param left  (Optional) The first HeadingPitchRoll.
+         * @param right  (Optional) The second HeadingPitchRoll.
+         */
+        static equals(left?: HeadingPitchRoll, right?: HeadingPitchRoll): Boolean;
+        /**
+         * Compares the provided HeadingPitchRolls componentwise and returns<code>true</code> if they pass an absolute or relative tolerance test,<code>false</code> otherwise.
+         * @param left  (Optional) The first HeadingPitchRoll.
+         * @param right  (Optional) The second HeadingPitchRoll.
+         * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
+         * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
+         */
+        static equalsEpsilon(left?: HeadingPitchRoll, right?: HeadingPitchRoll, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        /**
+         * Duplicates this HeadingPitchRoll instance.
+         * @param result  (Optional) The object onto which to store the result.
+         */
+        clone(result?: HeadingPitchRoll): HeadingPitchRoll;
+        /**
+         * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns<code>true</code> if they are equal, <code>false</code> otherwise.
+         * @param right  (Optional) The right hand side HeadingPitchRoll.
+         */
+        equals(right?: HeadingPitchRoll): Boolean;
+        /**
+         * Compares this HeadingPitchRoll against the provided HeadingPitchRoll componentwise and returns<code>true</code> if they pass an absolute or relative tolerance test,<code>false</code> otherwise.
+         * @param right  (Optional) The right hand side HeadingPitchRoll.
+         * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
+         * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
+         */
+        equalsEpsilon(right?: HeadingPitchRoll, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        /**
+         * Creates a string representing this HeadingPitchRoll in the format '(heading, pitch, roll)' in radians.
+         */
+        toString(): string;
+    }
+    /**
      * Terrain data for a single tile where the terrain data is represented as a heightmap.  A heightmapis a rectangular array of heights in row-major order from south to north and west to east.
      */
     class HeightmapTerrainData {
@@ -3746,6 +3813,12 @@ declare module __Cesium {
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
         static fromQuaternion(quaternion: Quaternion, result?: Matrix3): Matrix3;
+        /**
+         * Computes a 3x3 rotation matrix from the provided headingPitchRoll. (see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles )
+         * @param headingPitchRoll  (Required) the headingPitchRoll to use.
+         * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
+         */
+        static fromHeadingPitchRoll(headingPitchRoll: HeadingPitchRoll, result?: Matrix3): Matrix3;
         /**
          * Computes a Matrix3 instance representing a non-uniform scale.
          * @param scale  (Required) The x, y, and z scale factors.
@@ -5414,12 +5487,19 @@ declare module __Cesium {
          */
         static center(rectangle: Rectangle, result?: Cartographic): Cartographic;
         /**
-         * Computes the intersection of two rectangles
+         * Computes the intersection of two rectangles.  This function assumes that the rectangle's coordinates arelatitude and longitude in radians and produces a correct intersection, taking into account the fact thatthe same angle can be represented with multiple values as well as the wrapping of longitude at theanti-meridian.  For a simple intersection that ignores these factors and can be used with projectedcoordinates, see {@link Rectangle.simpleIntersection}.
          * @param rectangle  (Required) On rectangle to find an intersection
          * @param otherRectangle  (Required) Another rectangle to find an intersection
          * @param result  (Optional) The object onto which to store the result.
          */
         static intersection(rectangle: Rectangle, otherRectangle: Rectangle, result?: Rectangle): Rectangle;
+        /**
+         * Computes a simple intersection of two rectangles.  Unlike {@link Rectangle.intersection}, this functiondoes not attempt to put the angular coordinates into a consistent range or to account for crossing theanti-meridian.  As such, it can be used for rectangles where the coordinates are not simply latitudeand longitude (i.e. projected coordinates).
+         * @param rectangle  (Required) On rectangle to find an intersection
+         * @param otherRectangle  (Required) Another rectangle to find an intersection
+         * @param result  (Optional) The object onto which to store the result.
+         */
+        static simpleIntersection(rectangle: Rectangle, otherRectangle: Rectangle, result?: Rectangle): Rectangle;
         /**
          * Computes a rectangle that is the union of two rectangles.
          * @param rectangle  (Required) A rectangle to enclose in rectangle.
@@ -8636,6 +8716,18 @@ declare module __Cesium {
          * Gets the event that will be raised when a new cluster will be displayed. The signature of the event listener is {@link EntityCluster~newClusterCallback}.
          */
         clusterEvent: Event;
+        /**
+         * Gets or sets whether clustering billboard entities is enabled.
+         */
+        clusterBillboards: Boolean;
+        /**
+         * Gets or sets whether clustering labels entities is enabled.
+         */
+        clusterLabels: Boolean;
+        /**
+         * Gets or sets whether clustering point entities is enabled.
+         */
+        clusterPoints: Boolean;
         /**
          * Destroys the WebGL resources held by this object.  Destroying an object allows for deterministicrelease of WebGL resources, instead of relying on the garbage collector to destroy this object.<p>Unlike other objects that use WebGL resources, this object can be reused. For example, if a data source is removedfrom a data source collection and added to another.</p>
          */
@@ -19016,6 +19108,18 @@ declare module __Cesium {
          * The minimum number of screen space objects that can be clustered.
          */
         minimumClusterSize?: Number;
+        /**
+         * Whether or not to cluster the billboards of an entity.
+         */
+        clusterBillboards?: Boolean;
+        /**
+         * Whether or not to cluster the labels of an entity.
+         */
+        clusterLabels?: Boolean;
+        /**
+         * Whether or not to cluster the points of an entity.
+         */
+        clusterPoints?: Boolean;
     }
     interface IGridMaterialPropertyOptions {
         /**
@@ -23384,25 +23488,28 @@ declare module __Cesium {
          */
         function northUpEastToFixedFrame(origin: Cartesian3, ellipsoid?: Ellipsoid, result?: Matrix4): Matrix4;
         /**
-         * Computes a 4x4 transformation matrix from a reference frame with axes computed from the heading-pitch-roll anglescentered at the provided origin to the provided ellipsoid's fixed reference frame. Heading is the rotation from the local northdirection where a positive angle is increasing eastward. Pitch is the rotation from the local east-north plane. Positive pitch anglesare above the plane. Negative pitch angles are below the plane. Roll is the first rotation applied about the local east axis.
+         * Computes a 4x4 transformation matrix from a reference frame with an north-west-up axescentered at the provided origin to the provided ellipsoid's fixed reference frame.The local axes are defined as:<ul><li>The <code>x</code> axis points in the local north direction.</li><li>The <code>y</code> axis points in the local west direction.</li><li>The <code>z</code> axis points in the direction of the ellipsoid surface normal which passes through the position.</li></ul>
          * @param origin  (Required) The center point of the local reference frame.
-         * @param heading  (Required) The heading angle in radians.
-         * @param pitch  (Required) The pitch angle in radians.
-         * @param roll  (Required) The roll angle in radians.
          * @param ellipsoid  (Optional) The ellipsoid whose fixed frame is used in the transformation.
          * @param result  (Optional) The object onto which to store the result.
          */
-        function headingPitchRollToFixedFrame(origin: Cartesian3, heading: Number, pitch: Number, roll: Number, ellipsoid?: Ellipsoid, result?: Matrix4): Matrix4;
+        function northWestUpToFixedFrame(origin: Cartesian3, ellipsoid?: Ellipsoid, result?: Matrix4): Matrix4;
+        /**
+         * Computes a 4x4 transformation matrix from a reference frame with axes computed from the heading-pitch-roll anglescentered at the provided origin to the provided ellipsoid's fixed reference frame. Heading is the rotation from the local northdirection where a positive angle is increasing eastward. Pitch is the rotation from the local east-north plane. Positive pitch anglesare above the plane. Negative pitch angles are below the plane. Roll is the first rotation applied about the local east axis.
+         * @param origin  (Required) The center point of the local reference frame.
+         * @param headingPitchRoll  (Required) The heading, pitch, and roll.
+         * @param ellipsoid  (Optional) The ellipsoid whose fixed frame is used in the transformation.
+         * @param result  (Optional) The object onto which to store the result.
+         */
+        function headingPitchRollToFixedFrame(origin: Cartesian3, headingPitchRoll: HeadingPitchRoll, ellipsoid?: Ellipsoid, result?: Matrix4): Matrix4;
         /**
          * Computes a quaternion from a reference frame with axes computed from the heading-pitch-roll anglescentered at the provided origin. Heading is the rotation from the local northdirection where a positive angle is increasing eastward. Pitch is the rotation from the local east-north plane. Positive pitch anglesare above the plane. Negative pitch angles are below the plane. Roll is the first rotation applied about the local east axis.
          * @param origin  (Required) The center point of the local reference frame.
-         * @param heading  (Required) The heading angle in radians.
-         * @param pitch  (Required) The pitch angle in radians.
-         * @param roll  (Required) The roll angle in radians.
+         * @param headingPitchRoll  (Required) The heading, pitch, and roll.
          * @param ellipsoid  (Optional) The ellipsoid whose fixed frame is used in the transformation.
          * @param result  (Optional) The object onto which to store the result.
          */
-        function headingPitchRollQuaternion(origin: Cartesian3, heading: Number, pitch: Number, roll: Number, ellipsoid?: Ellipsoid, result?: Quaternion): Quaternion;
+        function headingPitchRollQuaternion(origin: Cartesian3, headingPitchRoll: HeadingPitchRoll, ellipsoid?: Ellipsoid, result?: Quaternion): Quaternion;
         /**
          * Computes a rotation matrix to transform a point or vector from True Equator Mean Equinox (TEME) axes to thepseudo-fixed axes at a given time.  This method treats the UT1 time standard as equivalent to UTC.
          * @param date  (Required) The time at which to compute the rotation matrix.

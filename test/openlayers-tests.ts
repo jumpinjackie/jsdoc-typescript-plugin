@@ -530,15 +530,15 @@ popup.setMap(popupMap);
 popup.setOffset(popupOffset);
 popup.setPosition(coordinate);
 popup.setPositioning(popupPositioning);
-popup.setPositioning(ol.OverlayPositioning.BOTTOM_CENTER);
-popup.setPositioning(ol.OverlayPositioning.BOTTOM_LEFT);
-popup.setPositioning(ol.OverlayPositioning.BOTTOM_RIGHT);
-popup.setPositioning(ol.OverlayPositioning.CENTER_CENTER);
-popup.setPositioning(ol.OverlayPositioning.CENTER_LEFT);
-popup.setPositioning(ol.OverlayPositioning.CENTER_RIGHT);
-popup.setPositioning(ol.OverlayPositioning.TOP_CENTER);
-popup.setPositioning(ol.OverlayPositioning.TOP_LEFT);
-popup.setPositioning(ol.OverlayPositioning.TOP_RIGHT);
+popup.setPositioning(ol.Overlay.Positioning.BOTTOM_CENTER);
+popup.setPositioning(ol.Overlay.Positioning.BOTTOM_LEFT);
+popup.setPositioning(ol.Overlay.Positioning.BOTTOM_RIGHT);
+popup.setPositioning(ol.Overlay.Positioning.CENTER_CENTER);
+popup.setPositioning(ol.Overlay.Positioning.CENTER_LEFT);
+popup.setPositioning(ol.Overlay.Positioning.CENTER_RIGHT);
+popup.setPositioning(ol.Overlay.Positioning.TOP_CENTER);
+popup.setPositioning(ol.Overlay.Positioning.TOP_LEFT);
+popup.setPositioning(ol.Overlay.Positioning.TOP_RIGHT);
 
 //
 // ol.format.GeoJSON

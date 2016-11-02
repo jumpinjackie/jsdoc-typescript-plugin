@@ -29,9 +29,9 @@
   },
   "homepage": "https://github.com/jumpinjackie/jsdoc-typescript-plugin#readme",
   "devDependencies": {
-    "cesium": "1.26.0",
+    "cesium": "1.27.0",
     "jsdoc": "^3.4.2",
-    "openlayers": "3.18.2",
-    "typescript": "^2.0.3"
+    "openlayers": "3.19.1",
+    "typescript": "^2.0.6"
   }
 }
