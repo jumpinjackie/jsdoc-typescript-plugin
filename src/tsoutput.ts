@@ -146,6 +146,9 @@ module TsdPlugin {
          * Returns a clean version of the given type name, stripped of whatever JSDoc-isms
          */
         public static cleanTypeName(name: string, bQualified = false): string {
+            if (!name) {
+                return '';
+            }
             let parts = name.replace("module:", "").split("~");
             let qualifiedName = parts[parts.length - 1];
             if (!qualifiedName) {

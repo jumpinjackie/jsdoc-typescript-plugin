@@ -193,7 +193,7 @@ module TsdPlugin {
                     else if (makeGlobal)
                         this.globalMembers.push(tdf);
                     this.trackedDoclets.set(doclet.longname, doclet);
-                } else if (doclet.kind == DocletKind.Function) {
+                } else if (TsdPlugin.FunctionTypedefRewriter.getDocletKind(doclet) == DocletKind.Function) {
                     let parentModule = doclet.memberof;
                     if (parentModule == null) {
                         let method = new TSMethod(doclet);
@@ -258,7 +258,7 @@ module TsdPlugin {
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
-
+                            
                 let isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
@@ -266,6 +266,7 @@ module TsdPlugin {
                 let cls: TSComposable = this.ensureClassDef(doclet.memberof);
                 let isTypedef = false;
                 let isClass = true;
+                
                 if (!cls) {
                     isClass = false;
                     //Failing that it would've been registered as a typedef
@@ -286,6 +287,7 @@ module TsdPlugin {
                         //HACK-ish: If we found an enum, that this is a member of, skip it if it already exists
                         let parentDoclet = this.trackedDoclets.get(doclet.memberof);
                         if (parentDoclet != null && TypeUtil.isEnumDoclet(parentDoclet)) {
+
                             let matches = (parentDoclet.properties || []).filter(prop => prop.name == doclet.name);
                             if (matches.length > 0)
                                 continue;
@@ -302,6 +304,7 @@ module TsdPlugin {
                                 this.moduleMembers.set(parentModule, []);
                             let prop = new TSProperty(doclet, false);
                             prop.setIsModule(true);
+
                             this.moduleMembers.get(parentModule).push(prop);
                         }
                         continue;
@@ -314,8 +317,12 @@ module TsdPlugin {
                     let method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
                     cls.addMember(method, logger);
-                } else if (doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
+                } else if (doclet.kind == DocletKind.Constant || doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
                     let prop = new TSProperty(doclet, isTypedef);
+                    if (doclet.longname == 'Color.RED') {
+                        console.log(isPublic);
+                        console.log(prop);
+                    }
                     prop.setIsPublic(isPublic);
                     cls.addMember(prop, logger);
                 }
