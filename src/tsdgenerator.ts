@@ -318,11 +318,7 @@ module TsdPlugin {
                     method.setIsPublic(isPublic);
                     cls.addMember(method, logger);
                 } else if (doclet.kind == DocletKind.Constant || doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                    let prop = new TSProperty(doclet, isTypedef);
-                    if (doclet.longname == 'Color.RED') {
-                        console.log(isPublic);
-                        console.log(prop);
-                    }
+                    let prop = new TSProperty(doclet, isTypedef);                   
                     prop.setIsPublic(isPublic);
                     cls.addMember(prop, logger);
                 }

@@ -10,7 +10,16 @@
 // augment and customize the content of this generated file
 //
 
-declare module __Cesium {
+declare module Cesium {
+
+    type CanvasPixelArray = any[];
+
+    type QuadtreeTile = any;
+
+    type QuadtreeOccluders = any;
+
+    type IViewerPerformanceWatchdogMixinOptions = any;
+
     /**
      * Cesium's internal copy of knockout.js
      */
