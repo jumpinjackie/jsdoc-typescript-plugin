@@ -20,6 +20,7 @@
         "outputDocletDefs": false,
         "fillUndocumentedDoclets": true,
         "defaultReturnType": "void",
+        "rewriteFunctionTypedefs": true,
         "headerFile": "./content/cesium_header.ts",
         "footerFile": "./content/cesium_footer.ts",
         "declareTopLevelElements": false,

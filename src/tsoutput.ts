@@ -146,6 +146,9 @@ module TsdPlugin {
          * Returns a clean version of the given type name, stripped of whatever JSDoc-isms
          */
         public static cleanTypeName(name: string, bQualified = false): string {
+            if (!name) {
+                return '';
+            }
             let parts = name.replace("module:", "").split("~");
             let qualifiedName = parts[parts.length - 1];
             if (!qualifiedName) {
@@ -619,8 +622,13 @@ module TsdPlugin {
             } else {
                 this.writeDescription("property", stream, conf, logger, publicTypes);
                 let propDecl = "";
+                
                 if (this.isModule) {
                     propDecl += "var ";
+                } else {
+                    if (this.isStatic()) {
+                        propDecl += "static ";
+                    }
                 }
                 propDecl += this.doclet.name;
                 if (this.doclet.type != null && this.isOptional(publicTypes)) {
@@ -1756,7 +1764,6 @@ module TsdPlugin {
                             logger.warn(`Member ${member.getFullName()} has @inheritdoc annotation, but no inherited member could be found`);
                     }
                 } else if (member.getIsPublic()) {
-                    //console.log(`Outputting member: ${member.getDoclet().longname}`);
                     member.output(stream, conf, logger, publicTypes);
                 } else {
                     //console.log(`Skipping non-public member: ${member.getDoclet().longname}`);

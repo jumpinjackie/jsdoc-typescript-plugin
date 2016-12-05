@@ -2,5 +2,5 @@
 }
 
 declare module "cesium" {
-    export = __Cesium;
+    export = Cesium;
 }

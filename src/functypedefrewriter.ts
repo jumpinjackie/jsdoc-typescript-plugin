@@ -4,6 +4,19 @@ module TsdPlugin {
      * A helper class to rewrite @typedef based function annotations into the @callback form
      */
     export class FunctionTypedefRewriter {
+        public static getDocletKind(doclet: jsdoc.IDoclet): string {
+            //Not a function or constructor eh?
+            if (doclet.kind != DocletKind.Function && doclet.kind != DocletKind.Class) {
+                if (doclet.params && doclet.params.length > 0) {
+                    doclet.memberof = null;
+                    return DocletKind.Function; //LIAR
+                }
+                if (doclet.returns && doclet.returns.length > 0) {
+                    return DocletKind.Function; //LIAR
+                }
+            }
+            return doclet.kind;
+        }
 
         private static isFunctionTypedef(doclet: jsdoc.IDoclet): boolean {
             return doclet.kind == DocletKind.Typedef &&
@@ -31,11 +44,13 @@ module TsdPlugin {
         }
 
         public static rewrite(doclet: jsdoc.IDoclet): void {
+
             if (FunctionTypedefRewriter.isFunctionTypedef(doclet)) {
                 // The meat that makes this possible is the @typedef annotation in the comments
                 // Use regex to test for common patterns
                 
                 // Clean the comment of newlines and *, so it doesn't trip the regex
+
                 let comment = doclet.comment.split("\n *").join("");
                 
                 // A function that returns a value
