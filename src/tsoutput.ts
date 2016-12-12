@@ -462,6 +462,10 @@ module TsdPlugin {
             this.ovReturnType = null;
         }
         
+        public getOverrideReturnType() {
+            return this.ovReturnType;
+        }
+
         public setOverrideReturnType(typeName: string): void {
             this.ovReturnType = typeName;
         }
@@ -1034,7 +1038,13 @@ module TsdPlugin {
                             utypes = TypeUtil.fixEnumTypeReferences(utypes, conf);
                             if (!conf.useUnionTypeForStringEnum)
                                 TypeUtil.fixEnumTypes(utypes, publicTypes, conf);
-                            argStr += utypes.join("|");
+
+                            //Parenthesise the union type if its a vararg
+                            if (arg.variable && utypes.length > 1) {
+                                argStr += "(" + utypes.join("|") + ")";
+                            } else {
+                                argStr += utypes.join("|");
+                            }
                             if (arg.variable) {
                                 argStr += "[]";
                             }
@@ -1240,10 +1250,17 @@ module TsdPlugin {
             this.isPublic = false;
         }
 
+        protected shouldAddMember(member: TSMember, logger?: ILogger): boolean {
+            return true;
+        }
+
         protected addMemberInternal(member: TSMember, logger?: ILogger): void {
             const doclet = member.getDoclet();
-            const name = doclet.name;
             const kind = doclet.kind;
+            if (!this.shouldAddMember(member, logger)) {
+                return;
+            }
+            const name = doclet.name;
             const isStatic = doclet.scope == "static";
             const existing = this.findMember(name, isStatic, kind);
             if (existing == null) {
@@ -1486,6 +1503,18 @@ module TsdPlugin {
                 }
                 this.alreadyAddedEnumMembers = true;
             }
+        }
+
+        protected shouldAddMember(member: TSMember, logger?: ILogger): boolean {
+            const doclet = member.getDoclet();
+            const kind = doclet.kind;
+            //This was encountered going through the OpenLayers 3.20 source and I cannot fathom a
+            //case where this is possibly a legitimate member (despite JSDoc picking it up)
+            if (doclet.longname.indexOf("[undefined]") >= 0) {
+                logger.warn(`Skipping attempt to add member (${doclet.longname}) as it appears to be a bogus member`);
+                return false;
+            }
+            return super.shouldAddMember(member, logger);
         }
 
         public addMember(member: TSMember, logger?: ILogger): void {

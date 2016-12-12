@@ -31,7 +31,7 @@
   "devDependencies": {
     "cesium": "1.27.0",
     "jsdoc": "^3.4.2",
-    "openlayers": "3.19.1",
+    "openlayers": "3.20.0",
     "typescript": "^2.0.6"
   }
 }
