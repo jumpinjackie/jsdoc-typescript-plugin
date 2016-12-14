@@ -8,7 +8,6 @@ module TsdPlugin {
             //Not a function or constructor eh?
             if (doclet.kind != DocletKind.Function && doclet.kind != DocletKind.Class) {
                 if (doclet.params && doclet.params.length > 0) {
-                    doclet.memberof = null;
                     return DocletKind.Function; //LIAR
                 }
                 if (doclet.returns && doclet.returns.length > 0) {

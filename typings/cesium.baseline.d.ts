@@ -303,13 +303,6 @@ declare module Cesium {
      */
     function createTileMapServiceImageryProvider(options?: any): UrlTemplateImageryProvider;
     /**
-     * Determines the visibility of a given tile.  The tile may be fully visible, partially visible, or notvisible at all.  Tiles that are renderable and are at least partially visible will be shown by a callto {@link QuadtreeTileProvider#showTileThisFrame}.
-     * @param tile  (Required) The tile instance.
-     * @param frameState  (Required) The state information about the current frame.
-     * @param occluders  (Required) The objects that may occlude this tile.
-     */
-    function computeTileVisibility(tile: QuadtreeTile, frameState: FrameState, occluders: QuadtreeOccluders): number;
-    /**
      * Create a Command from a given function, for use with ViewModels.A Command is a function with an extra <code>canExecute</code> observable property to determinewhether the command can be executed.  When executed, a Command function will check thevalue of <code>canExecute</code> and throw if false.  It also provides events for whena command has been or is about to be executed.
      * @param func  (Required) The function to execute.
      * @param canExecute  (Optional) A boolean indicating whether the function can currently be executed.
