@@ -4,7 +4,7 @@ module TsdPlugin {
      * A helper class to rewrite @typedef based function annotations into the @callback form
      */
     export class FunctionTypedefRewriter {
-        public static getDocletKind(doclet: jsdoc.IDoclet): string {
+        public static getDocletKind(doclet: Readonly<jsdoc.IDoclet>): string {
             //Not a function or constructor eh?
             if (doclet.kind != DocletKind.Function && doclet.kind != DocletKind.Class) {
                 if (doclet.params && doclet.params.length > 0) {
@@ -17,7 +17,7 @@ module TsdPlugin {
             return doclet.kind;
         }
 
-        private static isFunctionTypedef(doclet: jsdoc.IDoclet): boolean {
+        private static isFunctionTypedef(doclet: Readonly<jsdoc.IDoclet>): boolean {
             return doclet.kind == DocletKind.Typedef &&
                    doclet.type != null &&
                    doclet.type.names != null &&

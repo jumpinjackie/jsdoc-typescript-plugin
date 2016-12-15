@@ -124,12 +124,12 @@ module TsdPlugin {
         /**
          * User-defined type aliases
          */
-        aliases: IUserOverride<string>;
+        aliases: Readonly<IUserOverride<string>>;
 
         /**
          * User-defined interface definitions
          */
-        interfaces: IUserOverride<string[]>;
+        interfaces: Readonly<IUserOverride<string[]>>;
 
         /**
          * An annotation that if found in a parsed doclet, will consider said doclet to be
@@ -175,7 +175,7 @@ module TsdPlugin {
          * Member overrides to replace any generated members. Key is the JsDoc longname (ie. qualifiedClassName#memberName)
          * Value is the replacement for it
          */
-        memberReplacements: Dictionary<IMemberDeclaration>;
+        memberReplacements: Dictionary<Readonly<IMemberDeclaration>>;
 
         /**
          * Indicates if top-level elements (ie: doclets without parents) should be declared. Default is false, set to true 
@@ -211,13 +211,13 @@ module TsdPlugin {
         /**
          * Used to instruct the plugin to configure the given types as enums regardless of what the processed doclet may suggest it is
          */
-        processAsEnums?: IEnumConfiguration;
+        processAsEnums?: Readonly<IEnumConfiguration>;
         /**
          * Used to add type augmentations for any generated classes. 
          * 
          * @type {Dictionary<IClassTypeAugmentation>}
          * @memberOf IPluginConfig
          */
-        classTypeAugmentations?: Dictionary<IClassTypeAugmentation>;
+        classTypeAugmentations?: Dictionary<Readonly<IClassTypeAugmentation>>;
     }
 }

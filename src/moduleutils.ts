@@ -25,9 +25,9 @@ module TsdPlugin {
          * Writes the TS module tree out to the specified output stream
          */
         public static outputTsd(
-            module:      ITSModule,
+            module:      Readonly<ITSModule>,
             stream:      IndentedOutputStream,
-            conf:        IPluginConfig,
+            conf:        Readonly<IPluginConfig>,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>,
             isTopLevel:  boolean = true
