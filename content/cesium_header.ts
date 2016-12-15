@@ -18,8 +18,6 @@ declare module Cesium {
 
     type QuadtreeOccluders = any;
 
-    type IViewerPerformanceWatchdogMixinOptions = any;
-
     /**
      * Cesium's internal copy of knockout.js
      */

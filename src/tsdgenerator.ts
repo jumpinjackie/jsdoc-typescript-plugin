@@ -374,6 +374,9 @@ module TsdPlugin {
                     member.visit(context, this.config, logger);
                 }
             });
+            this.globalMembers.forEach((member, moduleName) => {
+                member.visit(context, this.config, logger);
+            });
             this.classes.forEach((cls, typeName) => {
                 if (cls.getIsPublic())
                     cls.visit(context, this.config, logger);
