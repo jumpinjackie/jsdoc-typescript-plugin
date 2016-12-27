@@ -3,6 +3,7 @@ let os = require("os");
 let env = require("jsdoc/env");
 let logger = require("jsdoc/util/logger");
 let tsConf = env.conf.typescript || {};
+let peg = require("pegjs");
 
 exports.handlers = {
     newDoclet(e: jsdoc.INewDocletEvent): void {
@@ -10,7 +11,7 @@ exports.handlers = {
             TsdPlugin.FunctionTypedefRewriter.rewrite(e.doclet);
         }
     },
-    processingComplete(e: jsdoc.IProcessingCompleteEvent): void {
+    processingComplete(e: jsdoc.IProcessingCompleteEvent): void {        
         let proc = new TsdPlugin.TsdGenerator(tsConf);
         let sf = {
             createStream: (fileName) => fs.createWriteStream(fileName),

@@ -1,4 +1,3 @@
-
 module TsdPlugin {
     /**
      * Defines the type of TypeScript element
@@ -12,7 +11,7 @@ module TsdPlugin {
         UserTypeAlias
     }
     
-    function CamelCase(name: string) {
+    function CamelCase(name: string) {        
         return name.charAt(0).toUpperCase() + name.slice(1);
     }
     
@@ -297,20 +296,7 @@ module TsdPlugin {
                     }
                     return "(" + funcParams.join(", ") + ") => any";
                 }
-                //Array - type[]
-                rgxm = tn.match(/(.+)\[\]$/);
-                if (rgxm) {
-                    //console.log("is array");
-                    //Don't strip parentheses here as that would indicate an array of unioned types
-                    return TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context) + "[]";
-                }
-                //Array - Array.<type>
-                rgxm = tn.match(/(^Array\.)\<(.+)>/); 
-                if (rgxm) {
-                    //console.log("is array");
-                    //Don't strip parentheses here as that would indicate an array of unioned types
-                    return TypeUtil.getTypeReplacement(rgxm[2], conf, logger, context) + "[]";
-                }
+
                 //kvp - Object.<TKey, TValue> -> { [key: TKey]: TValue; }
                 rgxm = tn.match(/(^Object\.)\<(.+)\,(.+)\>/);
                 if (rgxm) {
@@ -335,44 +321,18 @@ module TsdPlugin {
                     let valueType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[3]), conf, logger, context);
                     return "{ [key: " + keyType + "]: " + valueType + "; }";
                 }
-                //Some generic type - SomeGenericType.<AnotherType>
-                rgxm = tn.match(/(.+)(.\<)(.+)\>/);
-                if (rgxm) {
-                    //console.log("is generic type");
-                    let genericType = TypeUtil.getTypeReplacement(rgxm[1], conf, logger, context);
-                    let part = TypeUtil.stripOuterParentheses(rgxm[3]);
-                    let genericTypeArgs = part.split(",")
-                                              .map(tn => TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(tn), conf, logger, context));
-                    return genericType + "<" + genericTypeArgs.join(",") + ">";
-                }
-                //Array - untyped
-                if (tn.toLowerCase() == "array") {
-                    //console.log("is untyped array");
-                    //TODO: Include symbol context
-                    logger.warn("Encountered untyped array. Treating as 'any[]'");
-                    return "any[]";
-                }
-                //Union-type - typeA|typeB
-                if (tn.indexOf("|") >= 0) {
-                    //console.log("union type");
-                    let types = tn.split("|");
-                    let replTypes = [];
-                    for (let i = 0; i < types.length; i++) {
-                        replTypes.push(TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(types[i]), conf, logger, context));
-                    }
-                    return replTypes.join("|");
-                }
                 
                 //When referenced, tildefied types should be dotted
                 tn = tn.replace("~", ".");
                 
-                //DIRTY HACK: Due to my horrible regex skills, the generic type regex currently breaks down if we
-                //encounter nested generic types.
-                //
-                //When we fix this (https://github.com/jumpinjackie/jsdoc-typescript-plugin/issues/54), this can be removed
-                //
-                //In the meantime, just "patch" the incorrect output
-                tn = tn.replace(".<", "<");
+                const parsedType = Generics.parse(tn, (type: string) => {
+                    if (conf.typeReplacements.hasOwnProperty(type)) {
+                        return conf.typeReplacements[type];
+                    } else {
+                        return type;
+                    }
+                });
+                if (parsedType !== null) return parsedType;
                 
                 if (context != null) {
                     context.addType(tn, conf, logger);
