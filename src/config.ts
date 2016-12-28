@@ -219,5 +219,7 @@ module TsdPlugin {
          * @memberOf IPluginConfig
          */
         classTypeAugmentations?: Dictionary<Readonly<IClassTypeAugmentation>>;
+
+        rewriteFunctionTypedefs?: boolean;
     }
 }

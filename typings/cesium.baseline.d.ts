@@ -272,7 +272,7 @@ declare module Cesium {
      * @param level  (Required) The terrain level-of-detail from which to query terrain heights.
      * @param positions  (Required) The positions to update with terrain heights.
      */
-    function sampleTerrain(terrainProvider: TerrainProvider, level: Number, positions: Cartographic[]): Promise<Array<Cartographic>>;
+    function sampleTerrain(terrainProvider: TerrainProvider, level: Number, positions: Cartographic[]): Promise<Cartographic[]>;
     /**
      * Subdivides an array into a number of smaller, equal sized arrays.
      * @param array  (Required) The array to divide.
@@ -12672,7 +12672,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A viewport-aligned image positioned in the 3D scene, that is createdand rendered using a {@link BillboardCollection}.  A billboard is created and its initialproperties are set by calling {@link BillboardCollection#add}.<br /><br /><div align='center'><img src='images/Billboard.png' width='400' height='300' /><br />Example billboards</div>
@@ -12951,7 +12951,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
         /**
          * Converts a tiles (x, y, level) position into a quadkey used to request an imagefrom a Bing Maps server.
          * @param x  (Required) The tile's x coordinate.
@@ -14042,7 +14042,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * An {@link ImageryProvider} that draws a wireframe grid on every tile with controllable background and glow.May be useful for custom rendering effects or debugging terrain.
@@ -14136,7 +14136,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A ground primitive represents geometry draped over the terrain in the {@link Scene}.  The geometry must be from a single {@link GeometryInstance}.Batching multiple geometries is not yet supported.<p>A primitive combines the geometry instance with an {@link Appearance} that describes the full shading, including{@link Material} and {@link RenderState}.  Roughly, the geometry instance defines the structure and placement,and the appearance defines the visual characteristics.  Decoupling geometry and appearance allows us to mixand match most of them and add a new geometry or appearance independently of each other. Only the {@link PerInstanceColorAppearance}is supported at this time.</p><p>Because of the cutting edge nature of this feature in WebGL, it requires the EXT_frag_depth extension, which is currently only supported in Chrome,Firefox, and Edge. Apple support is expected in iOS 9 and MacOS Safari 9. Android support varies by hardware and IE11 will most likely never supportit. You can use webglreport.com to verify support for your hardware.</p><p>Valid geometries are {@link CircleGeometry}, {@link CorridorGeometry}, {@link EllipseGeometry}, {@link PolygonGeometry}, and {@link RectangleGeometry}.</p>
@@ -14396,7 +14396,7 @@ declare module Cesium {
          * @param ray  (Required) The ray to test for intersection.
          * @param scene  (Required) The scene.
          */
-        pickImageryLayerFeatures(ray: Ray, scene: Scene): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickImageryLayerFeatures(ray: Ray, scene: Scene): Promise<ImageryLayerFeatureInfo[]>;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -14551,7 +14551,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
         /**
          * Loads an image from a given URL.  If the server referenced by the URL already hastoo many requests pending, this function will instead return undefined, indicatingthat the request should be retried later.
          * @param url  (Required) The URL of the image.
@@ -14795,7 +14795,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A Material defines surface appearance through a combination of diffuse, specular,normal, emission, and alpha components. These values are specified using aJSON schema called Fabric which gets parsed and assembled into glsl shader codebehind-the-scenes. Check out the {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|wiki page}for more details on Fabric.<br /><br /><style type="text/css"> #materialDescriptions code {     font-weight: normal;     font-family: Consolas, 'Lucida Console', Monaco, monospace;     color: #A35A00; } #materialDescriptions ul, #materialDescriptions ul ul {     list-style-type: none; } #materialDescriptions ul ul {     margin-bottom: 10px; } #materialDescriptions ul ul li {     font-weight: normal;     color: #000000;     text-indent: -2em;     margin-left: 2em; } #materialDescriptions ul li {     font-weight: bold;     color: #0053CF; }</style>Base material types and their uniforms:<div id='materialDescriptions'><ul> <li>Color</li> <ul>     <li><code>color</code>:  rgba color object.</li> </ul> <li>Image</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>DiffuseMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>AlphaMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channel</code>:  One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>SpecularMap</li> <ul>     <li><code>image</code>: path to image.</li>     <li><code>channel</code>: One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>: Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>EmissionMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>BumpMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channel</code>:  One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li>     <li><code>strength</code>:  Bump strength value between 0.0 and 1.0 where 0.0 is small bumps and 1.0 is large bumps.</li> </ul> <li>NormalMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li>     <li><code>strength</code>:  Bump strength value between 0.0 and 1.0 where 0.0 is small bumps and 1.0 is large bumps.</li> </ul> <li>Grid</li> <ul>     <li><code>color</code>:  rgba color object for the whole material.</li>     <li><code>cellAlpha</code>: Alpha value for the cells between grid lines.  This will be combined with color.alpha.</li>     <li><code>lineCount</code>:  Object with x and y values specifying the number of columns and rows respectively.</li>     <li><code>lineThickness</code>:  Object with x and y values specifying the thickness of grid lines (in pixels where available).</li>     <li><code>lineOffset</code>:  Object with x and y values specifying the offset of grid lines (range is 0 to 1).</li> </ul> <li>Stripe</li> <ul>     <li><code>horizontal</code>:  Boolean that determines if the stripes are horizontal or vertical.</li>     <li><code>evenColor</code>:  rgba color object for the stripe's first color.</li>     <li><code>oddColor</code>:  rgba color object for the stripe's second color.</li>     <li><code>offset</code>:  Number that controls at which point into the pattern to begin drawing; with 0.0 being the beginning of the even color, 1.0 the beginning of the odd color, 2.0 being the even color again, and any multiple or fractional values being in between.</li>     <li><code>repeat</code>:  Number that controls the total number of stripes, half light and half dark.</li> </ul> <li>Checkerboard</li> <ul>     <li><code>lightColor</code>:  rgba color object for the checkerboard's light alternating color.</li>     <li><code>darkColor</code>: rgba color object for the checkerboard's dark alternating color.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of columns and rows respectively.</li> </ul> <li>Dot</li> <ul>     <li><code>lightColor</code>:  rgba color object for the dot color.</li>     <li><code>darkColor</code>:  rgba color object for the background color.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of columns and rows of dots respectively.</li> </ul> <li>Water</li> <ul>     <li><code>baseWaterColor</code>:  rgba color object base color of the water.</li>     <li><code>blendColor</code>:  rgba color object used when blending from water to non-water areas.</li>     <li><code>specularMap</code>:  Single channel texture used to indicate areas of water.</li>     <li><code>normalMap</code>:  Normal map for water normal perturbation.</li>     <li><code>frequency</code>:  Number that controls the number of waves.</li>     <li><code>normalMap</code>:  Normal map for water normal perturbation.</li>     <li><code>animationSpeed</code>:  Number that controls the animations speed of the water.</li>     <li><code>amplitude</code>:  Number that controls the amplitude of water waves.</li>     <li><code>specularIntensity</code>:  Number that controls the intensity of specular reflections.</li> </ul> <li>RimLighting</li> <ul>     <li><code>color</code>:  diffuse color and alpha.</li>     <li><code>rimColor</code>:  diffuse color and alpha of the rim.</li>     <li><code>width</code>:  Number that determines the rim's width.</li> </ul> <li>Fade</li> <ul>     <li><code>fadeInColor</code>: diffuse color and alpha at <code>time</code></li>     <li><code>fadeOutColor</code>: diffuse color and alpha at <code>maximumDistance</code> from <code>time</code></li>     <li><code>maximumDistance</code>: Number between 0.0 and 1.0 where the <code>fadeInColor</code> becomes the <code>fadeOutColor</code>. A value of 0.0 gives the entire material a color of <code>fadeOutColor</code> and a value of 1.0 gives the the entire material a color of <code>fadeInColor</code></li>     <li><code>repeat</code>: true if the fade should wrap around the texture coodinates.</li>     <li><code>fadeDirection</code>: Object with x and y values specifying if the fade should be in the x and y directions.</li>     <li><code>time</code>: Object with x and y values between 0.0 and 1.0 of the <code>fadeInColor</code> position</li> </ul> <li>PolylineArrow</li> <ul>     <li><code>color</code>: diffuse color and alpha.</li> </ul> <li>PolylineGlow</li> <ul>     <li><code>color</code>: color and maximum alpha for the glow on the line.</li>     <li><code>glowPower</code>: strength of the glow, as a percentage of the total line width (less than 1.0).</li> </ul> <li>PolylineOutline</li> <ul>     <li><code>color</code>: diffuse color and alpha for the interior of the line.</li>     <li><code>outlineColor</code>: diffuse color and alpha for the outline.</li>     <li><code>outlineWidth</code>: width of the outline in pixels.</li> </ul></ul></div>
@@ -16554,7 +16554,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * An atmosphere drawn around the limb of the provided ellipsoid.  Based on{@link http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter16.html|Accurate Atmospheric Scattering}in GPU Gems 2.<p>This is only supported in 3D.  atmosphere is faded out when morphing to 2D or Columbus view.</p>
@@ -16732,7 +16732,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A policy for discarding tile images according to some criteria.  This type describes aninterface and is not intended to be instantiated directly.
@@ -16852,7 +16852,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A viewport aligned quad.
@@ -16980,7 +16980,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * Provides tiled imagery served by {@link http://www.opengeospatial.org/standards/wmts|WMTS 1.0.0} compliant servers.This provider supports HTTP KVP-encoded and RESTful GetTile requests, but does not yet support the SOAP encoding.
@@ -17073,7 +17073,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<Array<ImageryLayerFeatureInfo>>;
+        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * <span style="display: block; text-align: center;"><img src="images/AnimationWidget.png" width="211" height="142" alt="" /><br />Animation widget</span><br /><br />The Animation widget provides buttons for play, pause, and reverse, along with thecurrent time and date, surrounded by a "shuttle ring" for controlling the speed of animation.<br /><br />The "shuttle ring" concept is borrowed from video editing, where typically a"jog wheel" can be rotated to move past individual animation frames very slowly, anda surrounding shuttle ring can be twisted to control direction and speed of fast playback.Cesium typically treats time as continuous (not broken into pre-defined animation frames),so this widget offers no jog wheel.  Instead, the shuttle ring is capable of both fast andvery slow playback.  Click and drag the shuttle ring pointer itself (shown above in green),or click in the rest of the ring area to nudge the pointer to the next preset speed in that direction.<br /><br />The Animation widget also provides a "realtime" button (in the upper-left) that keepsanimation time in sync with the end user's system clock, typically displaying"today" or "right now."  This mode is not available in {@link ClockRange.CLAMPED} or{@link ClockRange.LOOP_STOP} mode if the current time is outside of {@link Clock}'s startTime and endTime.
@@ -18524,13 +18524,17 @@ declare module Cesium {
          */
         destroy(): void;
         /**
-         * Asynchronously sets the camera to view the provided target
+         * Asynchronously sets the camera to view the provided entity, entities, or data source.If the data source is still in the process of loading or the visualization is otherwise still loading,this method waits for the data to be ready before performing the zoom.<p>The offset is heading/pitch/range in the local east-north-up reference frame centered at the center of the bounding sphere.The heading and the pitch angles are defined in the local east-north-up reference frame.The heading is the angle from y axis and increasing towards the x axis. Pitch is the rotation from the xy-plane. Positive pitchangles are above the plane. Negative pitch angles are below the plane. The range is the distance from the center. If the range iszero, a range will be computed such that the whole bounding sphere is visible.</p><p>In 2D, there must be a top down view. The camera will be placed above the target looking down. The height above thetarget will be the range. The heading will be determined from the offset. If the heading cannot bedetermined from the offset, the heading will be north.</p>
+         * @param target  (Required) The entity, array of entities, entity collection, data source or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+         * @param offset  (Optional) The offset from the center of the entity in the local east-north-up reference frame.
          */
-        zoomTo(target: any, offset?: HeadingPitchRange): Promise<Boolean>;
+        zoomTo(target: Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer>, offset?: HeadingPitchRange): Promise<Boolean>;
         /**
-         * Flies the camera to the provided target
+         * Flies the camera to the provided entity, entities, or data source.If the data source is still in the process of loading or the visualization is otherwise still loading,this method waits for the data to be ready before performing the flight.<p>The offset is heading/pitch/range in the local east-north-up reference frame centered at the center of the bounding sphere.The heading and the pitch angles are defined in the local east-north-up reference frame.The heading is the angle from y axis and increasing towards the x axis. Pitch is the rotation from the xy-plane. Positive pitchangles are above the plane. Negative pitch angles are below the plane. The range is the distance from the center. If the range iszero, a range will be computed such that the whole bounding sphere is visible.</p><p>In 2D, there must be a top down view. The camera will be placed above the target looking down. The height above thetarget will be the range. The heading will be determined from the offset. If the heading cannot bedetermined from the offset, the heading will be north.</p>
+         * @param target  (Required) The entity, array of entities, entity collection, data source or imagery layer to view. You can also pass a promise that resolves to one of the previously mentioned types.
+         * @param options  (Optional) Object with the following properties:
          */
-        flyTo(target: any, options?: Viewer.IViewerFlyToOptions): Promise<Boolean>;
+        flyTo(target: Entity|Entity[]|EntityCollection|DataSource|ImageryLayer|Promise<Entity|Entity[]|EntityCollection|DataSource|ImageryLayer>, options?: Viewer.IViewerFlyToOptions): Promise<Boolean>;
     }
     /**
      * A single button widget for toggling vr mode.

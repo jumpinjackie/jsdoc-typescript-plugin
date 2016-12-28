@@ -31,10 +31,17 @@ UnionTypeRest
 
 GenericType
     = name:Ident "."? "<" _ params:GenericTypeParams _ ">" {
-        return {
-            kind: "generic",
-            name: name,
-            types: params
+    	if (name === "Array") {
+          return {
+              kind: "array",
+              type: params[0]
+          } 	
+        } else {
+          return {
+              kind: "generic",
+              name: name,
+              types: params
+          }
         }
     }
 
@@ -47,35 +54,39 @@ GenericTypeParamsRest
     = "," _ type:Type {
         return type;
     }
-
+    
 SimpleType
-	= "Array" (!Ident) { 
-    	 //special handling of untyped array
-    	return {
-            kind: "generic",
-            name: "Array",
-            types: [{kind: "simple", name:"*"}]
+	= name:Ident {
+    	if (name === "Array") {
+          return {
+              kind: "array",
+              type: {kind: "simple", name:"*"}
+          } 	
+        } else {
+          return {
+              kind: "simple",
+              name: name
+          };
         }
-    }
-    / name:Ident {
-        return {
-            kind: "simple",
-            name: text()
-        };
     }
 
 ArrayType
-	= type:NonArrayType "[]" {
-        return {
-            kind: "generic",
-            name: "Array",
-            types: [type]
-        }
+    = type:NonArrayType arr:"[]"+ {
+        return arr.reduce((previousValue) => {
+          let obj = { 
+            kind: "array", 
+            type: previousValue !== null ? previousValue : type
+          }; 
+          return obj;
+        }, null);
     }
-    
+
 Ident
-  = [a-zA-Z$_-] [a-zA-Z0-9$_-]* {
-    return text();
+  = "*"
+  / [\\.a-zA-Z0-9$_-]* {
+    let txt = text();
+    if (txt.endsWith(".")) {return txt.slice(0,-1);}
+    return txt;
   }
 
 _ "whitespace"

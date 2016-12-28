@@ -11,7 +11,7 @@ module TsdPlugin {
         UserTypeAlias
     }
     
-    function CamelCase(name: string) {        
+    function CamelCase(name: string) {
         return name.charAt(0).toUpperCase() + name.slice(1);
     }
     
@@ -332,13 +332,13 @@ module TsdPlugin {
                         return type;
                     }
                 });
-                if (parsedType !== null) return parsedType;
-                
+
+                if (parsedType !== null) tn = parsedType;
+
                 if (context != null) {
                     context.addType(tn, conf, logger);
                 }
                 
-                //No other replacement suggestions, return as is
                 return tn;
             }
         }
