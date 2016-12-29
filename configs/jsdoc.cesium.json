@@ -73,16 +73,6 @@
             "TextureAtlas~CreateImageCallback"
         ],
         "memberReplacements": {
-            "Viewer#flyTo": {
-                "_reason": "Union processing can't handle this atm: https://github.com/jumpinjackie/jsdoc-typescript-plugin/issues/55",
-                "description": "Flies the camera to the provided target",
-                "declaration": "flyTo(target: any, options?: Viewer.IViewerFlyToOptions): Promise<Boolean>;"
-            },
-            "Viewer#zoomTo": {
-                "_reason": "Union processing can't handle this atm: https://github.com/jumpinjackie/jsdoc-typescript-plugin/issues/55",
-                "description": "Asynchronously sets the camera to view the provided target",
-                "declaration": "zoomTo(target: any, offset?: HeadingPitchRange): Promise<Boolean>;"
-            },
             "RectangleGeometryUpdater#createDynamicUpdater": {
                 "_reason": "Documentation Error. Duplicate parameter names in source",
                 "description": "Creates the dynamic updater to be used when GeometryUpdater#isDynamic is true.",

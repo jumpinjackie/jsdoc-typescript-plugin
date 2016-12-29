@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "system",
+        "module": "none",
         "target": "es5",
         "noImplicitAny": false,
         "outFile": "plugins/typescript.js",

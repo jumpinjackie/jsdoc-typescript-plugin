@@ -1,8 +1,9 @@
-let fs = require("fs");
-let os = require("os");
-let env = require("jsdoc/env");
-let logger = require("jsdoc/util/logger");
-let tsConf = env.conf.typescript || {};
+let fs: typeof nodeModules.fs = require("fs");
+let os: typeof nodeModules.os = require("os");
+let peg: typeof PEG = require("pegjs");
+let env: any = require("jsdoc/env");
+let logger:TsdPlugin.ILogger = require("jsdoc/util/logger");
+let tsConf:TsdPlugin.IPluginConfig  = env.conf.typescript || {}; 
 
 exports.handlers = {
     newDoclet(e: jsdoc.INewDocletEvent): void {
