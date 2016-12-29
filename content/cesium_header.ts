@@ -14,10 +14,6 @@ declare module Cesium {
 
     type CanvasPixelArray = any[];
 
-    type QuadtreeTile = any;
-
-    type QuadtreeOccluders = any;
-
     /**
      * Cesium's internal copy of knockout.js
      */
