@@ -14,10 +14,6 @@ declare module Cesium {
 
     type CanvasPixelArray = any[];
 
-    type QuadtreeTile = any;
-
-    type QuadtreeOccluders = any;
-
     /**
      * Cesium's internal copy of knockout.js
      */
@@ -96,12 +92,12 @@ declare module Cesium {
      * @param itemToFind  (Required) The item to find in the array.
      * @param comparator  (Required) The function to use to compare the item to       elements in the array.
      */
-    function binarySearch(array: any[], itemToFind: any, comparator: binarySearch.Comparator): Number;
+    function binarySearch(array: any[], itemToFind: any, comparator: binarySearch.Comparator): number;
     /**
      * A browser-independent function to cancel an animation frame requested using {@link requestAnimationFrame}.
      * @param requestID  (Required) The value returned by {@link requestAnimationFrame}.
      */
-    function cancelAnimationFrame(requestID: Number): void;
+    function cancelAnimationFrame(requestID: number): void;
     /**
      * Clones an object, returning a new object containing the same properties.
      * @param object  (Required) The object to clone.
@@ -173,7 +169,7 @@ declare module Cesium {
     /**
      * Gets a timestamp that can be used in measuring the time between events.  Timestampsare expressed in milliseconds, but it is not specified what the milliseconds aremeasured from.  This function uses performance.now() if it is available, or Date.now()otherwise.
      */
-    function getTimestamp(): Number;
+    function getTimestamp(): number;
     /**
      * Tests an object to see if it is an array.
      * @param value  (Required) The value to test.
@@ -183,7 +179,7 @@ declare module Cesium {
      * Determines if a given date is a leap year.
      * @param year  (Required) The year to be tested.
      */
-    function isLeapYear(year: Number): Boolean;
+    function isLeapYear(year: number): Boolean;
     /**
      * Asynchronously loads the given URL as raw binary data.  Returns a promise that will resolve toan ArrayBuffer once loaded, or reject if the URL failed to load.  The data is loadedusing XMLHttpRequest, which means that in order to make requests to another origin,the server must have Cross-Origin Resource Sharing (CORS) headers enabled.
      * @param url  (Required) The URL of the binary data, or a promise for the URL.
@@ -265,20 +261,20 @@ declare module Cesium {
      * A browser-independent function to request a new animation frame.  This is used to createan application's draw loop as shown in the example below.
      * @param callback  (Required) The function to call when the next frame should be drawn.
      */
-    function requestAnimationFrame(callback: requestAnimationFrame.Callback): Number;
+    function requestAnimationFrame(callback: requestAnimationFrame.Callback): number;
     /**
      * Initiates a terrain height query for an array of {@link Cartographic} positions byrequesting tiles from a terrain provider, sampling, and interpolating.  The interpolationmatches the triangles used to render the terrain at the specified level.  The queryhappens asynchronously, so this function returns a promise that is resolved whenthe query completes.  Each point height is modified in place.  If a height can not bedetermined because no terrain data is available for the specified level at that location,or another error occurs, the height is set to undefined.  As is typical of the{@link Cartographic} type, the supplied height is a height above the reference ellipsoid(such as {@link Ellipsoid.WGS84}) rather than an altitude above mean sea level.  In otherwords, it will not necessarily be 0.0 if sampled in the ocean.
      * @param terrainProvider  (Required) The terrain provider from which to query heights.
      * @param level  (Required) The terrain level-of-detail from which to query terrain heights.
      * @param positions  (Required) The positions to update with terrain heights.
      */
-    function sampleTerrain(terrainProvider: TerrainProvider, level: Number, positions: Cartographic[]): Promise<Cartographic[]>;
+    function sampleTerrain(terrainProvider: TerrainProvider, level: number, positions: Cartographic[]): Promise<Cartographic[]>;
     /**
      * Subdivides an array into a number of smaller, equal sized arrays.
      * @param array  (Required) The array to divide.
      * @param numberOfArrays  (Required) The number of arrays to divide the provided array into.
      */
-    function subdivideArray(array: any[], numberOfArrays: Number): void;
+    function subdivideArray(array: any[], numberOfArrays: number): void;
     /**
      * Because browsers throttle the number of parallel requests allowed to each server,this function tracks the number of active requests in progress to each server, andreturns undefined immediately if the request would exceed the maximum, allowingthe caller to retry later, instead of queueing indefinitely under the browser's control.
      * @param url  (Required) The URL to request.
@@ -371,19 +367,19 @@ declare module Cesium {
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        requestTileGeometry(x: Number, y: Number, level: Number): Promise<TerrainData>;
+        requestTileGeometry(x: number, y: number, level: number): Promise<TerrainData>;
         /**
          * Gets the maximum geometric error allowed in a tile at a given level.
          * @param level  (Required) The tile level for which to get the maximum geometric error.
          */
-        getLevelMaximumGeometricError(level: Number): Number;
+        getLevelMaximumGeometricError(level: number): number;
         /**
          * Determines whether data for a tile is available to be loaded.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        getTileDataAvailable(x: Number, y: Number, level: Number): Boolean;
+        getTileDataAvailable(x: number, y: number, level: number): Boolean;
     }
     /**
      * A collection of key-value pairs that is stored as a hash for easylookup but also provides an array for fast iteration.
@@ -396,7 +392,7 @@ declare module Cesium {
         /**
          * Gets the number of items in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Gets an unordered array of all values in the collection.This is a live array that will automatically reflect the values in the collection,it should not be modified directly.
          */
@@ -405,23 +401,23 @@ declare module Cesium {
          * Determines if the provided key is in the array.
          * @param key  (Required) The key to check.
          */
-        contains(key: string|Number): Boolean;
+        contains(key: string|number): Boolean;
         /**
          * Associates the provided key with the provided value.  If the key alreadyexists, it is overwritten with the new value.
          * @param key  (Required) A unique identifier.
          * @param value  (Required) The value to associate with the provided key.
          */
-        set(key: string|Number, value: any): void;
+        set(key: string|number, value: any): void;
         /**
          * Retrieves the value associated with the provided key.
          * @param key  (Required) The key whose value is to be retrieved.
          */
-        get(key: string|Number): any;
+        get(key: string|number): any;
         /**
          * Removes a key-value pair from the collection.
          * @param key  (Required) The key to be removed.
          */
-        remove(key: string|Number): Boolean;
+        remove(key: string|number): Boolean;
         /**
          * Clears the collection.
          */
@@ -501,41 +497,41 @@ declare module Cesium {
          * @param width  (Optional) The width of the rectangle.
          * @param height  (Optional) The height of the rectangle.
          */
-        constructor(x?: Number, y?: Number, width?: Number, height?: Number);
+        constructor(x?: number, y?: number, width?: number, height?: number);
         /**
          * The x coordinate of the rectangle.
          */
-        x: Number;
+        x: number;
         /**
          * The y coordinate of the rectangle.
          */
-        y: Number;
+        y: number;
         /**
          * The width of the rectangle.
          */
-        width: Number;
+        width: number;
         /**
          * The height of the rectangle.
          */
-        height: Number;
+        height: number;
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: BoundingRectangle, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: BoundingRectangle, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: BoundingRectangle): BoundingRectangle;
+        static unpack(array: number[], startingIndex?: number, result?: BoundingRectangle): BoundingRectangle;
         /**
          * Computes a bounding rectangle enclosing the list of 2D points.The rectangle is oriented with the corner at the bottom left.
          * @param positions  (Required) List of points that the bounding rectangle will enclose.  Each point must have <code>x</code> and <code>y</code> properties.
@@ -606,7 +602,7 @@ declare module Cesium {
          * @param center  (Optional) The center of the bounding sphere.
          * @param radius  (Optional) The radius of the bounding sphere.
          */
-        constructor(center?: Cartesian3, radius?: Number);
+        constructor(center?: Cartesian3, radius?: number);
         /**
          * The center point of the sphere.
          */
@@ -614,7 +610,7 @@ declare module Cesium {
         /**
          * The radius of the sphere.
          */
-        radius: Number;
+        radius: number;
         /**
          * Computes a tight-fitting bounding sphere enclosing a list of 3D Cartesian points.The bounding sphere is computed by running two algorithms, a naive algorithm andRitter's algorithm. The smaller of the two spheres is used to ensure a tight fit.
          * @param positions  (Required) An array of points that the bounding sphere will enclose.  Each point must have <code>x</code>, <code>y</code>, and <code>z</code> properties.
@@ -636,7 +632,7 @@ declare module Cesium {
          * @param maximumHeight  (Optional) The maximum height over the rectangle.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromRectangleWithHeights2D(rectangle: Rectangle, projection?: any, minimumHeight?: Number, maximumHeight?: Number, result?: BoundingSphere): BoundingSphere;
+        static fromRectangleWithHeights2D(rectangle: Rectangle, projection?: any, minimumHeight?: number, maximumHeight?: number, result?: BoundingSphere): BoundingSphere;
         /**
          * Computes a bounding sphere from an rectangle in 3D. The bounding sphere is created using a subsample of pointson the ellipsoid and contained in the rectangle. It may not be accurate for all rectangles on all types of ellipsoids.
          * @param rectangle  (Required) The valid rectangle used to create a bounding sphere.
@@ -644,7 +640,7 @@ declare module Cesium {
          * @param surfaceHeight  (Optional) The height above the surface of the ellipsoid.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromRectangle3D(rectangle: Rectangle, ellipsoid?: Ellipsoid, surfaceHeight?: Number, result?: BoundingSphere): BoundingSphere;
+        static fromRectangle3D(rectangle: Rectangle, ellipsoid?: Ellipsoid, surfaceHeight?: number, result?: BoundingSphere): BoundingSphere;
         /**
          * Computes a tight-fitting bounding sphere enclosing a list of 3D points, where the points arestored in a flat array in X, Y, Z, order.  The bounding sphere is computed by running twoalgorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used toensure a tight fit.
          * @param positions  (Required) An array of points that the bounding sphere will enclose.  Each point       is formed from three elements in the array in the order X, Y, Z.
@@ -652,14 +648,14 @@ declare module Cesium {
          * @param stride  (Optional) The number of array elements per vertex.  It must be at least 3, but it may       be higher.  Regardless of the value of this parameter, the X coordinate of the first position       is at array index 0, the Y coordinate is at array index 1, and the Z coordinate is at array index       2.  When stride is 3, the X coordinate of the next position then begins at array index 3.  If       the stride is 5, however, two array elements are skipped and the next position begins at array       index 5.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromVertices(positions: Number[], center?: Cartesian3, stride?: Number, result?: BoundingSphere): BoundingSphere;
+        static fromVertices(positions: number[], center?: Cartesian3, stride?: number, result?: BoundingSphere): BoundingSphere;
         /**
          * Computes a tight-fitting bounding sphere enclosing a list of {@link EncodedCartesian3}s, where the points arestored in parallel flat arrays in X, Y, Z, order.  The bounding sphere is computed by running twoalgorithms, a naive algorithm and Ritter's algorithm. The smaller of the two spheres is used toensure a tight fit.
          * @param positionsHigh  (Required) An array of high bits of the encoded cartesians that the bounding sphere will enclose.  Each point       is formed from three elements in the array in the order X, Y, Z.
          * @param positionsLow  (Required) An array of low bits of the encoded cartesians that the bounding sphere will enclose.  Each point       is formed from three elements in the array in the order X, Y, Z.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromEncodedCartesianVertices(positionsHigh: Number[], positionsLow: Number[], result?: BoundingSphere): BoundingSphere;
+        static fromEncodedCartesianVertices(positionsHigh: number[], positionsLow: number[], result?: BoundingSphere): BoundingSphere;
         /**
          * Computes a bounding sphere from the corner points of an axis-aligned bounding box.  The spheretighly and fully encompases the box.
          * @param corner  (Optional) The minimum height over the rectangle.
@@ -694,21 +690,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: BoundingSphere, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: BoundingSphere, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: BoundingSphere): BoundingSphere;
+        static unpack(array: number[], startingIndex?: number, result?: BoundingSphere): BoundingSphere;
         /**
          * Computes a bounding sphere that contains both the left and right bounding spheres.
          * @param left  (Required) A sphere to enclose in a bounding sphere.
@@ -741,7 +737,7 @@ declare module Cesium {
          * @param sphere  (Required) The sphere.
          * @param cartesian  (Required) The point
          */
-        static distanceSquaredTo(sphere: BoundingSphere, cartesian: Cartesian3): Number;
+        static distanceSquaredTo(sphere: BoundingSphere, cartesian: Cartesian3): number;
         /**
          * Applies a 4x4 affine transformation matrix to a bounding sphere where there is no scaleThe transformation matrix is not verified to have a uniform scale of 1.This method is faster than computing the general bounding sphere transform using {@link BoundingSphere.transform}.
          * @param sphere  (Required) The bounding sphere to apply the transformation to.
@@ -785,7 +781,7 @@ declare module Cesium {
          * Computes the estimated distance squared from the closest point on a bounding sphere to a point.
          * @param cartesian  (Required) The point
          */
-        distanceSquaredTo(cartesian: Cartesian3): Number;
+        distanceSquaredTo(cartesian: Cartesian3): number;
         /**
          * The distances calculated by the vector from the center of the bounding sphere to position projected onto directionplus/minus the radius of the bounding sphere.<br>If you imagine the infinite number of planes with normal direction, this computes the smallest distance to theclosest and farthest planes from position that intersect the bounding sphere.
          * @param position  (Required) The position to calculate the distance from.
@@ -831,21 +827,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: BoxGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: BoxGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: BoxGeometry): BoxGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: BoxGeometry): BoxGeometry;
         /**
          * Computes the geometric representation of a box, including its vertices, indices, and a bounding sphere.
          * @param boxGeometry  (Required) A description of the box.
@@ -874,21 +870,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: BoxOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: BoxOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: BoxOutlineGeometry): BoxOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: BoxOutlineGeometry): BoxOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of a box, including its vertices, indices, and a bounding sphere.
          * @param boxGeometry  (Required) A description of the box outline.
@@ -904,22 +900,22 @@ declare module Cesium {
          * @param x  (Optional) The X component.
          * @param y  (Optional) The Y component.
          */
-        constructor(x?: Number, y?: Number);
+        constructor(x?: number, y?: number);
         /**
          * The X component.
          */
-        x: Number;
+        x: number;
         /**
          * The Y component.
          */
-        y: Number;
+        y: number;
         /**
          * Creates a Cartesian2 instance from x and y coordinates.
          * @param x  (Required) The x coordinate.
          * @param y  (Required) The y coordinate.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromElements(x: Number, y: Number, result?: Cartesian2): Cartesian2;
+        static fromElements(x: number, y: number, result?: Cartesian2): Cartesian2;
         /**
          * Duplicates a Cartesian2 instance.
          * @param cartesian  (Required) The Cartesian to duplicate.
@@ -941,50 +937,50 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Cartesian2, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Cartesian2, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Cartesian2): Cartesian2;
+        static unpack(array: number[], startingIndex?: number, result?: Cartesian2): Cartesian2;
         /**
          * Flattens an array of Cartesian2s into and array of components.
          * @param array  (Required) The array of cartesians to pack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static packArray(array: Cartesian2[], result: Number[]): Number[];
+        static packArray(array: Cartesian2[], result: number[]): number[];
         /**
          * Unpacks an array of cartesian components into and array of Cartesian2s.
          * @param array  (Required) The array of components to unpack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static unpackArray(array: Number[], result: Cartesian2[]): Cartesian2[];
+        static unpackArray(array: number[], result: Cartesian2[]): Cartesian2[];
         /**
          * Creates a Cartesian2 from two consecutive elements in an array.
          * @param array  (Required) The array whose two consecutive elements correspond to the x and y components, respectively.
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to the x component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Cartesian2): Cartesian2;
+        static fromArray(array: number[], startingIndex?: number, result?: Cartesian2): Cartesian2;
         /**
          * Computes the value of the maximum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static maximumComponent(cartesian: Cartesian2): Number;
+        static maximumComponent(cartesian: Cartesian2): number;
         /**
          * Computes the value of the minimum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static minimumComponent(cartesian: Cartesian2): Number;
+        static minimumComponent(cartesian: Cartesian2): number;
         /**
          * Compares two Cartesians and computes a Cartesian which contains the minimum components of the supplied Cartesians.
          * @param first  (Required) A cartesian to compare.
@@ -1003,24 +999,24 @@ declare module Cesium {
          * Computes the provided Cartesian's squared magnitude.
          * @param cartesian  (Required) The Cartesian instance whose squared magnitude is to be computed.
          */
-        static magnitudeSquared(cartesian: Cartesian2): Number;
+        static magnitudeSquared(cartesian: Cartesian2): number;
         /**
          * Computes the Cartesian's magnitude (length).
          * @param cartesian  (Required) The Cartesian instance whose magnitude is to be computed.
          */
-        static magnitude(cartesian: Cartesian2): Number;
+        static magnitude(cartesian: Cartesian2): number;
         /**
          * Computes the distance between two points.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distance(left: Cartesian2, right: Cartesian2): Number;
+        static distance(left: Cartesian2, right: Cartesian2): number;
         /**
          * Computes the squared distance between two points.  Comparing squared distancesusing this function is more efficient than comparing distances using {@link Cartesian2#distance}.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distanceSquared(left: Cartesian2, right: Cartesian2): Number;
+        static distanceSquared(left: Cartesian2, right: Cartesian2): number;
         /**
          * Computes the normalized form of the supplied Cartesian.
          * @param cartesian  (Required) The Cartesian to be normalized.
@@ -1032,7 +1028,7 @@ declare module Cesium {
          * @param left  (Required) The first Cartesian.
          * @param right  (Required) The second Cartesian.
          */
-        static dot(left: Cartesian2, right: Cartesian2): Number;
+        static dot(left: Cartesian2, right: Cartesian2): number;
         /**
          * Computes the componentwise product of two Cartesians.
          * @param left  (Required) The first Cartesian.
@@ -1060,14 +1056,14 @@ declare module Cesium {
          * @param scalar  (Required) The scalar to multiply with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(cartesian: Cartesian2, scalar: Number, result: Cartesian2): Cartesian2;
+        static multiplyByScalar(cartesian: Cartesian2, scalar: number, result: Cartesian2): Cartesian2;
         /**
          * Divides the provided Cartesian componentwise by the provided scalar.
          * @param cartesian  (Required) The Cartesian to be divided.
          * @param scalar  (Required) The scalar to divide by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divideByScalar(cartesian: Cartesian2, scalar: Number, result: Cartesian2): Cartesian2;
+        static divideByScalar(cartesian: Cartesian2, scalar: number, result: Cartesian2): Cartesian2;
         /**
          * Negates the provided Cartesian.
          * @param cartesian  (Required) The Cartesian to be negated.
@@ -1087,13 +1083,13 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static lerp(start: Cartesian2, end: Cartesian2, t: Number, result: Cartesian2): Cartesian2;
+        static lerp(start: Cartesian2, end: Cartesian2, t: number, result: Cartesian2): Cartesian2;
         /**
          * Returns the angle, in radians, between the provided Cartesians.
          * @param left  (Required) The first Cartesian.
          * @param right  (Required) The second Cartesian.
          */
-        static angleBetween(left: Cartesian2, right: Cartesian2): Number;
+        static angleBetween(left: Cartesian2, right: Cartesian2): number;
         /**
          * Returns the axis that is most orthogonal to the provided Cartesian.
          * @param cartesian  (Required) The Cartesian on which to find the most orthogonal axis.
@@ -1113,7 +1109,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        static equalsEpsilon(left?: Cartesian2, right?: Cartesian2, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Cartesian2, right?: Cartesian2, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * An immutable Cartesian2 instance initialized to (0.0, 0.0).
          */
@@ -1142,7 +1138,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        equalsEpsilon(right?: Cartesian2, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        equalsEpsilon(right?: Cartesian2, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Creates a string representing this Cartesian in the format '(x, y)'.
          */
@@ -1158,19 +1154,19 @@ declare module Cesium {
          * @param y  (Optional) The Y component.
          * @param z  (Optional) The Z component.
          */
-        constructor(x?: Number, y?: Number, z?: Number);
+        constructor(x?: number, y?: number, z?: number);
         /**
          * The X component.
          */
-        x: Number;
+        x: number;
         /**
          * The Y component.
          */
-        y: Number;
+        y: number;
         /**
          * The Z component.
          */
-        z: Number;
+        z: number;
         /**
          * Converts the provided Spherical into Cartesian3 coordinates.
          * @param spherical  (Required) The Spherical to be converted to Cartesian3.
@@ -1184,7 +1180,7 @@ declare module Cesium {
          * @param z  (Required) The z coordinate.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromElements(x: Number, y: Number, z: Number, result?: Cartesian3): Cartesian3;
+        static fromElements(x: number, y: number, z: number, result?: Cartesian3): Cartesian3;
         /**
          * Duplicates a Cartesian3 instance.
          * @param cartesian  (Required) The Cartesian to duplicate.
@@ -1200,50 +1196,50 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Cartesian3, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Cartesian3, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Cartesian3): Cartesian3;
+        static unpack(array: number[], startingIndex?: number, result?: Cartesian3): Cartesian3;
         /**
          * Flattens an array of Cartesian3s into an array of components.
          * @param array  (Required) The array of cartesians to pack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static packArray(array: Cartesian3[], result: Number[]): Number[];
+        static packArray(array: Cartesian3[], result: number[]): number[];
         /**
          * Unpacks an array of cartesian components into an array of Cartesian3s.
          * @param array  (Required) The array of components to unpack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static unpackArray(array: Number[], result: Cartesian3[]): Cartesian3[];
+        static unpackArray(array: number[], result: Cartesian3[]): Cartesian3[];
         /**
          * Creates a Cartesian3 from three consecutive elements in an array.
          * @param array  (Required) The array whose three consecutive elements correspond to the x, y, and z components, respectively.
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to the x component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Cartesian3): Cartesian3;
+        static fromArray(array: number[], startingIndex?: number, result?: Cartesian3): Cartesian3;
         /**
          * Computes the value of the maximum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static maximumComponent(cartesian: Cartesian3): Number;
+        static maximumComponent(cartesian: Cartesian3): number;
         /**
          * Computes the value of the minimum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static minimumComponent(cartesian: Cartesian3): Number;
+        static minimumComponent(cartesian: Cartesian3): number;
         /**
          * Compares two Cartesians and computes a Cartesian which contains the minimum components of the supplied Cartesians.
          * @param first  (Required) A cartesian to compare.
@@ -1262,24 +1258,24 @@ declare module Cesium {
          * Computes the provided Cartesian's squared magnitude.
          * @param cartesian  (Required) The Cartesian instance whose squared magnitude is to be computed.
          */
-        static magnitudeSquared(cartesian: Cartesian3): Number;
+        static magnitudeSquared(cartesian: Cartesian3): number;
         /**
          * Computes the Cartesian's magnitude (length).
          * @param cartesian  (Required) The Cartesian instance whose magnitude is to be computed.
          */
-        static magnitude(cartesian: Cartesian3): Number;
+        static magnitude(cartesian: Cartesian3): number;
         /**
          * Computes the distance between two points.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distance(left: Cartesian3, right: Cartesian3): Number;
+        static distance(left: Cartesian3, right: Cartesian3): number;
         /**
          * Computes the squared distance between two points.  Comparing squared distancesusing this function is more efficient than comparing distances using {@link Cartesian3#distance}.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distanceSquared(left: Cartesian3, right: Cartesian3): Number;
+        static distanceSquared(left: Cartesian3, right: Cartesian3): number;
         /**
          * Computes the normalized form of the supplied Cartesian.
          * @param cartesian  (Required) The Cartesian to be normalized.
@@ -1291,7 +1287,7 @@ declare module Cesium {
          * @param left  (Required) The first Cartesian.
          * @param right  (Required) The second Cartesian.
          */
-        static dot(left: Cartesian3, right: Cartesian3): Number;
+        static dot(left: Cartesian3, right: Cartesian3): number;
         /**
          * Computes the componentwise product of two Cartesians.
          * @param left  (Required) The first Cartesian.
@@ -1319,14 +1315,14 @@ declare module Cesium {
          * @param scalar  (Required) The scalar to multiply with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(cartesian: Cartesian3, scalar: Number, result: Cartesian3): Cartesian3;
+        static multiplyByScalar(cartesian: Cartesian3, scalar: number, result: Cartesian3): Cartesian3;
         /**
          * Divides the provided Cartesian componentwise by the provided scalar.
          * @param cartesian  (Required) The Cartesian to be divided.
          * @param scalar  (Required) The scalar to divide by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divideByScalar(cartesian: Cartesian3, scalar: Number, result: Cartesian3): Cartesian3;
+        static divideByScalar(cartesian: Cartesian3, scalar: number, result: Cartesian3): Cartesian3;
         /**
          * Negates the provided Cartesian.
          * @param cartesian  (Required) The Cartesian to be negated.
@@ -1346,13 +1342,13 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static lerp(start: Cartesian3, end: Cartesian3, t: Number, result: Cartesian3): Cartesian3;
+        static lerp(start: Cartesian3, end: Cartesian3, t: number, result: Cartesian3): Cartesian3;
         /**
          * Returns the angle, in radians, between the provided Cartesians.
          * @param left  (Required) The first Cartesian.
          * @param right  (Required) The second Cartesian.
          */
-        static angleBetween(left: Cartesian3, right: Cartesian3): Number;
+        static angleBetween(left: Cartesian3, right: Cartesian3): number;
         /**
          * Returns the axis that is most orthogonal to the provided Cartesian.
          * @param cartesian  (Required) The Cartesian on which to find the most orthogonal axis.
@@ -1372,7 +1368,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        static equalsEpsilon(left?: Cartesian3, right?: Cartesian3, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Cartesian3, right?: Cartesian3, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Computes the cross (outer) product of two Cartesians.
          * @param left  (Required) The first Cartesian.
@@ -1388,7 +1384,7 @@ declare module Cesium {
          * @param ellipsoid  (Optional) The ellipsoid on which the position lies.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromDegrees(longitude: Number, latitude: Number, height?: Number, ellipsoid?: Ellipsoid, result?: Cartesian3): Cartesian3;
+        static fromDegrees(longitude: number, latitude: number, height?: number, ellipsoid?: Ellipsoid, result?: Cartesian3): Cartesian3;
         /**
          * Returns a Cartesian3 position from longitude and latitude values given in radians.
          * @param longitude  (Required) The longitude, in radians
@@ -1397,35 +1393,35 @@ declare module Cesium {
          * @param ellipsoid  (Optional) The ellipsoid on which the position lies.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromRadians(longitude: Number, latitude: Number, height?: Number, ellipsoid?: Ellipsoid, result?: Cartesian3): Cartesian3;
+        static fromRadians(longitude: number, latitude: number, height?: number, ellipsoid?: Ellipsoid, result?: Cartesian3): Cartesian3;
         /**
          * Returns an array of Cartesian3 positions given an array of longitude and latitude values given in degrees.
          * @param coordinates  (Required) A list of longitude and latitude values. Values alternate [longitude, latitude, longitude, latitude...].
          * @param ellipsoid  (Optional) The ellipsoid on which the coordinates lie.
          * @param result  (Optional) An array of Cartesian3 objects to store the result.
          */
-        static fromDegreesArray(coordinates: Number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
+        static fromDegreesArray(coordinates: number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
         /**
          * Returns an array of Cartesian3 positions given an array of longitude and latitude values given in radians.
          * @param coordinates  (Required) A list of longitude and latitude values. Values alternate [longitude, latitude, longitude, latitude...].
          * @param ellipsoid  (Optional) The ellipsoid on which the coordinates lie.
          * @param result  (Optional) An array of Cartesian3 objects to store the result.
          */
-        static fromRadiansArray(coordinates: Number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
+        static fromRadiansArray(coordinates: number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
         /**
          * Returns an array of Cartesian3 positions given an array of longitude, latitude and height values where longitude and latitude are given in degrees.
          * @param coordinates  (Required) A list of longitude, latitude and height values. Values alternate [longitude, latitude, height, longitude, latitude, height...].
          * @param ellipsoid  (Optional) The ellipsoid on which the position lies.
          * @param result  (Optional) An array of Cartesian3 objects to store the result.
          */
-        static fromDegreesArrayHeights(coordinates: Number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
+        static fromDegreesArrayHeights(coordinates: number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
         /**
          * Returns an array of Cartesian3 positions given an array of longitude, latitude and height values where longitude and latitude are given in radians.
          * @param coordinates  (Required) A list of longitude, latitude and height values. Values alternate [longitude, latitude, height, longitude, latitude, height...].
          * @param ellipsoid  (Optional) The ellipsoid on which the position lies.
          * @param result  (Optional) An array of Cartesian3 objects to store the result.
          */
-        static fromRadiansArrayHeights(coordinates: Number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
+        static fromRadiansArrayHeights(coordinates: number[], ellipsoid?: Ellipsoid, result?: Cartesian3[]): Cartesian3[];
         /**
          * An immutable Cartesian3 instance initialized to (0.0, 0.0, 0.0).
          */
@@ -1458,7 +1454,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        equalsEpsilon(right?: Cartesian3, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        equalsEpsilon(right?: Cartesian3, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Creates a string representing this Cartesian in the format '(x, y, z)'.
          */
@@ -1475,23 +1471,23 @@ declare module Cesium {
          * @param z  (Optional) The Z component.
          * @param w  (Optional) The W component.
          */
-        constructor(x?: Number, y?: Number, z?: Number, w?: Number);
+        constructor(x?: number, y?: number, z?: number, w?: number);
         /**
          * The X component.
          */
-        x: Number;
+        x: number;
         /**
          * The Y component.
          */
-        y: Number;
+        y: number;
         /**
          * The Z component.
          */
-        z: Number;
+        z: number;
         /**
          * The W component.
          */
-        w: Number;
+        w: number;
         /**
          * Creates a Cartesian4 instance from x, y, z and w coordinates.
          * @param x  (Required) The x coordinate.
@@ -1500,13 +1496,13 @@ declare module Cesium {
          * @param w  (Required) The w coordinate.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromElements(x: Number, y: Number, z: Number, w: Number, result?: Cartesian4): Cartesian4;
+        static fromElements(x: number, y: number, z: number, w: number, result?: Cartesian4): Cartesian4;
         /**
          * Creates a Cartesian4 instance from a {@link Color}. <code>red</code>, <code>green</code>, <code>blue</code>,and <code>alpha</code> map to <code>x</code>, <code>y</code>, <code>z</code>, and <code>w</code>, respectively.
          * @param color  (Required) The source color.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromColor(color: number, result?: Cartesian4): Cartesian4;
+        static fromColor(color: Color, result?: Cartesian4): Cartesian4;
         /**
          * Duplicates a Cartesian4 instance.
          * @param cartesian  (Required) The Cartesian to duplicate.
@@ -1516,50 +1512,50 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Cartesian4, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Cartesian4, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Cartesian4): Cartesian4;
+        static unpack(array: number[], startingIndex?: number, result?: Cartesian4): Cartesian4;
         /**
          * Flattens an array of Cartesian4s into and array of components.
          * @param array  (Required) The array of cartesians to pack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static packArray(array: Cartesian4[], result: Number[]): Number[];
+        static packArray(array: Cartesian4[], result: number[]): number[];
         /**
          * Unpacks an array of cartesian components into and array of Cartesian4s.
          * @param array  (Required) The array of components to unpack.
          * @param result  (Required) The array onto which to store the result.
          */
-        static unpackArray(array: Number[], result: Cartesian4[]): Cartesian4[];
+        static unpackArray(array: number[], result: Cartesian4[]): Cartesian4[];
         /**
          * Creates a Cartesian4 from four consecutive elements in an array.
          * @param array  (Required) The array whose four consecutive elements correspond to the x, y, z, and w components, respectively.
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to the x component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Cartesian4): Cartesian4;
+        static fromArray(array: number[], startingIndex?: number, result?: Cartesian4): Cartesian4;
         /**
          * Computes the value of the maximum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static maximumComponent(cartesian: Cartesian4): Number;
+        static maximumComponent(cartesian: Cartesian4): number;
         /**
          * Computes the value of the minimum component for the supplied Cartesian.
          * @param cartesian  (Required) The cartesian to use.
          */
-        static minimumComponent(cartesian: Cartesian4): Number;
+        static minimumComponent(cartesian: Cartesian4): number;
         /**
          * Compares two Cartesians and computes a Cartesian which contains the minimum components of the supplied Cartesians.
          * @param first  (Required) A cartesian to compare.
@@ -1578,24 +1574,24 @@ declare module Cesium {
          * Computes the provided Cartesian's squared magnitude.
          * @param cartesian  (Required) The Cartesian instance whose squared magnitude is to be computed.
          */
-        static magnitudeSquared(cartesian: Cartesian4): Number;
+        static magnitudeSquared(cartesian: Cartesian4): number;
         /**
          * Computes the Cartesian's magnitude (length).
          * @param cartesian  (Required) The Cartesian instance whose magnitude is to be computed.
          */
-        static magnitude(cartesian: Cartesian4): Number;
+        static magnitude(cartesian: Cartesian4): number;
         /**
          * Computes the 4-space distance between two points.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distance(left: Cartesian4, right: Cartesian4): Number;
+        static distance(left: Cartesian4, right: Cartesian4): number;
         /**
          * Computes the squared distance between two points.  Comparing squared distancesusing this function is more efficient than comparing distances using {@link Cartesian4#distance}.
          * @param left  (Required) The first point to compute the distance from.
          * @param right  (Required) The second point to compute the distance to.
          */
-        static distanceSquared(left: Cartesian4, right: Cartesian4): Number;
+        static distanceSquared(left: Cartesian4, right: Cartesian4): number;
         /**
          * Computes the normalized form of the supplied Cartesian.
          * @param cartesian  (Required) The Cartesian to be normalized.
@@ -1607,7 +1603,7 @@ declare module Cesium {
          * @param left  (Required) The first Cartesian.
          * @param right  (Required) The second Cartesian.
          */
-        static dot(left: Cartesian4, right: Cartesian4): Number;
+        static dot(left: Cartesian4, right: Cartesian4): number;
         /**
          * Computes the componentwise product of two Cartesians.
          * @param left  (Required) The first Cartesian.
@@ -1635,14 +1631,14 @@ declare module Cesium {
          * @param scalar  (Required) The scalar to multiply with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(cartesian: Cartesian4, scalar: Number, result: Cartesian4): Cartesian4;
+        static multiplyByScalar(cartesian: Cartesian4, scalar: number, result: Cartesian4): Cartesian4;
         /**
          * Divides the provided Cartesian componentwise by the provided scalar.
          * @param cartesian  (Required) The Cartesian to be divided.
          * @param scalar  (Required) The scalar to divide by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divideByScalar(cartesian: Cartesian4, scalar: Number, result: Cartesian4): Cartesian4;
+        static divideByScalar(cartesian: Cartesian4, scalar: number, result: Cartesian4): Cartesian4;
         /**
          * Negates the provided Cartesian.
          * @param cartesian  (Required) The Cartesian to be negated.
@@ -1662,7 +1658,7 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static lerp(start: Cartesian4, end: Cartesian4, t: Number, result: Cartesian4): Cartesian4;
+        static lerp(start: Cartesian4, end: Cartesian4, t: number, result: Cartesian4): Cartesian4;
         /**
          * Returns the axis that is most orthogonal to the provided Cartesian.
          * @param cartesian  (Required) The Cartesian on which to find the most orthogonal axis.
@@ -1682,7 +1678,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        static equalsEpsilon(left?: Cartesian4, right?: Cartesian4, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Cartesian4, right?: Cartesian4, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * An immutable Cartesian4 instance initialized to (0.0, 0.0, 0.0, 0.0).
          */
@@ -1719,7 +1715,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        equalsEpsilon(right?: Cartesian4, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        equalsEpsilon(right?: Cartesian4, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Creates a string representing this Cartesian in the format '(x, y)'.
          */
@@ -1735,19 +1731,19 @@ declare module Cesium {
          * @param latitude  (Optional) The latitude, in radians.
          * @param height  (Optional) The height, in meters, above the ellipsoid.
          */
-        constructor(longitude?: Number, latitude?: Number, height?: Number);
+        constructor(longitude?: number, latitude?: number, height?: number);
         /**
          * The longitude, in radians.
          */
-        longitude: Number;
+        longitude: number;
         /**
          * The latitude, in radians.
          */
-        latitude: Number;
+        latitude: number;
         /**
          * The height, in meters, above the ellipsoid.
          */
-        height: Number;
+        height: number;
         /**
          * Creates a new Cartographic instance from longitude and latitudespecified in radians.
          * @param longitude  (Required) The longitude, in radians.
@@ -1755,7 +1751,7 @@ declare module Cesium {
          * @param height  (Optional) The height, in meters, above the ellipsoid.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromRadians(longitude: Number, latitude: Number, height?: Number, result?: Cartographic): Cartographic;
+        static fromRadians(longitude: number, latitude: number, height?: number, result?: Cartographic): Cartographic;
         /**
          * Creates a new Cartographic instance from longitude and latitudespecified in degrees.  The values in the resulting object willbe in radians.
          * @param longitude  (Required) The longitude, in degrees.
@@ -1763,7 +1759,7 @@ declare module Cesium {
          * @param height  (Optional) The height, in meters, above the ellipsoid.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromDegrees(longitude: Number, latitude: Number, height?: Number, result?: Cartographic): Cartographic;
+        static fromDegrees(longitude: number, latitude: number, height?: number, result?: Cartographic): Cartographic;
         /**
          * Creates a new Cartographic instance from a Cartesian position. The values in theresulting object will be in radians.
          * @param cartesian  (Required) The Cartesian position to convert to cartographic representation.
@@ -1789,7 +1785,7 @@ declare module Cesium {
          * @param right  (Optional) The second cartographic.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        static equalsEpsilon(left?: Cartographic, right?: Cartographic, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Cartographic, right?: Cartographic, epsilon?: number): Boolean;
         /**
          * An immutable Cartographic instance initialized to (0.0, 0.0, 0.0).
          */
@@ -1809,7 +1805,7 @@ declare module Cesium {
          * @param right  (Optional) The second cartographic.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(right?: Cartographic, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: Cartographic, epsilon?: number): Boolean;
         /**
          * Creates a string representing this cartographic in the format '(longitude, latitude, height)'.
          */
@@ -1827,7 +1823,7 @@ declare module Cesium {
         /**
          * An array of times for the control points.
          */
-        times: Number[];
+        times: number[];
         /**
          * An array of {@link Cartesian3} control points.
          */
@@ -1844,13 +1840,13 @@ declare module Cesium {
          * Finds an index <code>i</code> in <code>times</code> such that the parameter<code>time</code> is in the interval <code>[times[i], times[i + 1]]</code>.
          * @param time  (Required) The time.
          */
-        findTimeInterval(time: Number): Number;
+        findTimeInterval(time: number): number;
         /**
          * Evaluates the curve at a given time.
          * @param time  (Required) The time at which to evaluate the curve.
          * @param result  (Optional) The object onto which to store the result.
          */
-        evaluate(time: Number, result?: Cartesian3): Cartesian3;
+        evaluate(time: number, result?: Cartesian3): Cartesian3;
     }
     /**
      * A {@link TerrainProvider} that access terrain data in a Cesium terrain format.The format is described on the{@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Cesium-Terrain-Server|Cesium wiki}.
@@ -1868,7 +1864,7 @@ declare module Cesium {
          * @param level  (Required) The level of the tile for which to request geometry.
          * @param throttleRequests  (Optional) True if the number of simultaneous requests should be limited,                 or false if the request should be initiated regardless of the number of requests                 already in progress.
          */
-        requestTileGeometry(x: Number, y: Number, level: Number, throttleRequests?: Boolean): Promise<TerrainData>;
+        requestTileGeometry(x: number, y: number, level: number, throttleRequests?: Boolean): Promise<TerrainData>;
         /**
          * Gets an event that is raised when the terrain provider encounters an asynchronous error.  By subscribingto the event, you will be notified of the error and can potentially recover from it.  Event listenersare passed an instance of {@link TileProviderError}.
          */
@@ -1909,14 +1905,14 @@ declare module Cesium {
          * Gets the maximum geometric error allowed in a tile at a given level.
          * @param level  (Required) The tile level for which to get the maximum geometric error.
          */
-        getLevelMaximumGeometricError(level: Number): Number;
+        getLevelMaximumGeometricError(level: number): number;
         /**
          * Determines whether data for a tile is available to be loaded.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        getTileDataAvailable(x: Number, y: Number, level: Number): Boolean;
+        getTileDataAvailable(x: number, y: number, level: number): Boolean;
     }
     /**
      * A description of a circle on the ellipsoid. Circle geometry can be rendered with both {@link Primitive} and {@link GroundPrimitive}.
@@ -1930,21 +1926,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CircleGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CircleGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CircleGeometry): CircleGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CircleGeometry): CircleGeometry;
         /**
          * Computes the geometric representation of a circle on an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param circleGeometry  (Required) A description of the circle.
@@ -1963,21 +1959,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CircleOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CircleOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CircleOutlineGeometry): CircleOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CircleOutlineGeometry): CircleOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of a circle on an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param circleGeometry  (Required) A description of the circle.
@@ -2020,7 +2016,7 @@ declare module Cesium {
         /**
          * Gets or sets how much time advances when {@link Clock#tick} is called. Negative values allow for advancing backwards.If {@link Clock#clockStep} is set to {@link ClockStep.TICK_DEPENDENT}, this is the number of seconds to advance.If {@link Clock#clockStep} is set to {@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}, this value is multiplied by theelapsed system time since the last call to {@link Clock#tick}.Changing this property will change{@link Clock#clockStep} from {@link ClockStep.SYSTEM_CLOCK} to{@link ClockStep.SYSTEM_CLOCK_MULTIPLIER}.
          */
-        multiplier: Number;
+        multiplier: number;
         /**
          * Determines if calls to {@link Clock#tick} are frame dependent or system clock dependent.Changing this property to {@link ClockStep.SYSTEM_CLOCK} will set{@link Clock#multiplier} to 1.0, {@link Clock#shouldAnimate} to true, and{@link Clock#currentTime} to the current system clock time.
          */
@@ -2045,29 +2041,29 @@ declare module Cesium {
          * @param blue  (Optional) The blue component.
          * @param alpha  (Optional) The alpha component.
          */
-        constructor(red?: Number, green?: Number, blue?: Number, alpha?: Number);
+        constructor(red?: number, green?: number, blue?: number, alpha?: number);
         /**
          * The red component.
          */
-        red: Number;
+        red: number;
         /**
          * The green component.
          */
-        green: Number;
+        green: number;
         /**
          * The blue component.
          */
-        blue: Number;
+        blue: number;
         /**
          * The alpha component.
          */
-        alpha: Number;
+        alpha: number;
         /**
          * Creates a Color instance from a {@link Cartesian4}. <code>x</code>, <code>y</code>, <code>z</code>,and <code>w</code> map to <code>red</code>, <code>green</code>, <code>blue</code>, and <code>alpha</code>, respectively.
          * @param cartesian  (Required) The source cartesian.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromCartesian4(cartesian: Cartesian4, result?: number): number;
+        static fromCartesian4(cartesian: Cartesian4, result?: Color): Color;
         /**
          * Creates a new Color specified using red, green, blue, and alpha valuesthat are in the range of 0 to 255, converting them internally to a range of 0.0 to 1.0.
          * @param red  (Optional) The red component.
@@ -2076,20 +2072,20 @@ declare module Cesium {
          * @param alpha  (Optional) The alpha component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromBytes(red?: Number, green?: Number, blue?: Number, alpha?: Number, result?: number): number;
+        static fromBytes(red?: number, green?: number, blue?: number, alpha?: number, result?: Color): Color;
         /**
          * Creates a new Color that has the same red, green, and blue componentsof the specified color, but with the specified alpha value.
          * @param color  (Required) The base color
          * @param alpha  (Required) The new alpha component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromAlpha(color: number, alpha: Number, result?: number): number;
+        static fromAlpha(color: Color, alpha: number, result?: Color): Color;
         /**
          * Creates a new Color from a single numeric unsigned 32-bit RGBA value, using the endiannessof the system.
          * @param rgba  (Required) A single numeric unsigned 32-bit RGBA value.
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        static fromRgba(rgba: Number, result?: number): number;
+        static fromRgba(rgba: number, result?: Color): Color;
         /**
          * Creates a Color instance from hue, saturation, and lightness.
          * @param hue  (Optional) The hue angle 0...1
@@ -2098,75 +2094,75 @@ declare module Cesium {
          * @param alpha  (Optional) The alpha component 0...1
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        static fromHsl(hue?: Number, saturation?: Number, lightness?: Number, alpha?: Number, result?: number): number;
+        static fromHsl(hue?: number, saturation?: number, lightness?: number, alpha?: number, result?: Color): Color;
         /**
          * Creates a random color using the provided options. For reproducible random colors, you shouldcall {@link CesiumMath#setRandomNumberSeed} once at the beginning of your application.
          * @param options  (Optional) Object with the following properties:
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        static fromRandom(options?: Color.IColorFromRandomOptions, result?: number): number;
+        static fromRandom(options?: Color.IColorFromRandomOptions, result?: Color): Color;
         /**
          * Creates a Color instance from a CSS color value.
          * @param color  (Required) The CSS color value in #rgb, #rrggbb, rgb(), rgba(), hsl(), or hsla() format.
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        static fromCssColorString(color: string, result?: number): number;
+        static fromCssColorString(color: string, result?: Color): Color;
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: number, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Color, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: number): number;
+        static unpack(array: number[], startingIndex?: number, result?: Color): Color;
         /**
          * Converts a 'byte' color component in the range of 0 to 255 intoa 'float' color component in the range of 0 to 1.0.
          * @param number  (Required) The number to be converted.
          */
-        static byteToFloat(number: Number): Number;
+        static byteToFloat(number: number): number;
         /**
          * Converts a 'float' color component in the range of 0 to 1.0 intoa 'byte' color component in the range of 0 to 255.
          * @param number  (Required) The number to be converted.
          */
-        static floatToByte(number: Number): Number;
+        static floatToByte(number: number): number;
         /**
          * Duplicates a Color.
          * @param color  (Required) The Color to duplicate.
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        static clone(color: number, result?: number): number;
+        static clone(color: Color, result?: Color): Color;
         /**
          * Returns true if the first Color equals the second color.
          * @param left  (Required) The first Color to compare for equality.
          * @param right  (Required) The second Color to compare for equality.
          */
-        static equals(left: number, right: number): Boolean;
+        static equals(left: Color, right: Color): Boolean;
         /**
          * Returns a duplicate of a Color instance.
          * @param result  (Optional) The object to store the result in, if undefined a new instance will be created.
          */
-        clone(result?: number): number;
+        clone(result?: Color): Color;
         /**
          * Returns true if this Color equals other.
          * @param other  (Required) The Color to compare for equality.
          */
-        equals(other: number): Boolean;
+        equals(other: Color): Boolean;
         /**
          * Returns <code>true</code> if this Color equals other componentwise within the specified epsilon.
          * @param other  (Required) The Color to compare for equality.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(other: number, epsilon?: Number): Boolean;
+        equalsEpsilon(other: Color, epsilon?: number): Boolean;
         /**
          * Creates a string representing this Color in the format '(red, green, blue, alpha)'.
          */
@@ -2179,666 +2175,666 @@ declare module Cesium {
          * Converts this color to an array of red, green, blue, and alpha valuesthat are in the range of 0 to 255.
          * @param result  (Optional) The array to store the result in, if undefined a new instance will be created.
          */
-        toBytes(result?: Number[]): Number[];
+        toBytes(result?: number[]): number[];
         /**
          * Converts this color to a single numeric unsigned 32-bit RGBA value, using the endiannessof the system.
          */
-        toRgba(): Number;
+        toRgba(): number;
         /**
          * Brightens this color by the provided magnitude.
          * @param magnitude  (Required) A positive number indicating the amount to brighten.
          * @param result  (Required) The object onto which to store the result.
          */
-        brighten(magnitude: Number, result: number): number;
+        brighten(magnitude: number, result: Color): Color;
         /**
          * Darkens this color by the provided magnitude.
          * @param magnitude  (Required) A positive number indicating the amount to darken.
          * @param result  (Required) The object onto which to store the result.
          */
-        darken(magnitude: Number, result: number): number;
+        darken(magnitude: number, result: Color): Color;
         /**
          * Creates a new Color that has the same red, green, and blue componentsas this Color, but with the specified alpha value.
          * @param alpha  (Required) The new alpha component.
          * @param result  (Optional) The object onto which to store the result.
          */
-        withAlpha(alpha: Number, result?: number): number;
+        withAlpha(alpha: number, result?: Color): Color;
         /**
          * Computes the componentwise sum of two Colors.
          * @param left  (Required) The first Color.
          * @param right  (Required) The second Color.
          * @param result  (Required) The object onto which to store the result.
          */
-        static add(left: number, right: number, result: number): number;
+        static add(left: Color, right: Color, result: Color): Color;
         /**
          * Computes the componentwise difference of two Colors.
          * @param left  (Required) The first Color.
          * @param right  (Required) The second Color.
          * @param result  (Required) The object onto which to store the result.
          */
-        static subtract(left: number, right: number, result: number): number;
+        static subtract(left: Color, right: Color, result: Color): Color;
         /**
          * Computes the componentwise product of two Colors.
          * @param left  (Required) The first Color.
          * @param right  (Required) The second Color.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiply(left: number, right: number, result: number): number;
+        static multiply(left: Color, right: Color, result: Color): Color;
         /**
          * Computes the componentwise quotient of two Colors.
          * @param left  (Required) The first Color.
          * @param right  (Required) The second Color.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divide(left: number, right: number, result: number): number;
+        static divide(left: Color, right: Color, result: Color): Color;
         /**
          * Computes the componentwise modulus of two Colors.
          * @param left  (Required) The first Color.
          * @param right  (Required) The second Color.
          * @param result  (Required) The object onto which to store the result.
          */
-        static mod(left: number, right: number, result: number): number;
+        static mod(left: Color, right: Color, result: Color): Color;
         /**
          * Multiplies the provided Color componentwise by the provided scalar.
          * @param color  (Required) The Color to be scaled.
          * @param scalar  (Required) The scalar to multiply with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(color: number, scalar: Number, result: number): number;
+        static multiplyByScalar(color: Color, scalar: number, result: Color): Color;
         /**
          * Divides the provided Color componentwise by the provided scalar.
          * @param color  (Required) The Color to be divided.
          * @param scalar  (Required) The scalar to divide with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divideByScalar(color: number, scalar: Number, result: number): number;
+        static divideByScalar(color: Color, scalar: number, result: Color): Color;
         /**
          * An immutable Color instance initialized to CSS color #F0F8FF<span class="colorSwath" style="background: #F0F8FF;"></span>
          */
-        static ALICEBLUE: number;
+        static ALICEBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FAEBD7<span class="colorSwath" style="background: #FAEBD7;"></span>
          */
-        static ANTIQUEWHITE: number;
+        static ANTIQUEWHITE: Color;
         /**
          * An immutable Color instance initialized to CSS color #00FFFF<span class="colorSwath" style="background: #00FFFF;"></span>
          */
-        static AQUA: number;
+        static AQUA: Color;
         /**
          * An immutable Color instance initialized to CSS color #7FFFD4<span class="colorSwath" style="background: #7FFFD4;"></span>
          */
-        static AQUAMARINE: number;
+        static AQUAMARINE: Color;
         /**
          * An immutable Color instance initialized to CSS color #F0FFFF<span class="colorSwath" style="background: #F0FFFF;"></span>
          */
-        static AZURE: number;
+        static AZURE: Color;
         /**
          * An immutable Color instance initialized to CSS color #F5F5DC<span class="colorSwath" style="background: #F5F5DC;"></span>
          */
-        static BEIGE: number;
+        static BEIGE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFE4C4<span class="colorSwath" style="background: #FFE4C4;"></span>
          */
-        static BISQUE: number;
+        static BISQUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #000000<span class="colorSwath" style="background: #000000;"></span>
          */
-        static BLACK: number;
+        static BLACK: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFEBCD<span class="colorSwath" style="background: #FFEBCD;"></span>
          */
-        static BLANCHEDALMOND: number;
+        static BLANCHEDALMOND: Color;
         /**
          * An immutable Color instance initialized to CSS color #0000FF<span class="colorSwath" style="background: #0000FF;"></span>
          */
-        static BLUE: number;
+        static BLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #8A2BE2<span class="colorSwath" style="background: #8A2BE2;"></span>
          */
-        static BLUEVIOLET: number;
+        static BLUEVIOLET: Color;
         /**
          * An immutable Color instance initialized to CSS color #A52A2A<span class="colorSwath" style="background: #A52A2A;"></span>
          */
-        static BROWN: number;
+        static BROWN: Color;
         /**
          * An immutable Color instance initialized to CSS color #DEB887<span class="colorSwath" style="background: #DEB887;"></span>
          */
-        static BURLYWOOD: number;
+        static BURLYWOOD: Color;
         /**
          * An immutable Color instance initialized to CSS color #5F9EA0<span class="colorSwath" style="background: #5F9EA0;"></span>
          */
-        static CADETBLUE: number;
+        static CADETBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #7FFF00<span class="colorSwath" style="background: #7FFF00;"></span>
          */
-        static CHARTREUSE: number;
+        static CHARTREUSE: Color;
         /**
          * An immutable Color instance initialized to CSS color #D2691E<span class="colorSwath" style="background: #D2691E;"></span>
          */
-        static CHOCOLATE: number;
+        static CHOCOLATE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF7F50<span class="colorSwath" style="background: #FF7F50;"></span>
          */
-        static CORAL: number;
+        static CORAL: Color;
         /**
          * An immutable Color instance initialized to CSS color #6495ED<span class="colorSwath" style="background: #6495ED;"></span>
          */
-        static CORNFLOWERBLUE: number;
+        static CORNFLOWERBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFF8DC<span class="colorSwath" style="background: #FFF8DC;"></span>
          */
-        static CORNSILK: number;
+        static CORNSILK: Color;
         /**
          * An immutable Color instance initialized to CSS color #DC143C<span class="colorSwath" style="background: #DC143C;"></span>
          */
-        static CRIMSON: number;
+        static CRIMSON: Color;
         /**
          * An immutable Color instance initialized to CSS color #00FFFF<span class="colorSwath" style="background: #00FFFF;"></span>
          */
-        static CYAN: number;
+        static CYAN: Color;
         /**
          * An immutable Color instance initialized to CSS color #00008B<span class="colorSwath" style="background: #00008B;"></span>
          */
-        static DARKBLUE: number;
+        static DARKBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #008B8B<span class="colorSwath" style="background: #008B8B;"></span>
          */
-        static DARKCYAN: number;
+        static DARKCYAN: Color;
         /**
          * An immutable Color instance initialized to CSS color #B8860B<span class="colorSwath" style="background: #B8860B;"></span>
          */
-        static DARKGOLDENROD: number;
+        static DARKGOLDENROD: Color;
         /**
          * An immutable Color instance initialized to CSS color #A9A9A9<span class="colorSwath" style="background: #A9A9A9;"></span>
          */
-        static DARKGRAY: number;
+        static DARKGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #006400<span class="colorSwath" style="background: #006400;"></span>
          */
-        static DARKGREEN: number;
+        static DARKGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #A9A9A9<span class="colorSwath" style="background: #A9A9A9;"></span>
          */
-        static DARKGREY: number;
+        static DARKGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #BDB76B<span class="colorSwath" style="background: #BDB76B;"></span>
          */
-        static DARKKHAKI: number;
+        static DARKKHAKI: Color;
         /**
          * An immutable Color instance initialized to CSS color #8B008B<span class="colorSwath" style="background: #8B008B;"></span>
          */
-        static DARKMAGENTA: number;
+        static DARKMAGENTA: Color;
         /**
          * An immutable Color instance initialized to CSS color #556B2F<span class="colorSwath" style="background: #556B2F;"></span>
          */
-        static DARKOLIVEGREEN: number;
+        static DARKOLIVEGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF8C00<span class="colorSwath" style="background: #FF8C00;"></span>
          */
-        static DARKORANGE: number;
+        static DARKORANGE: Color;
         /**
          * An immutable Color instance initialized to CSS color #9932CC<span class="colorSwath" style="background: #9932CC;"></span>
          */
-        static DARKORCHID: number;
+        static DARKORCHID: Color;
         /**
          * An immutable Color instance initialized to CSS color #8B0000<span class="colorSwath" style="background: #8B0000;"></span>
          */
-        static DARKRED: number;
+        static DARKRED: Color;
         /**
          * An immutable Color instance initialized to CSS color #E9967A<span class="colorSwath" style="background: #E9967A;"></span>
          */
-        static DARKSALMON: number;
+        static DARKSALMON: Color;
         /**
          * An immutable Color instance initialized to CSS color #8FBC8F<span class="colorSwath" style="background: #8FBC8F;"></span>
          */
-        static DARKSEAGREEN: number;
+        static DARKSEAGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #483D8B<span class="colorSwath" style="background: #483D8B;"></span>
          */
-        static DARKSLATEBLUE: number;
+        static DARKSLATEBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #2F4F4F<span class="colorSwath" style="background: #2F4F4F;"></span>
          */
-        static DARKSLATEGRAY: number;
+        static DARKSLATEGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #2F4F4F<span class="colorSwath" style="background: #2F4F4F;"></span>
          */
-        static DARKSLATEGREY: number;
+        static DARKSLATEGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #00CED1<span class="colorSwath" style="background: #00CED1;"></span>
          */
-        static DARKTURQUOISE: number;
+        static DARKTURQUOISE: Color;
         /**
          * An immutable Color instance initialized to CSS color #9400D3<span class="colorSwath" style="background: #9400D3;"></span>
          */
-        static DARKVIOLET: number;
+        static DARKVIOLET: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF1493<span class="colorSwath" style="background: #FF1493;"></span>
          */
-        static DEEPPINK: number;
+        static DEEPPINK: Color;
         /**
          * An immutable Color instance initialized to CSS color #00BFFF<span class="colorSwath" style="background: #00BFFF;"></span>
          */
-        static DEEPSKYBLUE: number;
+        static DEEPSKYBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #696969<span class="colorSwath" style="background: #696969;"></span>
          */
-        static DIMGRAY: number;
+        static DIMGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #696969<span class="colorSwath" style="background: #696969;"></span>
          */
-        static DIMGREY: number;
+        static DIMGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #1E90FF<span class="colorSwath" style="background: #1E90FF;"></span>
          */
-        static DODGERBLUE: number;
+        static DODGERBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #B22222<span class="colorSwath" style="background: #B22222;"></span>
          */
-        static FIREBRICK: number;
+        static FIREBRICK: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFAF0<span class="colorSwath" style="background: #FFFAF0;"></span>
          */
-        static FLORALWHITE: number;
+        static FLORALWHITE: Color;
         /**
          * An immutable Color instance initialized to CSS color #228B22<span class="colorSwath" style="background: #228B22;"></span>
          */
-        static FORESTGREEN: number;
+        static FORESTGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF00FF<span class="colorSwath" style="background: #FF00FF;"></span>
          */
-        static FUSCHIA: number;
+        static FUSCHIA: Color;
         /**
          * An immutable Color instance initialized to CSS color #DCDCDC<span class="colorSwath" style="background: #DCDCDC;"></span>
          */
-        static GAINSBORO: number;
+        static GAINSBORO: Color;
         /**
          * An immutable Color instance initialized to CSS color #F8F8FF<span class="colorSwath" style="background: #F8F8FF;"></span>
          */
-        static GHOSTWHITE: number;
+        static GHOSTWHITE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFD700<span class="colorSwath" style="background: #FFD700;"></span>
          */
-        static GOLD: number;
+        static GOLD: Color;
         /**
          * An immutable Color instance initialized to CSS color #DAA520<span class="colorSwath" style="background: #DAA520;"></span>
          */
-        static GOLDENROD: number;
+        static GOLDENROD: Color;
         /**
          * An immutable Color instance initialized to CSS color #808080<span class="colorSwath" style="background: #808080;"></span>
          */
-        static GRAY: number;
+        static GRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #008000<span class="colorSwath" style="background: #008000;"></span>
          */
-        static GREEN: number;
+        static GREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #ADFF2F<span class="colorSwath" style="background: #ADFF2F;"></span>
          */
-        static GREENYELLOW: number;
+        static GREENYELLOW: Color;
         /**
          * An immutable Color instance initialized to CSS color #808080<span class="colorSwath" style="background: #808080;"></span>
          */
-        static GREY: number;
+        static GREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #F0FFF0<span class="colorSwath" style="background: #F0FFF0;"></span>
          */
-        static HONEYDEW: number;
+        static HONEYDEW: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF69B4<span class="colorSwath" style="background: #FF69B4;"></span>
          */
-        static HOTPINK: number;
+        static HOTPINK: Color;
         /**
          * An immutable Color instance initialized to CSS color #CD5C5C<span class="colorSwath" style="background: #CD5C5C;"></span>
          */
-        static INDIANRED: number;
+        static INDIANRED: Color;
         /**
          * An immutable Color instance initialized to CSS color #4B0082<span class="colorSwath" style="background: #4B0082;"></span>
          */
-        static INDIGO: number;
+        static INDIGO: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFFF0<span class="colorSwath" style="background: #FFFFF0;"></span>
          */
-        static IVORY: number;
+        static IVORY: Color;
         /**
          * An immutable Color instance initialized to CSS color #F0E68C<span class="colorSwath" style="background: #F0E68C;"></span>
          */
-        static KHAKI: number;
+        static KHAKI: Color;
         /**
          * An immutable Color instance initialized to CSS color #E6E6FA<span class="colorSwath" style="background: #E6E6FA;"></span>
          */
-        static LAVENDER: number;
+        static LAVENDER: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFF0F5<span class="colorSwath" style="background: #FFF0F5;"></span>
          */
-        static LAVENDAR_BLUSH: number;
+        static LAVENDAR_BLUSH: Color;
         /**
          * An immutable Color instance initialized to CSS color #7CFC00<span class="colorSwath" style="background: #7CFC00;"></span>
          */
-        static LAWNGREEN: number;
+        static LAWNGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFACD<span class="colorSwath" style="background: #FFFACD;"></span>
          */
-        static LEMONCHIFFON: number;
+        static LEMONCHIFFON: Color;
         /**
          * An immutable Color instance initialized to CSS color #ADD8E6<span class="colorSwath" style="background: #ADD8E6;"></span>
          */
-        static LIGHTBLUE: number;
+        static LIGHTBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #F08080<span class="colorSwath" style="background: #F08080;"></span>
          */
-        static LIGHTCORAL: number;
+        static LIGHTCORAL: Color;
         /**
          * An immutable Color instance initialized to CSS color #E0FFFF<span class="colorSwath" style="background: #E0FFFF;"></span>
          */
-        static LIGHTCYAN: number;
+        static LIGHTCYAN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FAFAD2<span class="colorSwath" style="background: #FAFAD2;"></span>
          */
-        static LIGHTGOLDENRODYELLOW: number;
+        static LIGHTGOLDENRODYELLOW: Color;
         /**
          * An immutable Color instance initialized to CSS color #D3D3D3<span class="colorSwath" style="background: #D3D3D3;"></span>
          */
-        static LIGHTGRAY: number;
+        static LIGHTGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #90EE90<span class="colorSwath" style="background: #90EE90;"></span>
          */
-        static LIGHTGREEN: number;
+        static LIGHTGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #D3D3D3<span class="colorSwath" style="background: #D3D3D3;"></span>
          */
-        static LIGHTGREY: number;
+        static LIGHTGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFB6C1<span class="colorSwath" style="background: #FFB6C1;"></span>
          */
-        static LIGHTPINK: number;
+        static LIGHTPINK: Color;
         /**
          * An immutable Color instance initialized to CSS color #20B2AA<span class="colorSwath" style="background: #20B2AA;"></span>
          */
-        static LIGHTSEAGREEN: number;
+        static LIGHTSEAGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #87CEFA<span class="colorSwath" style="background: #87CEFA;"></span>
          */
-        static LIGHTSKYBLUE: number;
+        static LIGHTSKYBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #778899<span class="colorSwath" style="background: #778899;"></span>
          */
-        static LIGHTSLATEGRAY: number;
+        static LIGHTSLATEGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #778899<span class="colorSwath" style="background: #778899;"></span>
          */
-        static LIGHTSLATEGREY: number;
+        static LIGHTSLATEGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #B0C4DE<span class="colorSwath" style="background: #B0C4DE;"></span>
          */
-        static LIGHTSTEELBLUE: number;
+        static LIGHTSTEELBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFFE0<span class="colorSwath" style="background: #FFFFE0;"></span>
          */
-        static LIGHTYELLOW: number;
+        static LIGHTYELLOW: Color;
         /**
          * An immutable Color instance initialized to CSS color #00FF00<span class="colorSwath" style="background: #00FF00;"></span>
          */
-        static LIME: number;
+        static LIME: Color;
         /**
          * An immutable Color instance initialized to CSS color #32CD32<span class="colorSwath" style="background: #32CD32;"></span>
          */
-        static LIMEGREEN: number;
+        static LIMEGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FAF0E6<span class="colorSwath" style="background: #FAF0E6;"></span>
          */
-        static LINEN: number;
+        static LINEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF00FF<span class="colorSwath" style="background: #FF00FF;"></span>
          */
-        static MAGENTA: number;
+        static MAGENTA: Color;
         /**
          * An immutable Color instance initialized to CSS color #800000<span class="colorSwath" style="background: #800000;"></span>
          */
-        static MAROON: number;
+        static MAROON: Color;
         /**
          * An immutable Color instance initialized to CSS color #66CDAA<span class="colorSwath" style="background: #66CDAA;"></span>
          */
-        static MEDIUMAQUAMARINE: number;
+        static MEDIUMAQUAMARINE: Color;
         /**
          * An immutable Color instance initialized to CSS color #0000CD<span class="colorSwath" style="background: #0000CD;"></span>
          */
-        static MEDIUMBLUE: number;
+        static MEDIUMBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #BA55D3<span class="colorSwath" style="background: #BA55D3;"></span>
          */
-        static MEDIUMORCHID: number;
+        static MEDIUMORCHID: Color;
         /**
          * An immutable Color instance initialized to CSS color #9370DB<span class="colorSwath" style="background: #9370DB;"></span>
          */
-        static MEDIUMPURPLE: number;
+        static MEDIUMPURPLE: Color;
         /**
          * An immutable Color instance initialized to CSS color #3CB371<span class="colorSwath" style="background: #3CB371;"></span>
          */
-        static MEDIUMSEAGREEN: number;
+        static MEDIUMSEAGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #7B68EE<span class="colorSwath" style="background: #7B68EE;"></span>
          */
-        static MEDIUMSLATEBLUE: number;
+        static MEDIUMSLATEBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #00FA9A<span class="colorSwath" style="background: #00FA9A;"></span>
          */
-        static MEDIUMSPRINGGREEN: number;
+        static MEDIUMSPRINGGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #48D1CC<span class="colorSwath" style="background: #48D1CC;"></span>
          */
-        static MEDIUMTURQUOISE: number;
+        static MEDIUMTURQUOISE: Color;
         /**
          * An immutable Color instance initialized to CSS color #C71585<span class="colorSwath" style="background: #C71585;"></span>
          */
-        static MEDIUMVIOLETRED: number;
+        static MEDIUMVIOLETRED: Color;
         /**
          * An immutable Color instance initialized to CSS color #191970<span class="colorSwath" style="background: #191970;"></span>
          */
-        static MIDNIGHTBLUE: number;
+        static MIDNIGHTBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #F5FFFA<span class="colorSwath" style="background: #F5FFFA;"></span>
          */
-        static MINTCREAM: number;
+        static MINTCREAM: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFE4E1<span class="colorSwath" style="background: #FFE4E1;"></span>
          */
-        static MISTYROSE: number;
+        static MISTYROSE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFE4B5<span class="colorSwath" style="background: #FFE4B5;"></span>
          */
-        static MOCCASIN: number;
+        static MOCCASIN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFDEAD<span class="colorSwath" style="background: #FFDEAD;"></span>
          */
-        static NAVAJOWHITE: number;
+        static NAVAJOWHITE: Color;
         /**
          * An immutable Color instance initialized to CSS color #000080<span class="colorSwath" style="background: #000080;"></span>
          */
-        static NAVY: number;
+        static NAVY: Color;
         /**
          * An immutable Color instance initialized to CSS color #FDF5E6<span class="colorSwath" style="background: #FDF5E6;"></span>
          */
-        static OLDLACE: number;
+        static OLDLACE: Color;
         /**
          * An immutable Color instance initialized to CSS color #808000<span class="colorSwath" style="background: #808000;"></span>
          */
-        static OLIVE: number;
+        static OLIVE: Color;
         /**
          * An immutable Color instance initialized to CSS color #6B8E23<span class="colorSwath" style="background: #6B8E23;"></span>
          */
-        static OLIVEDRAB: number;
+        static OLIVEDRAB: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFA500<span class="colorSwath" style="background: #FFA500;"></span>
          */
-        static ORANGE: number;
+        static ORANGE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF4500<span class="colorSwath" style="background: #FF4500;"></span>
          */
-        static ORANGERED: number;
+        static ORANGERED: Color;
         /**
          * An immutable Color instance initialized to CSS color #DA70D6<span class="colorSwath" style="background: #DA70D6;"></span>
          */
-        static ORCHID: number;
+        static ORCHID: Color;
         /**
          * An immutable Color instance initialized to CSS color #EEE8AA<span class="colorSwath" style="background: #EEE8AA;"></span>
          */
-        static PALEGOLDENROD: number;
+        static PALEGOLDENROD: Color;
         /**
          * An immutable Color instance initialized to CSS color #98FB98<span class="colorSwath" style="background: #98FB98;"></span>
          */
-        static PALEGREEN: number;
+        static PALEGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #AFEEEE<span class="colorSwath" style="background: #AFEEEE;"></span>
          */
-        static PALETURQUOISE: number;
+        static PALETURQUOISE: Color;
         /**
          * An immutable Color instance initialized to CSS color #DB7093<span class="colorSwath" style="background: #DB7093;"></span>
          */
-        static PALEVIOLETRED: number;
+        static PALEVIOLETRED: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFEFD5<span class="colorSwath" style="background: #FFEFD5;"></span>
          */
-        static PAPAYAWHIP: number;
+        static PAPAYAWHIP: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFDAB9<span class="colorSwath" style="background: #FFDAB9;"></span>
          */
-        static PEACHPUFF: number;
+        static PEACHPUFF: Color;
         /**
          * An immutable Color instance initialized to CSS color #CD853F<span class="colorSwath" style="background: #CD853F;"></span>
          */
-        static PERU: number;
+        static PERU: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFC0CB<span class="colorSwath" style="background: #FFC0CB;"></span>
          */
-        static PINK: number;
+        static PINK: Color;
         /**
          * An immutable Color instance initialized to CSS color #DDA0DD<span class="colorSwath" style="background: #DDA0DD;"></span>
          */
-        static PLUM: number;
+        static PLUM: Color;
         /**
          * An immutable Color instance initialized to CSS color #B0E0E6<span class="colorSwath" style="background: #B0E0E6;"></span>
          */
-        static POWDERBLUE: number;
+        static POWDERBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #800080<span class="colorSwath" style="background: #800080;"></span>
          */
-        static PURPLE: number;
+        static PURPLE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF0000<span class="colorSwath" style="background: #FF0000;"></span>
          */
-        static RED: number;
+        static RED: Color;
         /**
          * An immutable Color instance initialized to CSS color #BC8F8F<span class="colorSwath" style="background: #BC8F8F;"></span>
          */
-        static ROSYBROWN: number;
+        static ROSYBROWN: Color;
         /**
          * An immutable Color instance initialized to CSS color #4169E1<span class="colorSwath" style="background: #4169E1;"></span>
          */
-        static ROYALBLUE: number;
+        static ROYALBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #8B4513<span class="colorSwath" style="background: #8B4513;"></span>
          */
-        static SADDLEBROWN: number;
+        static SADDLEBROWN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FA8072<span class="colorSwath" style="background: #FA8072;"></span>
          */
-        static SALMON: number;
+        static SALMON: Color;
         /**
          * An immutable Color instance initialized to CSS color #F4A460<span class="colorSwath" style="background: #F4A460;"></span>
          */
-        static SANDYBROWN: number;
+        static SANDYBROWN: Color;
         /**
          * An immutable Color instance initialized to CSS color #2E8B57<span class="colorSwath" style="background: #2E8B57;"></span>
          */
-        static SEAGREEN: number;
+        static SEAGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFF5EE<span class="colorSwath" style="background: #FFF5EE;"></span>
          */
-        static SEASHELL: number;
+        static SEASHELL: Color;
         /**
          * An immutable Color instance initialized to CSS color #A0522D<span class="colorSwath" style="background: #A0522D;"></span>
          */
-        static SIENNA: number;
+        static SIENNA: Color;
         /**
          * An immutable Color instance initialized to CSS color #C0C0C0<span class="colorSwath" style="background: #C0C0C0;"></span>
          */
-        static SILVER: number;
+        static SILVER: Color;
         /**
          * An immutable Color instance initialized to CSS color #87CEEB<span class="colorSwath" style="background: #87CEEB;"></span>
          */
-        static SKYBLUE: number;
+        static SKYBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #6A5ACD<span class="colorSwath" style="background: #6A5ACD;"></span>
          */
-        static SLATEBLUE: number;
+        static SLATEBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #708090<span class="colorSwath" style="background: #708090;"></span>
          */
-        static SLATEGRAY: number;
+        static SLATEGRAY: Color;
         /**
          * An immutable Color instance initialized to CSS color #708090<span class="colorSwath" style="background: #708090;"></span>
          */
-        static SLATEGREY: number;
+        static SLATEGREY: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFAFA<span class="colorSwath" style="background: #FFFAFA;"></span>
          */
-        static SNOW: number;
+        static SNOW: Color;
         /**
          * An immutable Color instance initialized to CSS color #00FF7F<span class="colorSwath" style="background: #00FF7F;"></span>
          */
-        static SPRINGGREEN: number;
+        static SPRINGGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS color #4682B4<span class="colorSwath" style="background: #4682B4;"></span>
          */
-        static STEELBLUE: number;
+        static STEELBLUE: Color;
         /**
          * An immutable Color instance initialized to CSS color #D2B48C<span class="colorSwath" style="background: #D2B48C;"></span>
          */
-        static TAN: number;
+        static TAN: Color;
         /**
          * An immutable Color instance initialized to CSS color #008080<span class="colorSwath" style="background: #008080;"></span>
          */
-        static TEAL: number;
+        static TEAL: Color;
         /**
          * An immutable Color instance initialized to CSS color #D8BFD8<span class="colorSwath" style="background: #D8BFD8;"></span>
          */
-        static THISTLE: number;
+        static THISTLE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FF6347<span class="colorSwath" style="background: #FF6347;"></span>
          */
-        static TOMATO: number;
+        static TOMATO: Color;
         /**
          * An immutable Color instance initialized to CSS color #40E0D0<span class="colorSwath" style="background: #40E0D0;"></span>
          */
-        static TURQUOISE: number;
+        static TURQUOISE: Color;
         /**
          * An immutable Color instance initialized to CSS color #EE82EE<span class="colorSwath" style="background: #EE82EE;"></span>
          */
-        static VIOLET: number;
+        static VIOLET: Color;
         /**
          * An immutable Color instance initialized to CSS color #F5DEB3<span class="colorSwath" style="background: #F5DEB3;"></span>
          */
-        static WHEAT: number;
+        static WHEAT: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFFFF<span class="colorSwath" style="background: #FFFFFF;"></span>
          */
-        static WHITE: number;
+        static WHITE: Color;
         /**
          * An immutable Color instance initialized to CSS color #F5F5F5<span class="colorSwath" style="background: #F5F5F5;"></span>
          */
-        static WHITESMOKE: number;
+        static WHITESMOKE: Color;
         /**
          * An immutable Color instance initialized to CSS color #FFFF00<span class="colorSwath" style="background: #FFFF00;"></span>
          */
-        static YELLOW: number;
+        static YELLOW: Color;
         /**
          * An immutable Color instance initialized to CSS color #9ACD32<span class="colorSwath" style="background: #9ACD32;"></span>
          */
-        static YELLOWGREEN: number;
+        static YELLOWGREEN: Color;
         /**
          * An immutable Color instance initialized to CSS transparent.<span class="colorSwath" style="background: transparent;"></span>
          */
-        static TRANSPARENT: number;
+        static TRANSPARENT: Color;
     }
     /**
      * Value and type information for per-instance geometry color.
@@ -2851,7 +2847,7 @@ declare module Cesium {
          * @param blue  (Optional) The blue component.
          * @param alpha  (Optional) The alpha component.
          */
-        constructor(red?: Number, green?: Number, blue?: Number, alpha?: Number);
+        constructor(red?: number, green?: number, blue?: number, alpha?: number);
         /**
          * The values for the attributes stored in a typed array.
          */
@@ -2863,7 +2859,7 @@ declare module Cesium {
         /**
          * The number of components in the attributes, i.e., {@link ColorGeometryInstanceAttribute#value}.
          */
-        componentsPerAttribute: Number;
+        componentsPerAttribute: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.
          */
@@ -2872,13 +2868,13 @@ declare module Cesium {
          * Creates a new {@link ColorGeometryInstanceAttribute} instance given the provided {@link Color}.
          * @param color  (Required) The color.
          */
-        static fromColor(color: number): ColorGeometryInstanceAttribute;
+        static fromColor(color: Color): ColorGeometryInstanceAttribute;
         /**
          * Converts a color to a typed array that can be used to assign a color attribute.
          * @param color  (Required) The color.
          * @param result  (Optional) The array to store the result in, if undefined a new instance will be created.
          */
-        static toValue(color: number, result?: Uint8Array): Uint8Array;
+        static toValue(color: Color, result?: Uint8Array): Uint8Array;
         /**
          * Compares the provided ColorGeometryInstanceAttributes and returns<code>true</code> if they are equal, <code>false</code> otherwise.
          * @param left  (Optional) The first ColorGeometryInstanceAttribute.
@@ -2898,21 +2894,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CorridorGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CorridorGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CorridorGeometry): CorridorGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CorridorGeometry): CorridorGeometry;
         /**
          * Computes the geometric representation of a corridor, including its vertices, indices, and a bounding sphere.
          * @param corridorGeometry  (Required) A description of the corridor.
@@ -2931,21 +2927,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CorridorOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CorridorOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CorridorOutlineGeometry): CorridorOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CorridorOutlineGeometry): CorridorOutlineGeometry;
         /**
          * Computes the geometric representation of a corridor, including its vertices, indices, and a bounding sphere.
          * @param corridorOutlineGeometry  (Required) A description of the corridor.
@@ -3007,21 +3003,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CylinderGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CylinderGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CylinderGeometry): CylinderGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CylinderGeometry): CylinderGeometry;
         /**
          * Computes the geometric representation of a cylinder, including its vertices, indices, and a bounding sphere.
          * @param cylinderGeometry  (Required) A description of the cylinder.
@@ -3040,21 +3036,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: CylinderOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: CylinderOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: CylinderOutlineGeometry): CylinderOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: CylinderOutlineGeometry): CylinderOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of a cylinder, including its vertices, indices, and a bounding sphere.
          * @param cylinderGeometry  (Required) A description of the cylinder outline.
@@ -3107,15 +3103,15 @@ declare module Cesium {
          * @param near  (Optional) The smallest distance in the interval where the object is visible.
          * @param far  (Optional) The largest distance in the interval where the object is visible.
          */
-        constructor(near?: Number, far?: Number);
+        constructor(near?: number, far?: number);
         /**
          * The smallest distance in the interval where the object is visible.
          */
-        near: Number;
+        near: number;
         /**
          * The largest distance in the interval where the object is visible.
          */
-        far: Number;
+        far: number;
         /**
          * Determines if two distance display conditions are equal.
          * @param left  (Required) A distance display condition.
@@ -3148,7 +3144,7 @@ declare module Cesium {
          * @param near  (Optional) The near distance.
          * @param far  (Optional) The far distance.
          */
-        constructor(near?: Number, far?: Number);
+        constructor(near?: number, far?: number);
         /**
          * The values for the attributes stored in a typed array.
          */
@@ -3160,7 +3156,7 @@ declare module Cesium {
         /**
          * The number of components in the attributes, i.e., {@link DistanceDisplayConditionGeometryInstanceAttribute#value}.
          */
-        componentsPerAttribute: Number;
+        componentsPerAttribute: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.
          */
@@ -3189,21 +3185,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: EllipseGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: EllipseGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: EllipseGeometry): EllipseGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: EllipseGeometry): EllipseGeometry;
         /**
          * Computes the geometric representation of a ellipse on an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param ellipseGeometry  (Required) A description of the ellipse.
@@ -3222,21 +3218,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: EllipseOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: EllipseOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: EllipseOutlineGeometry): EllipseOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: EllipseOutlineGeometry): EllipseOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of an ellipse on an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param ellipseGeometry  (Required) A description of the ellipse.
@@ -3253,7 +3249,7 @@ declare module Cesium {
          * @param y  (Optional) The radius in the y direction.
          * @param z  (Optional) The radius in the z direction.
          */
-        constructor(x?: Number, y?: Number, z?: Number);
+        constructor(x?: number, y?: number, z?: number);
         /**
          * Gets the radii of the ellipsoid.
          */
@@ -3277,11 +3273,11 @@ declare module Cesium {
         /**
          * Gets the minimum radius of the ellipsoid.
          */
-        minimumRadius: Number;
+        minimumRadius: number;
         /**
          * Gets the maximum radius of the ellipsoid.
          */
-        maximumRadius: Number;
+        maximumRadius: number;
         /**
          * Duplicates an Ellipsoid instance.
          * @param ellipsoid  (Required) The ellipsoid to duplicate.
@@ -3313,21 +3309,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Ellipsoid, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Ellipsoid, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Ellipsoid): Ellipsoid;
+        static unpack(array: number[], startingIndex?: number, result?: Ellipsoid): Ellipsoid;
         /**
          * Computes the unit vector directed from the center of this ellipsoid toward the provided Cartesian position.
          * @param cartesian  (Required) The Cartesian for which to to determine the geocentric normal.
@@ -3422,7 +3418,7 @@ declare module Cesium {
         /**
          * Gets the surface distance between the start and end point
          */
-        surfaceDistance: Number;
+        surfaceDistance: number;
         /**
          * Gets the initial planetodetic point on the path.
          */
@@ -3434,11 +3430,11 @@ declare module Cesium {
         /**
          * Gets the heading at the initial point.
          */
-        startHeading: Number;
+        startHeading: number;
         /**
          * Gets the heading at the final point.
          */
-        endHeading: Number;
+        endHeading: number;
         /**
          * Sets the start and end points of the geodesic
          * @param start  (Required) The initial planetodetic point on the path.
@@ -3449,12 +3445,12 @@ declare module Cesium {
          * Provides the location of a point at the indicated portion along the geodesic.
          * @param fraction  (Required) The portion of the distance between the initial and final points.
          */
-        interpolateUsingFraction(fraction: Number): Cartographic;
+        interpolateUsingFraction(fraction: number): Cartographic;
         /**
          * Provides the location of a point at the indicated distance along the geodesic.
          * @param distance  (Required) The distance from the inital point to the point of interest along the geodesic
          */
-        interpolateUsingSurfaceDistance(distance: Number): Cartographic;
+        interpolateUsingSurfaceDistance(distance: number): Cartographic;
     }
     /**
      * A description of an ellipsoid centered at the origin.
@@ -3468,21 +3464,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: EllipsoidGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: EllipsoidGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: EllipsoidGeometry): EllipsoidGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: EllipsoidGeometry): EllipsoidGeometry;
         /**
          * Computes the geometric representation of an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param ellipsoidGeometry  (Required) A description of the ellipsoid.
@@ -3501,21 +3497,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: EllipsoidOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: EllipsoidOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: EllipsoidOutlineGeometry): EllipsoidOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: EllipsoidOutlineGeometry): EllipsoidOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of an ellipsoid, including its vertices, indices, and a bounding sphere.
          * @param ellipsoidGeometry  (Required) A description of the ellipsoid outline.
@@ -3633,19 +3629,19 @@ declare module Cesium {
          * @param level  (Required) The level of the tile for which to request geometry.
          * @param throttleRequests  (Optional) True if the number of simultaneous requests should be limited,                 or false if the request should be initiated regardless of the number of requests                 already in progress.
          */
-        requestTileGeometry(x: Number, y: Number, level: Number, throttleRequests?: Boolean): Promise<TerrainData>;
+        requestTileGeometry(x: number, y: number, level: number, throttleRequests?: Boolean): Promise<TerrainData>;
         /**
          * Gets the maximum geometric error allowed in a tile at a given level.
          * @param level  (Required) The tile level for which to get the maximum geometric error.
          */
-        getLevelMaximumGeometricError(level: Number): Number;
+        getLevelMaximumGeometricError(level: number): number;
         /**
          * Determines whether data for a tile is available to be loaded.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        getTileDataAvailable(x: Number, y: Number, level: Number): Boolean;
+        getTileDataAvailable(x: number, y: number, level: number): Boolean;
     }
     /**
      * A generic utility class for managing subscribers for a particular event.This class is usually instantiated inside of a container class andexposed as a property for others to subscribe to.
@@ -3658,7 +3654,7 @@ declare module Cesium {
         /**
          * The number of listeners currently subscribed to the event.
          */
-        numberOfListeners: Number;
+        numberOfListeners: number;
         /**
          * Registers a callback function to be executed whenever the event is raised.An optional scope can be provided to serve as the <code>this</code> pointerin which the function will execute.
          * @param listener  (Required) The function to be executed when the event is raised.
@@ -3748,12 +3744,12 @@ declare module Cesium {
          * Gets the total number of tiles in the X direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfXTilesAtLevel(level: Number): Number;
+        getNumberOfXTilesAtLevel(level: number): number;
         /**
          * Gets the total number of tiles in the Y direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfYTilesAtLevel(level: Number): Number;
+        getNumberOfYTilesAtLevel(level: number): number;
         /**
          * Transforms an rectangle specified in geodetic radians to the native coordinate systemof this tiling scheme.
          * @param rectangle  (Required) The rectangle to transform.
@@ -3767,7 +3763,7 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToNativeRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToNativeRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Converts tile x, y coordinates and level to a cartographic rectangle in radians.
          * @param x  (Required) The integer x coordinate of the tile.
@@ -3775,14 +3771,14 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Calculates the tile x, y coordinates of the tile containinga given cartographic position.
          * @param position  (Required) The position.
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        positionToTileXY(position: Cartographic, level: Number, result?: Cartesian2): Cartesian2;
+        positionToTileXY(position: Cartographic, level: number, result?: Cartesian2): Cartesian2;
     }
     /**
      * A geometry representation with attributes forming vertices and optional index datadefining primitives.  Geometries and an {@link Appearance}, which describes the shading,can be assigned to a {@link Primitive} for visualization.  A <code>Primitive</code> canbe created from many heterogeneous - in many cases - geometries for performance.<p>Geometries can be transformed and optimized using functions in {@link GeometryPipeline}.</p>
@@ -3813,7 +3809,7 @@ declare module Cesium {
          * Computes the number of vertices in a geometry.  The runtime is linear withrespect to the number of attributes in a vertex, not the number of vertices.
          * @param geometry  (Required) The geometry.
          */
-        static computeNumberOfVertices(geometry: Geometry): Number;
+        static computeNumberOfVertices(geometry: Geometry): number;
     }
     /**
      * Values and type information for geometry attributes.  A {@link Geometry}generally contains one or more attributes.  All attributes together formthe geometry's vertices.
@@ -3831,7 +3827,7 @@ declare module Cesium {
         /**
          * A number between 1 and 4 that defines the number of components in an attributes.For example, a position attribute with x, y, and z components would have 3 asshown in the code example.
          */
-        componentsPerAttribute: Number;
+        componentsPerAttribute: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.<p>This is commonly used when storing colors using {@link ComponentDatatype.UNSIGNED_BYTE}.</p>
          */
@@ -3916,7 +3912,7 @@ declare module Cesium {
         /**
          * A number between 1 and 4 that defines the number of components in an attributes.For example, a position attribute with x, y, and z components would have 3 asshown in the code example.
          */
-        componentsPerAttribute: Number;
+        componentsPerAttribute: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.<p>This is commonly used when storing colors using {@link ComponentDatatype.UNSIGNED_BYTE}.</p>
          */
@@ -3924,7 +3920,7 @@ declare module Cesium {
         /**
          * The values for the attributes stored in a typed array.  In the code example,every three elements in <code>values</code> defines one attributes since<code>componentsPerAttribute</code> is 3.
          */
-        value: Number[];
+        value: number[];
     }
     /**
      * Represents a Gregorian date in a more precise format than the JavaScript Date object.In addition to submillisecond precision, this object can also represent leap seconds.
@@ -3937,31 +3933,31 @@ declare module Cesium {
         /**
          * Gets or sets the year as a whole number.
          */
-        year: Number;
+        year: number;
         /**
          * Gets or sets the month as a whole number with range [1, 12].
          */
-        month: Number;
+        month: number;
         /**
          * Gets or sets the day of the month as a whole number starting at 1.
          */
-        day: Number;
+        day: number;
         /**
          * Gets or sets the hour as a whole number with range [0, 23].
          */
-        hour: Number;
+        hour: number;
         /**
          * Gets or sets the minute of the hour as a whole number with range [0, 59].
          */
-        minute: Number;
+        minute: number;
         /**
          * Gets or sets the second of the minute as a whole number with range [0, 60], with 60 representing a leap second.
          */
-        second: Number;
+        second: number;
         /**
          * Gets or sets the millisecond of the second as a floating point number with range [0.0, 1000.0).
          */
-        millisecond: Number;
+        millisecond: number;
         /**
          * Gets or sets whether this time is during a leap second.
          */
@@ -3977,19 +3973,19 @@ declare module Cesium {
          * @param pitch  (Optional) The pitch angle in radians.
          * @param range  (Optional) The distance from the center in meters.
          */
-        constructor(heading?: Number, pitch?: Number, range?: Number);
+        constructor(heading?: number, pitch?: number, range?: number);
         /**
          * Heading is the rotation from the local north direction where a positive angle is increasing eastward.
          */
-        heading: Number;
+        heading: number;
         /**
          * Pitch is the rotation from the local xy-plane. Positive pitch anglesare above the plane. Negative pitch angles are below the plane.
          */
-        pitch: Number;
+        pitch: number;
         /**
          * Range is the distance from the center of the local frame.
          */
-        range: Number;
+        range: number;
         /**
          * Duplicates a HeadingPitchRange instance.
          * @param hpr  (Required) The HeadingPitchRange to duplicate.
@@ -4007,7 +4003,7 @@ declare module Cesium {
          * @param pitch  (Optional) The pitch component in radians.
          * @param roll  (Optional) The roll component in radians.
          */
-        constructor(heading?: Number, pitch?: Number, roll?: Number);
+        constructor(heading?: number, pitch?: number, roll?: number);
         /**
          * Computes the heading, pitch and roll from a quaternion (see http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles )
          * @param quaternion  (Required) The quaternion from which to retrieve heading, pitch, and roll, all expressed in radians.
@@ -4021,7 +4017,7 @@ declare module Cesium {
          * @param roll  (Required) the heading in degrees
          * @param result  (Optional) The object in which to store the result. If not provided, a new instance is created and returned.
          */
-        static fromDegrees(heading: Number, pitch: Number, roll: Number, result?: HeadingPitchRoll): HeadingPitchRoll;
+        static fromDegrees(heading: number, pitch: number, roll: number, result?: HeadingPitchRoll): HeadingPitchRoll;
         /**
          * Duplicates a HeadingPitchRoll instance.
          * @param headingPitchRoll  (Required) The HeadingPitchRoll to duplicate.
@@ -4041,7 +4037,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        static equalsEpsilon(left?: HeadingPitchRoll, right?: HeadingPitchRoll, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        static equalsEpsilon(left?: HeadingPitchRoll, right?: HeadingPitchRoll, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Duplicates this HeadingPitchRoll instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -4058,7 +4054,7 @@ declare module Cesium {
          * @param relativeEpsilon  (Optional) The relative epsilon tolerance to use for equality testing.
          * @param absoluteEpsilon  (Optional) The absolute epsilon tolerance to use for equality testing.
          */
-        equalsEpsilon(right?: HeadingPitchRoll, relativeEpsilon?: Number, absoluteEpsilon?: Number): Boolean;
+        equalsEpsilon(right?: HeadingPitchRoll, relativeEpsilon?: number, absoluteEpsilon?: number): Boolean;
         /**
          * Creates a string representing this HeadingPitchRoll in the format '(heading, pitch, roll)' in radians.
          */
@@ -4083,7 +4079,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude in radians.
          * @param latitude  (Required) The latitude in radians.
          */
-        interpolateHeight(rectangle: Rectangle, longitude: Number, latitude: Number): Number;
+        interpolateHeight(rectangle: Rectangle, longitude: number, latitude: number): number;
         /**
          * Upsamples this terrain data for use by a descendant tile.  The resulting instance will contain a subset of theheight samples in this instance, interpolated if necessary.
          * @param tilingScheme  (Required) The tiling scheme of this terrain data.
@@ -4094,7 +4090,7 @@ declare module Cesium {
          * @param descendantY  (Required) The Y coordinate within the tiling scheme of the descendant tile for which we are upsampling.
          * @param descendantLevel  (Required) The level within the tiling scheme of the descendant tile for which we are upsampling.
          */
-        upsample(tilingScheme: TilingScheme, thisX: Number, thisY: Number, thisLevel: Number, descendantX: Number, descendantY: Number, descendantLevel: Number): Promise<HeightmapTerrainData>;
+        upsample(tilingScheme: TilingScheme, thisX: number, thisY: number, thisLevel: number, descendantX: number, descendantY: number, descendantLevel: number): Promise<HeightmapTerrainData>;
         /**
          * Determines if a given child tile is available, based on the{@link HeightmapTerrainData.childTileMask}.  The given child tile coordinates are assumedto be one of the four children of this tile.  If non-child tile coordinates aregiven, the availability of the southeast child tile is returned.
          * @param thisX  (Required) The tile X coordinate of this (the parent) tile.
@@ -4102,7 +4098,7 @@ declare module Cesium {
          * @param childX  (Required) The tile X coordinate of the child tile to check for availability.
          * @param childY  (Required) The tile Y coordinate of the child tile to check for availability.
          */
-        isChildAvailable(thisX: Number, thisY: Number, childX: Number, childY: Number): Boolean;
+        isChildAvailable(thisX: number, thisY: number, childX: number, childY: number): Boolean;
         /**
          * Gets a value indicating whether or not this terrain data was created by upsampling lower resolutionterrain data.  If this value is false, the data was obtained from some other source, suchas by downloading it from a remote server.  This method should return true for instancesreturned from a call to {@link HeightmapTerrainData#upsample}.
          */
@@ -4120,7 +4116,7 @@ declare module Cesium {
         /**
          * An array of times for the control points.
          */
-        times: Number[];
+        times: number[];
         /**
          * An array of {@link Cartesian3} control points.
          */
@@ -4152,13 +4148,13 @@ declare module Cesium {
          * Finds an index <code>i</code> in <code>times</code> such that the parameter<code>time</code> is in the interval <code>[times[i], times[i + 1]]</code>.
          * @param time  (Required) The time.
          */
-        findTimeInterval(time: Number): Number;
+        findTimeInterval(time: number): number;
         /**
          * Evaluates the curve at a given time.
          * @param time  (Required) The time at which to evaluate the curve.
          * @param result  (Optional) The object onto which to store the result.
          */
-        evaluate(time: Number, result?: Cartesian3): Cartesian3;
+        evaluate(time: number, result?: Cartesian3): Cartesian3;
     }
     /**
      * Represents the closed interval [start, stop].
@@ -4169,15 +4165,15 @@ declare module Cesium {
          * @param start  (Optional) The beginning of the interval.
          * @param stop  (Optional) The end of the interval.
          */
-        constructor(start?: Number, stop?: Number);
+        constructor(start?: number, stop?: number);
         /**
          * The beginning of the interval.
          */
-        start: Number;
+        start: number;
         /**
          * The end of the interval.
          */
-        stop: Number;
+        stop: number;
     }
     /**
      * Represents an astronomical Julian date, which is the number of days since noon on January 1, -4712 (4713 BC).For increased precision, this class stores the whole number part of the date and the secondspart of the date in separate components.  In order to be safe for arithmetic and representleap seconds, the date is always stored in the International Atomic Time standard{@link TimeStandard.TAI}.
@@ -4189,15 +4185,15 @@ declare module Cesium {
          * @param secondsOfDay  (Optional) The number of seconds into the current Julian Day Number.  Fractional seconds, negative seconds and seconds greater than a day will be handled correctly.
          * @param timeStandard  (Optional) The time standard in which the first two parameters are defined.
          */
-        constructor(julianDayNumber?: Number, secondsOfDay?: Number, timeStandard?: number);
+        constructor(julianDayNumber?: number, secondsOfDay?: number, timeStandard?: number);
         /**
          * Gets or sets the number of whole days.
          */
-        dayNumber: Number;
+        dayNumber: number;
         /**
          * Gets or sets the number of seconds into the current day.
          */
-        secondsOfDay: Number;
+        secondsOfDay: number;
         /**
          * Creates a new instance from a JavaScript Date.
          * @param date  (Required) A JavaScript Date.
@@ -4231,7 +4227,7 @@ declare module Cesium {
          * @param julianDate  (Required) The date to be converted.
          * @param precision  (Optional) The number of fractional digits used to represent the seconds component.  By default, the most precise representation is used.
          */
-        static toIso8601(julianDate: JulianDate, precision?: Number): string;
+        static toIso8601(julianDate: JulianDate, precision?: number): string;
         /**
          * Duplicates a JulianDate instance.
          * @param julianDate  (Required) The date to duplicate.
@@ -4243,7 +4239,7 @@ declare module Cesium {
          * @param left  (Required) The first instance.
          * @param right  (Required) The second instance.
          */
-        static compare(left: JulianDate, right: JulianDate): Number;
+        static compare(left: JulianDate, right: JulianDate): number;
         /**
          * Compares two instances and returns <code>true</code> if they are equal, <code>false</code> otherwise.
          * @param left  (Optional) The first instance.
@@ -4256,57 +4252,57 @@ declare module Cesium {
          * @param right  (Optional) The second instance.
          * @param epsilon  (Optional) The maximum number of seconds that should separate the two instances.
          */
-        static equalsEpsilon(left?: JulianDate, right?: JulianDate, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: JulianDate, right?: JulianDate, epsilon?: number): Boolean;
         /**
          * Computes the total number of whole and fractional days represented by the provided instance.
          * @param julianDate  (Required) The date.
          */
-        static totalDays(julianDate: JulianDate): Number;
+        static totalDays(julianDate: JulianDate): number;
         /**
          * Computes the difference in seconds between the provided instance.
          * @param left  (Required) The first instance.
          * @param right  (Required) The second instance.
          */
-        static secondsDifference(left: JulianDate, right: JulianDate): Number;
+        static secondsDifference(left: JulianDate, right: JulianDate): number;
         /**
          * Computes the difference in days between the provided instance.
          * @param left  (Required) The first instance.
          * @param right  (Required) The second instance.
          */
-        static daysDifference(left: JulianDate, right: JulianDate): Number;
+        static daysDifference(left: JulianDate, right: JulianDate): number;
         /**
          * Computes the number of seconds the provided instance is ahead of UTC.
          * @param julianDate  (Required) The date.
          */
-        static computeTaiMinusUtc(julianDate: JulianDate): Number;
+        static computeTaiMinusUtc(julianDate: JulianDate): number;
         /**
          * Adds the provided number of seconds to the provided date instance.
          * @param julianDate  (Required) The date.
          * @param seconds  (Required) The number of seconds to add or subtract.
          * @param result  (Required) An existing instance to use for the result.
          */
-        static addSeconds(julianDate: JulianDate, seconds: Number, result: JulianDate): JulianDate;
+        static addSeconds(julianDate: JulianDate, seconds: number, result: JulianDate): JulianDate;
         /**
          * Adds the provided number of minutes to the provided date instance.
          * @param julianDate  (Required) The date.
          * @param minutes  (Required) The number of minutes to add or subtract.
          * @param result  (Required) An existing instance to use for the result.
          */
-        static addMinutes(julianDate: JulianDate, minutes: Number, result: JulianDate): JulianDate;
+        static addMinutes(julianDate: JulianDate, minutes: number, result: JulianDate): JulianDate;
         /**
          * Adds the provided number of hours to the provided date instance.
          * @param julianDate  (Required) The date.
          * @param hours  (Required) The number of hours to add or subtract.
          * @param result  (Required) An existing instance to use for the result.
          */
-        static addHours(julianDate: JulianDate, hours: Number, result: JulianDate): JulianDate;
+        static addHours(julianDate: JulianDate, hours: number, result: JulianDate): JulianDate;
         /**
          * Adds the provided number of days to the provided date instance.
          * @param julianDate  (Required) The date.
          * @param days  (Required) The number of days to add or subtract.
          * @param result  (Required) An existing instance to use for the result.
          */
-        static addDays(julianDate: JulianDate, days: Number, result: JulianDate): JulianDate;
+        static addDays(julianDate: JulianDate, days: number, result: JulianDate): JulianDate;
         /**
          * Compares the provided instances and returns <code>true</code> if <code>left</code> is earlier than <code>right</code>, <code>false</code> otherwise.
          * @param left  (Required) The first instance.
@@ -4346,7 +4342,7 @@ declare module Cesium {
          * @param right  (Optional) The second instance.
          * @param epsilon  (Optional) The maximum number of seconds that should separate the two instances.
          */
-        equalsEpsilon(right?: JulianDate, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: JulianDate, epsilon?: number): Boolean;
         /**
          * Creates a string representing this date in ISO8601 format.
          */
@@ -4365,7 +4361,7 @@ declare module Cesium {
          * @param date  (Optional) A Julian date representing the time of the leap second.
          * @param offset  (Optional) The cumulative number of seconds that TAI is ahead of UTC at the provided date.
          */
-        constructor(date?: JulianDate, offset?: Number);
+        constructor(date?: JulianDate, offset?: number);
         /**
          * Gets or sets the date at which this leap second occurs.
          */
@@ -4373,7 +4369,7 @@ declare module Cesium {
         /**
          * Gets or sets the cumulative number of seconds between the UTC and TAI time standards at the timeof this leap second.
          */
-        offset: Number;
+        offset: number;
     }
     /**
      * A spline that uses piecewise linear interpolation to create a curve.
@@ -4387,7 +4383,7 @@ declare module Cesium {
         /**
          * An array of times for the control points.
          */
-        times: Number[];
+        times: number[];
         /**
          * An array of {@link Cartesian3} control points.
          */
@@ -4396,13 +4392,13 @@ declare module Cesium {
          * Finds an index <code>i</code> in <code>times</code> such that the parameter<code>time</code> is in the interval <code>[times[i], times[i + 1]]</code>.
          * @param time  (Required) The time.
          */
-        findTimeInterval(time: Number): Number;
+        findTimeInterval(time: number): number;
         /**
          * Evaluates the curve at a given time.
          * @param time  (Required) The time at which to evaluate the curve.
          * @param result  (Optional) The object onto which to store the result.
          */
-        evaluate(time: Number, result?: Cartesian3): Cartesian3;
+        evaluate(time: number, result?: Cartesian3): Cartesian3;
     }
     /**
      * Defines how geodetic ellipsoid coordinates ({@link Cartographic}) project to aflat map like Cesium's 2D and Columbus View modes.
@@ -4440,25 +4436,25 @@ declare module Cesium {
          * @param column0Row1  (Optional) The value for column 0, row 1.
          * @param column1Row1  (Optional) The value for column 1, row 1.
          */
-        constructor(column0Row0?: Number, column1Row0?: Number, column0Row1?: Number, column1Row1?: Number);
+        constructor(column0Row0?: number, column1Row0?: number, column0Row1?: number, column1Row1?: number);
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Matrix2, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Matrix2, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Matrix2): Matrix2;
+        static unpack(array: number[], startingIndex?: number, result?: Matrix2): Matrix2;
         /**
          * Duplicates a Matrix2 instance.
          * @param matrix  (Required) The matrix to duplicate.
@@ -4471,19 +4467,19 @@ declare module Cesium {
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to first column first row position in the matrix.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Matrix2): Matrix2;
+        static fromArray(array: number[], startingIndex?: number, result?: Matrix2): Matrix2;
         /**
          * Creates a Matrix2 instance from a column-major order array.
          * @param values  (Required) The column-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromColumnMajorArray(values: Number[], result?: Matrix2): Matrix2;
+        static fromColumnMajorArray(values: number[], result?: Matrix2): Matrix2;
         /**
          * Creates a Matrix2 instance from a row-major order array.The resulting matrix will be in column-major order.
          * @param values  (Required) The row-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRowMajorArray(values: Number[], result?: Matrix2): Matrix2;
+        static fromRowMajorArray(values: number[], result?: Matrix2): Matrix2;
         /**
          * Computes a Matrix2 instance representing a non-uniform scale.
          * @param scale  (Required) The x and y scale factors.
@@ -4495,32 +4491,32 @@ declare module Cesium {
          * @param scale  (Required) The uniform scale factor.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromUniformScale(scale: Number, result?: Matrix2): Matrix2;
+        static fromUniformScale(scale: number, result?: Matrix2): Matrix2;
         /**
          * Creates a rotation matrix.
          * @param angle  (Required) The angle, in radians, of the rotation.  Positive angles are counterclockwise.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRotation(angle: Number, result?: Matrix2): Matrix2;
+        static fromRotation(angle: number, result?: Matrix2): Matrix2;
         /**
          * Creates an Array from the provided Matrix2 instance.The array will be in column-major order.
          * @param matrix  (Required) The matrix to use..
          * @param result  (Optional) The Array onto which to store the result.
          */
-        static toArray(matrix: Matrix2, result?: Number[]): Number[];
+        static toArray(matrix: Matrix2, result?: number[]): number[];
         /**
          * Computes the array index of the element at the provided row and column.
          * @param row  (Required) The zero-based index of the row.
          * @param column  (Required) The zero-based index of the column.
          */
-        static getElementIndex(row: Number, column: Number): Number;
+        static getElementIndex(row: number, column: number): number;
         /**
          * Retrieves a copy of the matrix column at the provided index as a Cartesian2 instance.
          * @param matrix  (Required) The matrix to use.
          * @param index  (Required) The zero-based index of the column to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getColumn(matrix: Matrix2, index: Number, result: Cartesian2): Cartesian2;
+        static getColumn(matrix: Matrix2, index: number, result: Cartesian2): Cartesian2;
         /**
          * Computes a new matrix that replaces the specified column in the provided matrix with the provided Cartesian2 instance.
          * @param matrix  (Required) The matrix to use.
@@ -4528,14 +4524,14 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified column.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setColumn(matrix: Matrix2, index: Number, cartesian: Cartesian2, result: Cartesian2): Matrix2;
+        static setColumn(matrix: Matrix2, index: number, cartesian: Cartesian2, result: Cartesian2): Matrix2;
         /**
          * Retrieves a copy of the matrix row at the provided index as a Cartesian2 instance.
          * @param matrix  (Required) The matrix to use.
          * @param index  (Required) The zero-based index of the row to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getRow(matrix: Matrix2, index: Number, result: Cartesian2): Cartesian2;
+        static getRow(matrix: Matrix2, index: number, result: Cartesian2): Cartesian2;
         /**
          * Computes a new matrix that replaces the specified row in the provided matrix with the provided Cartesian2 instance.
          * @param matrix  (Required) The matrix to use.
@@ -4543,7 +4539,7 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified row.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setRow(matrix: Matrix2, index: Number, cartesian: Cartesian2, result: Matrix2): Matrix2;
+        static setRow(matrix: Matrix2, index: number, cartesian: Cartesian2, result: Matrix2): Matrix2;
         /**
          * Extracts the non-uniform scale assuming the matrix is an affine transformation.
          * @param matrix  (Required) The matrix.
@@ -4554,7 +4550,7 @@ declare module Cesium {
          * Computes the maximum scale assuming the matrix is an affine transformation.The maximum scale is the maximum length of the column vectors.
          * @param matrix  (Required) The matrix.
          */
-        static getMaximumScale(matrix: Matrix2): Number;
+        static getMaximumScale(matrix: Matrix2): number;
         /**
          * Computes the product of two matrices.
          * @param left  (Required) The first matrix.
@@ -4589,7 +4585,7 @@ declare module Cesium {
          * @param scalar  (Required) The number to multiply by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(matrix: Matrix2, scalar: Number, result: Matrix2): Matrix2;
+        static multiplyByScalar(matrix: Matrix2, scalar: number, result: Matrix2): Matrix2;
         /**
          * Computes the product of a matrix times a (non-uniform) scale, as if the scale were a scale matrix.
          * @param matrix  (Required) The matrix on the left-hand side.
@@ -4627,7 +4623,7 @@ declare module Cesium {
          * @param right  (Optional) The second matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        static equalsEpsilon(left?: Matrix2, right?: Matrix2, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Matrix2, right?: Matrix2, epsilon?: number): Boolean;
         /**
          * An immutable Matrix2 instance initialized to the identity matrix.
          */
@@ -4639,23 +4635,23 @@ declare module Cesium {
         /**
          * The index into Matrix2 for column 0, row 0.
          */
-        static COLUMN0ROW0: Number;
+        static COLUMN0ROW0: number;
         /**
          * The index into Matrix2 for column 0, row 1.
          */
-        static COLUMN0ROW1: Number;
+        static COLUMN0ROW1: number;
         /**
          * The index into Matrix2 for column 1, row 0.
          */
-        static COLUMN1ROW0: Number;
+        static COLUMN1ROW0: number;
         /**
          * The index into Matrix2 for column 1, row 1.
          */
-        static COLUMN1ROW1: Number;
+        static COLUMN1ROW1: number;
         /**
          * Gets the number of items in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Duplicates the provided Matrix2 instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -4671,7 +4667,7 @@ declare module Cesium {
          * @param right  (Optional) The right hand side matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(right?: Matrix2, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: Matrix2, epsilon?: number): Boolean;
         /**
          * Creates a string representing this Matrix with each row beingon a separate line and in the format '(column0, column1)'.
          */
@@ -4693,25 +4689,25 @@ declare module Cesium {
          * @param column1Row2  (Optional) The value for column 1, row 2.
          * @param column2Row2  (Optional) The value for column 2, row 2.
          */
-        constructor(column0Row0?: Number, column1Row0?: Number, column2Row0?: Number, column0Row1?: Number, column1Row1?: Number, column2Row1?: Number, column0Row2?: Number, column1Row2?: Number, column2Row2?: Number);
+        constructor(column0Row0?: number, column1Row0?: number, column2Row0?: number, column0Row1?: number, column1Row1?: number, column2Row1?: number, column0Row2?: number, column1Row2?: number, column2Row2?: number);
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Matrix3, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Matrix3, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Matrix3): Matrix3;
+        static unpack(array: number[], startingIndex?: number, result?: Matrix3): Matrix3;
         /**
          * Duplicates a Matrix3 instance.
          * @param matrix  (Required) The matrix to duplicate.
@@ -4724,19 +4720,19 @@ declare module Cesium {
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to first column first row position in the matrix.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Matrix3): Matrix3;
+        static fromArray(array: number[], startingIndex?: number, result?: Matrix3): Matrix3;
         /**
          * Creates a Matrix3 instance from a column-major order array.
          * @param values  (Required) The column-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromColumnMajorArray(values: Number[], result?: Matrix3): Matrix3;
+        static fromColumnMajorArray(values: number[], result?: Matrix3): Matrix3;
         /**
          * Creates a Matrix3 instance from a row-major order array.The resulting matrix will be in column-major order.
          * @param values  (Required) The row-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRowMajorArray(values: Number[], result?: Matrix3): Matrix3;
+        static fromRowMajorArray(values: number[], result?: Matrix3): Matrix3;
         /**
          * Computes a 3x3 rotation matrix from the provided quaternion.
          * @param quaternion  (Required) the quaternion to use.
@@ -4760,7 +4756,7 @@ declare module Cesium {
          * @param scale  (Required) The uniform scale factor.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromUniformScale(scale: Number, result?: Matrix3): Matrix3;
+        static fromUniformScale(scale: number, result?: Matrix3): Matrix3;
         /**
          * Computes a Matrix3 instance representing the cross product equivalent matrix of a Cartesian3 vector.
          * @param the  (Required) vector on the left hand side of the cross product operation.
@@ -4772,38 +4768,38 @@ declare module Cesium {
          * @param angle  (Required) The angle, in radians, of the rotation.  Positive angles are counterclockwise.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRotationX(angle: Number, result?: Matrix3): Matrix3;
+        static fromRotationX(angle: number, result?: Matrix3): Matrix3;
         /**
          * Creates a rotation matrix around the y-axis.
          * @param angle  (Required) The angle, in radians, of the rotation.  Positive angles are counterclockwise.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRotationY(angle: Number, result?: Matrix3): Matrix3;
+        static fromRotationY(angle: number, result?: Matrix3): Matrix3;
         /**
          * Creates a rotation matrix around the z-axis.
          * @param angle  (Required) The angle, in radians, of the rotation.  Positive angles are counterclockwise.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRotationZ(angle: Number, result?: Matrix3): Matrix3;
+        static fromRotationZ(angle: number, result?: Matrix3): Matrix3;
         /**
          * Creates an Array from the provided Matrix3 instance.The array will be in column-major order.
          * @param matrix  (Required) The matrix to use..
          * @param result  (Optional) The Array onto which to store the result.
          */
-        static toArray(matrix: Matrix3, result?: Number[]): Number[];
+        static toArray(matrix: Matrix3, result?: number[]): number[];
         /**
          * Computes the array index of the element at the provided row and column.
          * @param row  (Required) The zero-based index of the row.
          * @param column  (Required) The zero-based index of the column.
          */
-        static getElementIndex(row: Number, column: Number): Number;
+        static getElementIndex(row: number, column: number): number;
         /**
          * Retrieves a copy of the matrix column at the provided index as a Cartesian3 instance.
          * @param matrix  (Required) The matrix to use.
          * @param index  (Required) The zero-based index of the column to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getColumn(matrix: Matrix3, index: Number, result: Cartesian3): Cartesian3;
+        static getColumn(matrix: Matrix3, index: number, result: Cartesian3): Cartesian3;
         /**
          * Computes a new matrix that replaces the specified column in the provided matrix with the provided Cartesian3 instance.
          * @param matrix  (Required) The matrix to use.
@@ -4811,14 +4807,14 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified column.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setColumn(matrix: Matrix3, index: Number, cartesian: Cartesian3, result: Matrix3): Matrix3;
+        static setColumn(matrix: Matrix3, index: number, cartesian: Cartesian3, result: Matrix3): Matrix3;
         /**
          * Retrieves a copy of the matrix row at the provided index as a Cartesian3 instance.
          * @param matrix  (Required) The matrix to use.
          * @param index  (Required) The zero-based index of the row to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getRow(matrix: Matrix3, index: Number, result: Cartesian3): Cartesian3;
+        static getRow(matrix: Matrix3, index: number, result: Cartesian3): Cartesian3;
         /**
          * Computes a new matrix that replaces the specified row in the provided matrix with the provided Cartesian3 instance.
          * @param matrix  (Required) The matrix to use.
@@ -4826,7 +4822,7 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified row.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setRow(matrix: Matrix3, index: Number, cartesian: Cartesian3, result: Matrix3): Matrix3;
+        static setRow(matrix: Matrix3, index: number, cartesian: Cartesian3, result: Matrix3): Matrix3;
         /**
          * Extracts the non-uniform scale assuming the matrix is an affine transformation.
          * @param matrix  (Required) The matrix.
@@ -4837,7 +4833,7 @@ declare module Cesium {
          * Computes the maximum scale assuming the matrix is an affine transformation.The maximum scale is the maximum length of the column vectors.
          * @param matrix  (Required) The matrix.
          */
-        static getMaximumScale(matrix: Matrix3): Number;
+        static getMaximumScale(matrix: Matrix3): number;
         /**
          * Computes the product of two matrices.
          * @param left  (Required) The first matrix.
@@ -4872,7 +4868,7 @@ declare module Cesium {
          * @param scalar  (Required) The number to multiply by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(matrix: Matrix3, scalar: Number, result: Matrix3): Matrix3;
+        static multiplyByScalar(matrix: Matrix3, scalar: number, result: Matrix3): Matrix3;
         /**
          * Computes the product of a matrix times a (non-uniform) scale, as if the scale were a scale matrix.
          * @param matrix  (Required) The matrix on the left-hand side.
@@ -4908,7 +4904,7 @@ declare module Cesium {
          * Computes the determinant of the provided matrix.
          * @param matrix  (Required) The matrix to use.
          */
-        static determinant(matrix: Matrix3): Number;
+        static determinant(matrix: Matrix3): number;
         /**
          * Computes the inverse of the provided matrix.
          * @param matrix  (Required) The matrix to invert.
@@ -4927,7 +4923,7 @@ declare module Cesium {
          * @param right  (Optional) The second matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        static equalsEpsilon(left?: Matrix3, right?: Matrix3, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Matrix3, right?: Matrix3, epsilon?: number): Boolean;
         /**
          * An immutable Matrix3 instance initialized to the identity matrix.
          */
@@ -4939,43 +4935,43 @@ declare module Cesium {
         /**
          * The index into Matrix3 for column 0, row 0.
          */
-        static COLUMN0ROW0: Number;
+        static COLUMN0ROW0: number;
         /**
          * The index into Matrix3 for column 0, row 1.
          */
-        static COLUMN0ROW1: Number;
+        static COLUMN0ROW1: number;
         /**
          * The index into Matrix3 for column 0, row 2.
          */
-        static COLUMN0ROW2: Number;
+        static COLUMN0ROW2: number;
         /**
          * The index into Matrix3 for column 1, row 0.
          */
-        static COLUMN1ROW0: Number;
+        static COLUMN1ROW0: number;
         /**
          * The index into Matrix3 for column 1, row 1.
          */
-        static COLUMN1ROW1: Number;
+        static COLUMN1ROW1: number;
         /**
          * The index into Matrix3 for column 1, row 2.
          */
-        static COLUMN1ROW2: Number;
+        static COLUMN1ROW2: number;
         /**
          * The index into Matrix3 for column 2, row 0.
          */
-        static COLUMN2ROW0: Number;
+        static COLUMN2ROW0: number;
         /**
          * The index into Matrix3 for column 2, row 1.
          */
-        static COLUMN2ROW1: Number;
+        static COLUMN2ROW1: number;
         /**
          * The index into Matrix3 for column 2, row 2.
          */
-        static COLUMN2ROW2: Number;
+        static COLUMN2ROW2: number;
         /**
          * Gets the number of items in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Duplicates the provided Matrix3 instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -4991,7 +4987,7 @@ declare module Cesium {
          * @param right  (Optional) The right hand side matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(right?: Matrix3, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: Matrix3, epsilon?: number): Boolean;
         /**
          * Creates a string representing this Matrix with each row beingon a separate line and in the format '(column0, column1, column2)'.
          */
@@ -5020,25 +5016,25 @@ declare module Cesium {
          * @param column2Row3  (Optional) The value for column 2, row 3.
          * @param column3Row3  (Optional) The value for column 3, row 3.
          */
-        constructor(column0Row0?: Number, column1Row0?: Number, column2Row0?: Number, column3Row0?: Number, column0Row1?: Number, column1Row1?: Number, column2Row1?: Number, column3Row1?: Number, column0Row2?: Number, column1Row2?: Number, column2Row2?: Number, column3Row2?: Number, column0Row3?: Number, column1Row3?: Number, column2Row3?: Number, column3Row3?: Number);
+        constructor(column0Row0?: number, column1Row0?: number, column2Row0?: number, column3Row0?: number, column0Row1?: number, column1Row1?: number, column2Row1?: number, column3Row1?: number, column0Row2?: number, column1Row2?: number, column2Row2?: number, column3Row2?: number, column0Row3?: number, column1Row3?: number, column2Row3?: number, column3Row3?: number);
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Matrix4, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Matrix4, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Matrix4): Matrix4;
+        static unpack(array: number[], startingIndex?: number, result?: Matrix4): Matrix4;
         /**
          * Duplicates a Matrix4 instance.
          * @param matrix  (Required) The matrix to duplicate.
@@ -5051,19 +5047,19 @@ declare module Cesium {
          * @param startingIndex  (Optional) The offset into the array of the first element, which corresponds to first column first row position in the matrix.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromArray(array: Number[], startingIndex?: Number, result?: Matrix4): Matrix4;
+        static fromArray(array: number[], startingIndex?: number, result?: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance from a column-major order array.
          * @param values  (Required) The column-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromColumnMajorArray(values: Number[], result?: Matrix4): Matrix4;
+        static fromColumnMajorArray(values: number[], result?: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance from a row-major order array.The resulting matrix will be in column-major order.
          * @param values  (Required) The row-major order array.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromRowMajorArray(values: Number[], result?: Matrix4): Matrix4;
+        static fromRowMajorArray(values: number[], result?: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance from a Matrix3 representing the rotationand a Cartesian3 representing the translation.
          * @param rotation  (Required) The upper left portion of the matrix representing the rotation.
@@ -5102,7 +5098,7 @@ declare module Cesium {
          * @param scale  (Required) The uniform scale factor.
          * @param result  (Optional) The object in which the result will be stored, if undefined a new instance will be created.
          */
-        static fromUniformScale(scale: Number, result?: Matrix4): Matrix4;
+        static fromUniformScale(scale: number, result?: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance from a Camera.
          * @param camera  (Required) The camera to use.
@@ -5117,7 +5113,7 @@ declare module Cesium {
          * @param far  (Required) The distance to the far plane in meters.
          * @param result  (Required) The object in which the result will be stored.
          */
-        static computePerspectiveFieldOfView(fovY: Number, aspectRatio: Number, near: Number, far: Number, result: Matrix4): Matrix4;
+        static computePerspectiveFieldOfView(fovY: number, aspectRatio: number, near: number, far: number, result: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance representing an orthographic transformation matrix.
          * @param left  (Required) The number of meters to the left of the camera that will be in view.
@@ -5128,7 +5124,7 @@ declare module Cesium {
          * @param far  (Required) The distance to the far plane in meters.
          * @param result  (Required) The object in which the result will be stored.
          */
-        static computeOrthographicOffCenter(left: Number, right: Number, bottom: Number, top: Number, near: Number, far: Number, result: Matrix4): Matrix4;
+        static computeOrthographicOffCenter(left: number, right: number, bottom: number, top: number, near: number, far: number, result: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance representing an off center perspective transformation.
          * @param left  (Required) The number of meters to the left of the camera that will be in view.
@@ -5139,7 +5135,7 @@ declare module Cesium {
          * @param far  (Required) The distance to the far plane in meters.
          * @param result  (Required) The object in which the result will be stored.
          */
-        static computePerspectiveOffCenter(left: Number, right: Number, bottom: Number, top: Number, near: Number, far: Number, result: Matrix4): Matrix4;
+        static computePerspectiveOffCenter(left: number, right: number, bottom: number, top: number, near: number, far: number, result: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance representing an infinite off center perspective transformation.
          * @param left  (Required) The number of meters to the left of the camera that will be in view.
@@ -5149,7 +5145,7 @@ declare module Cesium {
          * @param near  (Required) The distance to the near plane in meters.
          * @param result  (Required) The object in which the result will be stored.
          */
-        static computeInfinitePerspectiveOffCenter(left: Number, right: Number, bottom: Number, top: Number, near: Number, result: Matrix4): Matrix4;
+        static computeInfinitePerspectiveOffCenter(left: number, right: number, bottom: number, top: number, near: number, result: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance that transforms from normalized device coordinates to window coordinates.
          * @param viewport  (Optional) The viewport's corners as shown in Example 1.
@@ -5157,7 +5153,7 @@ declare module Cesium {
          * @param farDepthRange  (Optional) The far plane distance in window coordinates.
          * @param result  (Optional) The object in which the result will be stored.
          */
-        static computeViewportTransformation(viewport?: any, nearDepthRange?: Number, farDepthRange?: Number, result?: Matrix4): Matrix4;
+        static computeViewportTransformation(viewport?: any, nearDepthRange?: number, farDepthRange?: number, result?: Matrix4): Matrix4;
         /**
          * Computes a Matrix4 instance that transforms from world space to view space.
          * @param position  (Required) The position of the camera.
@@ -5172,20 +5168,20 @@ declare module Cesium {
          * @param matrix  (Required) The matrix to use..
          * @param result  (Optional) The Array onto which to store the result.
          */
-        static toArray(matrix: Matrix4, result?: Number[]): Number[];
+        static toArray(matrix: Matrix4, result?: number[]): number[];
         /**
          * Computes the array index of the element at the provided row and column.
          * @param row  (Required) The zero-based index of the row.
          * @param column  (Required) The zero-based index of the column.
          */
-        static getElementIndex(row: Number, column: Number): Number;
+        static getElementIndex(row: number, column: number): number;
         /**
          * Retrieves a copy of the matrix column at the provided index as a Cartesian4 instance.
          * @param matrix  (Required) The matrix to use.
          * @param index  (Required) The zero-based index of the column to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getColumn(matrix: Matrix4, index: Number, result: Cartesian4): Cartesian4;
+        static getColumn(matrix: Matrix4, index: number, result: Cartesian4): Cartesian4;
         /**
          * Computes a new matrix that replaces the specified column in the provided matrix with the provided Cartesian4 instance.
          * @param matrix  (Required) The matrix to use.
@@ -5193,7 +5189,7 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified column.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setColumn(matrix: Matrix4, index: Number, cartesian: Cartesian4, result: Matrix4): Matrix4;
+        static setColumn(matrix: Matrix4, index: number, cartesian: Cartesian4, result: Matrix4): Matrix4;
         /**
          * Computes a new matrix that replaces the translation in the rightmost column of the providedmatrix with the provided translation.  This assumes the matrix is an affine transformation
          * @param matrix  (Required) The matrix to use.
@@ -5207,7 +5203,7 @@ declare module Cesium {
          * @param index  (Required) The zero-based index of the row to retrieve.
          * @param result  (Required) The object onto which to store the result.
          */
-        static getRow(matrix: Matrix4, index: Number, result: Cartesian4): Cartesian4;
+        static getRow(matrix: Matrix4, index: number, result: Cartesian4): Cartesian4;
         /**
          * Computes a new matrix that replaces the specified row in the provided matrix with the provided Cartesian4 instance.
          * @param matrix  (Required) The matrix to use.
@@ -5215,7 +5211,7 @@ declare module Cesium {
          * @param cartesian  (Required) The Cartesian whose values will be assigned to the specified row.
          * @param result  (Required) The object onto which to store the result.
          */
-        static setRow(matrix: Matrix4, index: Number, cartesian: Cartesian4, result: Matrix4): Matrix4;
+        static setRow(matrix: Matrix4, index: number, cartesian: Cartesian4, result: Matrix4): Matrix4;
         /**
          * Extracts the non-uniform scale assuming the matrix is an affine transformation.
          * @param matrix  (Required) The matrix.
@@ -5226,7 +5222,7 @@ declare module Cesium {
          * Computes the maximum scale assuming the matrix is an affine transformation.The maximum scale is the maximum length of the column vectors in the upper-left3x3 matrix.
          * @param matrix  (Required) The matrix.
          */
-        static getMaximumScale(matrix: Matrix4): Number;
+        static getMaximumScale(matrix: Matrix4): number;
         /**
          * Computes the product of two matrices.
          * @param left  (Required) The first matrix.
@@ -5275,7 +5271,7 @@ declare module Cesium {
          * @param scale  (Required) The uniform scale on the right-hand side.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByUniformScale(matrix: Matrix4, scale: Number, result: Matrix4): Matrix4;
+        static multiplyByUniformScale(matrix: Matrix4, scale: number, result: Matrix4): Matrix4;
         /**
          * Multiplies an affine transformation matrix (with a bottom row of <code>[0.0, 0.0, 0.0, 1.0]</code>)by an implicit non-uniform scale matrix.  This is an optimizationfor <code>Matrix4.multiply(m, Matrix4.fromUniformScale(scale), m);</code>, where<code>m</code> must be an affine matrix.This function performs fewer allocations and arithmetic operations.
          * @param matrix  (Required) The affine matrix on the left-hand side.
@@ -5310,7 +5306,7 @@ declare module Cesium {
          * @param scalar  (Required) The number to multiply by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(matrix: Matrix4, scalar: Number, result: Matrix4): Matrix4;
+        static multiplyByScalar(matrix: Matrix4, scalar: number, result: Matrix4): Matrix4;
         /**
          * Computes a negated copy of the provided matrix.
          * @param matrix  (Required) The matrix to negate.
@@ -5341,7 +5337,7 @@ declare module Cesium {
          * @param right  (Optional) The second matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        static equalsEpsilon(left?: Matrix4, right?: Matrix4, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Matrix4, right?: Matrix4, epsilon?: number): Boolean;
         /**
          * Gets the translation portion of the provided matrix, assuming the matrix is a affine transformation matrix.
          * @param matrix  (Required) The matrix to use.
@@ -5377,71 +5373,71 @@ declare module Cesium {
         /**
          * The index into Matrix4 for column 0, row 0.
          */
-        static COLUMN0ROW0: Number;
+        static COLUMN0ROW0: number;
         /**
          * The index into Matrix4 for column 0, row 1.
          */
-        static COLUMN0ROW1: Number;
+        static COLUMN0ROW1: number;
         /**
          * The index into Matrix4 for column 0, row 2.
          */
-        static COLUMN0ROW2: Number;
+        static COLUMN0ROW2: number;
         /**
          * The index into Matrix4 for column 0, row 3.
          */
-        static COLUMN0ROW3: Number;
+        static COLUMN0ROW3: number;
         /**
          * The index into Matrix4 for column 1, row 0.
          */
-        static COLUMN1ROW0: Number;
+        static COLUMN1ROW0: number;
         /**
          * The index into Matrix4 for column 1, row 1.
          */
-        static COLUMN1ROW1: Number;
+        static COLUMN1ROW1: number;
         /**
          * The index into Matrix4 for column 1, row 2.
          */
-        static COLUMN1ROW2: Number;
+        static COLUMN1ROW2: number;
         /**
          * The index into Matrix4 for column 1, row 3.
          */
-        static COLUMN1ROW3: Number;
+        static COLUMN1ROW3: number;
         /**
          * The index into Matrix4 for column 2, row 0.
          */
-        static COLUMN2ROW0: Number;
+        static COLUMN2ROW0: number;
         /**
          * The index into Matrix4 for column 2, row 1.
          */
-        static COLUMN2ROW1: Number;
+        static COLUMN2ROW1: number;
         /**
          * The index into Matrix4 for column 2, row 2.
          */
-        static COLUMN2ROW2: Number;
+        static COLUMN2ROW2: number;
         /**
          * The index into Matrix4 for column 2, row 3.
          */
-        static COLUMN2ROW3: Number;
+        static COLUMN2ROW3: number;
         /**
          * The index into Matrix4 for column 3, row 0.
          */
-        static COLUMN3ROW0: Number;
+        static COLUMN3ROW0: number;
         /**
          * The index into Matrix4 for column 3, row 1.
          */
-        static COLUMN3ROW1: Number;
+        static COLUMN3ROW1: number;
         /**
          * The index into Matrix4 for column 3, row 2.
          */
-        static COLUMN3ROW2: Number;
+        static COLUMN3ROW2: number;
         /**
          * The index into Matrix4 for column 3, row 3.
          */
-        static COLUMN3ROW3: Number;
+        static COLUMN3ROW3: number;
         /**
          * Gets the number of items in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Duplicates the provided Matrix4 instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -5457,7 +5453,7 @@ declare module Cesium {
          * @param right  (Optional) The right hand side matrix.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(right?: Matrix4, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: Matrix4, epsilon?: number): Boolean;
         /**
          * Computes a string representing this Matrix with each row beingon a separate line and in the format '(column0, column1, column2, column3)'.
          */
@@ -5474,23 +5470,23 @@ declare module Cesium {
          * @param far  (Optional) The upper bound of the camera range.
          * @param farValue  (Optional) The value at the upper bound of the camera range.
          */
-        constructor(near?: Number, nearValue?: Number, far?: Number, farValue?: Number);
+        constructor(near?: number, nearValue?: number, far?: number, farValue?: number);
         /**
          * The lower bound of the camera range.
          */
-        near: Number;
+        near: number;
         /**
          * The value at the lower bound of the camera range.
          */
-        nearValue: Number;
+        nearValue: number;
         /**
          * The upper bound of the camera range.
          */
-        far: Number;
+        far: number;
         /**
          * The value at the upper bound of the camera range.
          */
-        farValue: Number;
+        farValue: number;
         /**
          * Duplicates a NearFarScalar instance.
          * @param nearFarScalar  (Required) The NearFarScalar to duplicate.
@@ -5500,21 +5496,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: NearFarScalar, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: NearFarScalar, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: NearFarScalar): NearFarScalar;
+        static unpack(array: number[], startingIndex?: number, result?: NearFarScalar): NearFarScalar;
         /**
          * Compares the provided NearFarScalar and returns <code>true</code> if they are equal,<code>false</code> otherwise.
          * @param left  (Optional) The first NearFarScalar.
@@ -5549,7 +5545,7 @@ declare module Cesium {
         /**
          * The radius of the occluder.
          */
-        radius: Number;
+        radius: number;
         /**
          * The position of the camera.
          */
@@ -5575,7 +5571,7 @@ declare module Cesium {
          * Determine to what extent an occludee is visible (not visible, partially visible,  or fully visible).
          * @param occludeeBS  (Required) The bounding sphere of the occludee.
          */
-        computeVisibility(occludeeBS: BoundingSphere): Number;
+        computeVisibility(occludeeBS: BoundingSphere): number;
         /**
          * Computes a point that can be used as the occludee position to the visibility functions.Use a radius of zero for the occludee radius.  Typically, a user computes a bounding sphere aroundan object that is used for visibility; however it is also possible to compute a point that ifseen/not seen would also indicate if an object is visible/not visible.  This function is bettercalled for objects that do not move relative to the occluder and is large, such as a chunk ofterrain.  You are better off not calling this and using the object's bounding sphere for objectssuch as a satellite or ground vehicle.
          * @param occluderBoundingSphere  (Required) The bounding sphere surrounding the occluder.
@@ -5622,7 +5618,7 @@ declare module Cesium {
          * @param ellipsoid  (Optional) The ellipsoid on which the rectangle is defined.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromRectangle(rectangle: Rectangle, minimumHeight?: Number, maximumHeight?: Number, ellipsoid?: Ellipsoid, result?: OrientedBoundingBox): OrientedBoundingBox;
+        static fromRectangle(rectangle: Rectangle, minimumHeight?: number, maximumHeight?: number, ellipsoid?: Ellipsoid, result?: OrientedBoundingBox): OrientedBoundingBox;
         /**
          * Duplicates a OrientedBoundingBox instance.
          * @param box  (Required) The bounding box to duplicate.
@@ -5640,7 +5636,7 @@ declare module Cesium {
          * @param box  (Required) The box.
          * @param cartesian  (Required) The point
          */
-        static distanceSquaredTo(box: OrientedBoundingBox, cartesian: Cartesian3): Number;
+        static distanceSquaredTo(box: OrientedBoundingBox, cartesian: Cartesian3): number;
         /**
          * The distances calculated by the vector from the center of the bounding box to position projected onto direction.<br>If you imagine the infinite number of planes with normal direction, this computes the smallest distance to theclosest and farthest planes from position that intersect the bounding box.
          * @param box  (Required) The bounding box to calculate the distance to.
@@ -5664,7 +5660,7 @@ declare module Cesium {
          * Computes the estimated distance squared from the closest point on a bounding box to a point.
          * @param cartesian  (Required) The point
          */
-        distanceSquaredTo(cartesian: Cartesian3): Number;
+        distanceSquaredTo(cartesian: Cartesian3): number;
         /**
          * The distances calculated by the vector from the center of the bounding box to position projected onto direction.<br>If you imagine the infinite number of planes with normal direction, this computes the smallest distance to theclosest and farthest planes from position that intersect the bounding box.
          * @param position  (Required) The position to calculate the distance from.
@@ -5707,28 +5703,28 @@ declare module Cesium {
          * @param color  (Required) The color of the pin.
          * @param size  (Required) The size of the pin, in pixels.
          */
-        fromColor(color: number, size: Number): HTMLCanvasElement;
+        fromColor(color: Color, size: number): HTMLCanvasElement;
         /**
          * Creates a pin with the specified icon, color, and size.
          * @param url  (Required) The url of the image to be stamped onto the pin.
          * @param color  (Required) The color of the pin.
          * @param size  (Required) The size of the pin, in pixels.
          */
-        fromUrl(url: string, color: number, size: Number): HTMLCanvasElement|Promise<HTMLCanvasElement>;
+        fromUrl(url: string, color: Color, size: number): HTMLCanvasElement|Promise<HTMLCanvasElement>;
         /**
          * Creates a pin with the specified {@link https://www.mapbox.com/maki/|maki} icon identifier, color, and size.
          * @param id  (Required) The id of the maki icon to be stamped onto the pin.
          * @param color  (Required) The color of the pin.
          * @param size  (Required) The size of the pin, in pixels.
          */
-        fromMakiIconId(id: string, color: number, size: Number): HTMLCanvasElement|Promise<HTMLCanvasElement>;
+        fromMakiIconId(id: string, color: Color, size: number): HTMLCanvasElement|Promise<HTMLCanvasElement>;
         /**
          * Creates a pin with the specified text, color, and size.  The text will be sized to be as large as possiblewhile still being contained completely within the pin.
          * @param text  (Required) The text to be stamped onto the pin.
          * @param color  (Required) The color of the pin.
          * @param size  (Required) The size of the pin, in pixels.
          */
-        fromText(text: string, color: number, size: Number): HTMLCanvasElement;
+        fromText(text: string, color: Color, size: number): HTMLCanvasElement;
     }
     /**
      * A plane in Hessian Normal Form defined by<pre>ax + by + cz + d = 0</pre>where (a, b, c) is the plane's <code>normal</code>, d is the signed<code>distance</code> to the plane, and (x, y, z) is any point onthe plane.
@@ -5739,7 +5735,7 @@ declare module Cesium {
          * @param normal  (Required) The plane's normal (normalized).
          * @param distance  (Required) The shortest distance from the origin to the plane.  The sign of<code>distance</code> determines which side of the plane the originis on.  If <code>distance</code> is positive, the origin is in the half-spacein the direction of the normal; if negative, the origin is in the half-spaceopposite to the normal; if zero, the plane passes through the origin.
          */
-        constructor(normal: Cartesian3, distance: Number);
+        constructor(normal: Cartesian3, distance: number);
         /**
          * The plane's normal.
          */
@@ -5747,7 +5743,7 @@ declare module Cesium {
         /**
          * The shortest distance from the origin to the plane.  The sign of<code>distance</code> determines which side of the plane the originis on.  If <code>distance</code> is positive, the origin is in the half-spacein the direction of the normal; if negative, the origin is in the half-spaceopposite to the normal; if zero, the plane passes through the origin.
          */
-        distance: Number;
+        distance: number;
         /**
          * Creates a plane from a normal and a point on the plane.
          * @param point  (Required) The point on the plane.
@@ -5766,7 +5762,7 @@ declare module Cesium {
          * @param plane  (Required) The plane.
          * @param point  (Required) The point.
          */
-        static getPointDistance(plane: Plane, point: Cartesian3): Number;
+        static getPointDistance(plane: Plane, point: Cartesian3): number;
         /**
          * A constant initialized to the XY plane passing through the origin, with normal in positive Z.
          */
@@ -5792,7 +5788,7 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * A description of a polygon from an array of positions. Polygon geometry can be rendered with both {@link Primitive} and {@link GroundPrimitive}.
          * @param options  (Required) Object with the following properties:
@@ -5804,14 +5800,14 @@ declare module Cesium {
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: PolygonGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: PolygonGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: PolygonGeometry): void;
+        static unpack(array: number[], startingIndex?: number, result?: PolygonGeometry): void;
         /**
          * Computes the geometric representation of a polygon, including its vertices, indices, and a bounding sphere.
          * @param polygonGeometry  (Required) A description of the polygon.
@@ -5849,21 +5845,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: PolygonOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: PolygonOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: PolygonOutlineGeometry): PolygonOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: PolygonOutlineGeometry): PolygonOutlineGeometry;
         /**
          * A description of a polygon outline from an array of positions.
          * @param options  (Required) Object with the following properties:
@@ -5887,21 +5883,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: PolylineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: PolylineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: PolylineGeometry): PolylineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: PolylineGeometry): PolylineGeometry;
         /**
          * Computes the geometric representation of a polyline, including its vertices, indices, and a bounding sphere.
          * @param polylineGeometry  (Required) A description of the polyline.
@@ -5920,21 +5916,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: PolylineVolumeGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: PolylineVolumeGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: PolylineVolumeGeometry): PolylineVolumeGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: PolylineVolumeGeometry): PolylineVolumeGeometry;
         /**
          * Computes the geometric representation of a polyline with a volume, including its vertices, indices, and a bounding sphere.
          * @param polylineVolumeGeometry  (Required) A description of the polyline volume.
@@ -5953,21 +5949,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: PolylineVolumeOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: PolylineVolumeOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: PolylineVolumeOutlineGeometry): PolylineVolumeOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: PolylineVolumeOutlineGeometry): PolylineVolumeOutlineGeometry;
         /**
          * Computes the geometric representation of the outline of a polyline with a volume, including its vertices, indices, and a bounding sphere.
          * @param polylineVolumeOutlineGeometry  (Required) A description of the polyline volume outline.
@@ -5997,14 +5993,14 @@ declare module Cesium {
          * @param descendantY  (Required) The Y coordinate within the tiling scheme of the descendant tile for which we are upsampling.
          * @param descendantLevel  (Required) The level within the tiling scheme of the descendant tile for which we are upsampling.
          */
-        upsample(tilingScheme: TilingScheme, thisX: Number, thisY: Number, thisLevel: Number, descendantX: Number, descendantY: Number, descendantLevel: Number): Promise<QuantizedMeshTerrainData>;
+        upsample(tilingScheme: TilingScheme, thisX: number, thisY: number, thisLevel: number, descendantX: number, descendantY: number, descendantLevel: number): Promise<QuantizedMeshTerrainData>;
         /**
          * Computes the terrain height at a specified longitude and latitude.
          * @param rectangle  (Required) The rectangle covered by this terrain data.
          * @param longitude  (Required) The longitude in radians.
          * @param latitude  (Required) The latitude in radians.
          */
-        interpolateHeight(rectangle: Rectangle, longitude: Number, latitude: Number): Number;
+        interpolateHeight(rectangle: Rectangle, longitude: number, latitude: number): number;
         /**
          * Determines if a given child tile is available, based on the{@link HeightmapTerrainData.childTileMask}.  The given child tile coordinates are assumedto be one of the four children of this tile.  If non-child tile coordinates aregiven, the availability of the southeast child tile is returned.
          * @param thisX  (Required) The tile X coordinate of this (the parent) tile.
@@ -6012,7 +6008,7 @@ declare module Cesium {
          * @param childX  (Required) The tile X coordinate of the child tile to check for availability.
          * @param childY  (Required) The tile Y coordinate of the child tile to check for availability.
          */
-        isChildAvailable(thisX: Number, thisY: Number, childX: Number, childY: Number): Boolean;
+        isChildAvailable(thisX: number, thisY: number, childX: number, childY: number): Boolean;
         /**
          * Gets a value indicating whether or not this terrain data was created by upsampling lower resolutionterrain data.  If this value is false, the data was obtained from some other source, suchas by downloading it from a remote server.  This method should return true for instancesreturned from a call to {@link HeightmapTerrainData#upsample}.
          */
@@ -6029,30 +6025,30 @@ declare module Cesium {
          * @param z  (Optional) The Z component.
          * @param w  (Optional) The W component.
          */
-        constructor(x?: Number, y?: Number, z?: Number, w?: Number);
+        constructor(x?: number, y?: number, z?: number, w?: number);
         /**
          * The X component.
          */
-        x: Number;
+        x: number;
         /**
          * The Y component.
          */
-        y: Number;
+        y: number;
         /**
          * The Z component.
          */
-        z: Number;
+        z: number;
         /**
          * The W component.
          */
-        w: Number;
+        w: number;
         /**
          * Computes a quaternion representing a rotation around an axis.
          * @param axis  (Required) The axis of rotation.
          * @param angle  (Required) The angle in radians to rotate around the axis.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromAxisAngle(axis: Cartesian3, angle: Number, result?: Quaternion): Quaternion;
+        static fromAxisAngle(axis: Cartesian3, angle: number, result?: Quaternion): Quaternion;
         /**
          * Computes a Quaternion from the provided Matrix3 instance.
          * @param matrix  (Required) The rotation matrix.
@@ -6066,29 +6062,29 @@ declare module Cesium {
          * @param roll  (Required) The roll angle in radians.
          * @param result  (Optional) The object onto which to store the result.
          */
-        static fromHeadingPitchRoll(heading: Number, pitch: Number, roll: Number, result?: Quaternion): Quaternion;
+        static fromHeadingPitchRoll(heading: number, pitch: number, roll: number, result?: Quaternion): Quaternion;
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Quaternion, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Quaternion, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Quaternion): Quaternion;
+        static unpack(array: number[], startingIndex?: number, result?: Quaternion): Quaternion;
         /**
          * The number of elements used to store the object into an array in its interpolatable form.
          */
-        static packedInterpolationLength: Number;
+        static packedInterpolationLength: number;
         /**
          * Converts a packed array into a form suitable for interpolation.
          * @param packedArray  (Required) The packed array.
@@ -6096,7 +6092,7 @@ declare module Cesium {
          * @param lastIndex  (Optional) The index of the last element to be converted.
          * @param result  (Optional) The object into which to store the result.
          */
-        static convertPackedArrayForInterpolation(packedArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: Number[]): void;
+        static convertPackedArrayForInterpolation(packedArray: number[], startingIndex?: number, lastIndex?: number, result?: number[]): void;
         /**
          * Retrieves an instance from a packed array converted with {@link convertPackedArrayForInterpolation}.
          * @param array  (Required) The array previously packed for interpolation.
@@ -6105,7 +6101,7 @@ declare module Cesium {
          * @param lastIndex  (Optional) The lastIndex used to convert the array.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpackInterpolationResult(array: Number[], sourceArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: Quaternion): Quaternion;
+        static unpackInterpolationResult(array: number[], sourceArray: number[], startingIndex?: number, lastIndex?: number, result?: Quaternion): Quaternion;
         /**
          * Duplicates a Quaternion instance.
          * @param quaternion  (Required) The quaternion to duplicate.
@@ -6122,12 +6118,12 @@ declare module Cesium {
          * Computes magnitude squared for the provided quaternion.
          * @param quaternion  (Required) The quaternion to conjugate.
          */
-        static magnitudeSquared(quaternion: Quaternion): Number;
+        static magnitudeSquared(quaternion: Quaternion): number;
         /**
          * Computes magnitude for the provided quaternion.
          * @param quaternion  (Required) The quaternion to conjugate.
          */
-        static magnitude(quaternion: Quaternion): Number;
+        static magnitude(quaternion: Quaternion): number;
         /**
          * Computes the normalized form of the provided quaternion.
          * @param quaternion  (Required) The quaternion to normalize.
@@ -6165,7 +6161,7 @@ declare module Cesium {
          * @param left  (Required) The first quaternion.
          * @param right  (Required) The second quaternion.
          */
-        static dot(left: Quaternion, right: Quaternion): Number;
+        static dot(left: Quaternion, right: Quaternion): number;
         /**
          * Computes the product of two quaternions.
          * @param left  (Required) The first quaternion.
@@ -6179,14 +6175,14 @@ declare module Cesium {
          * @param scalar  (Required) The scalar to multiply with.
          * @param result  (Required) The object onto which to store the result.
          */
-        static multiplyByScalar(quaternion: Quaternion, scalar: Number, result: Quaternion): Quaternion;
+        static multiplyByScalar(quaternion: Quaternion, scalar: number, result: Quaternion): Quaternion;
         /**
          * Divides the provided quaternion componentwise by the provided scalar.
          * @param quaternion  (Required) The quaternion to be divided.
          * @param scalar  (Required) The scalar to divide by.
          * @param result  (Required) The object onto which to store the result.
          */
-        static divideByScalar(quaternion: Quaternion, scalar: Number, result: Quaternion): Quaternion;
+        static divideByScalar(quaternion: Quaternion, scalar: number, result: Quaternion): Quaternion;
         /**
          * Computes the axis of rotation of the provided quaternion.
          * @param quaternion  (Required) The quaternion to use.
@@ -6197,7 +6193,7 @@ declare module Cesium {
          * Computes the angle of rotation of the provided quaternion.
          * @param quaternion  (Required) The quaternion to use.
          */
-        static computeAngle(quaternion: Quaternion): Number;
+        static computeAngle(quaternion: Quaternion): number;
         /**
          * Computes the linear interpolation or extrapolation at t using the provided quaternions.
          * @param start  (Required) The value corresponding to t at 0.0.
@@ -6205,7 +6201,7 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static lerp(start: Quaternion, end: Quaternion, t: Number, result: Quaternion): Quaternion;
+        static lerp(start: Quaternion, end: Quaternion, t: number, result: Quaternion): Quaternion;
         /**
          * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.
          * @param start  (Required) The value corresponding to t at 0.0.
@@ -6213,7 +6209,7 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static slerp(start: Quaternion, end: Quaternion, t: Number, result: Quaternion): Quaternion;
+        static slerp(start: Quaternion, end: Quaternion, t: number, result: Quaternion): Quaternion;
         /**
          * The logarithmic quaternion function.
          * @param quaternion  (Required) The unit quaternion.
@@ -6243,7 +6239,7 @@ declare module Cesium {
          * @param t  (Required) The time in [0,1] used to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static squad(q0: Quaternion, q1: Quaternion, s0: Quaternion, s1: Quaternion, t: Number, result: Quaternion): Quaternion;
+        static squad(q0: Quaternion, q1: Quaternion, s0: Quaternion, s1: Quaternion, t: number, result: Quaternion): Quaternion;
         /**
          * Computes the spherical linear interpolation or extrapolation at t using the provided quaternions.This implementation is faster than {@link Quaternion#slerp}, but is only accurate up to 10<sup>-6</sup>.
          * @param start  (Required) The value corresponding to t at 0.0.
@@ -6251,7 +6247,7 @@ declare module Cesium {
          * @param t  (Required) The point along t at which to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static fastSlerp(start: Quaternion, end: Quaternion, t: Number, result: Quaternion): Quaternion;
+        static fastSlerp(start: Quaternion, end: Quaternion, t: number, result: Quaternion): Quaternion;
         /**
          * Computes the spherical quadrangle interpolation between quaternions.An implementation that is faster than {@link Quaternion#squad}, but less accurate.
          * @param q0  (Required) The first quaternion.
@@ -6261,7 +6257,7 @@ declare module Cesium {
          * @param t  (Required) The time in [0,1] used to interpolate.
          * @param result  (Required) The object onto which to store the result.
          */
-        static fastSquad(q0: Quaternion, q1: Quaternion, s0: Quaternion, s1: Quaternion, t: Number, result: Quaternion): Quaternion;
+        static fastSquad(q0: Quaternion, q1: Quaternion, s0: Quaternion, s1: Quaternion, t: number, result: Quaternion): Quaternion;
         /**
          * Compares the provided quaternions componentwise and returns<code>true</code> if they are equal, <code>false</code> otherwise.
          * @param left  (Optional) The first quaternion.
@@ -6274,7 +6270,7 @@ declare module Cesium {
          * @param right  (Optional) The second quaternion.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        static equalsEpsilon(left?: Quaternion, right?: Quaternion, epsilon?: Number): Boolean;
+        static equalsEpsilon(left?: Quaternion, right?: Quaternion, epsilon?: number): Boolean;
         /**
          * An immutable Quaternion instance initialized to (0.0, 0.0, 0.0, 0.0).
          */
@@ -6298,7 +6294,7 @@ declare module Cesium {
          * @param right  (Optional) The right hand side quaternion.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(right?: Quaternion, epsilon?: Number): Boolean;
+        equalsEpsilon(right?: Quaternion, epsilon?: number): Boolean;
         /**
          * Returns a string representing this quaternion in the format (x, y, z, w).
          */
@@ -6316,7 +6312,7 @@ declare module Cesium {
         /**
          * An array of times for the control points.
          */
-        times: Number[];
+        times: number[];
         /**
          * An array of {@link Quaternion} control points.
          */
@@ -6329,13 +6325,13 @@ declare module Cesium {
          * Finds an index <code>i</code> in <code>times</code> such that the parameter<code>time</code> is in the interval <code>[times[i], times[i + 1]]</code>.
          * @param time  (Required) The time.
          */
-        findTimeInterval(time: Number): Number;
+        findTimeInterval(time: number): number;
         /**
          * Evaluates the curve at a given time.
          * @param time  (Required) The time at which to evaluate the curve.
          * @param result  (Optional) The object onto which to store the result.
          */
-        evaluate(time: Number, result?: Quaternion): Quaternion;
+        evaluate(time: number, result?: Quaternion): Quaternion;
     }
     /**
      * A queue that can enqueue items at the end, and dequeue items from the front.
@@ -6348,7 +6344,7 @@ declare module Cesium {
         /**
          * The length of the queue.
          */
-        length: Number;
+        length: number;
         /**
          * Enqueues the specified item.
          * @param item  (Required) The item to enqueue.
@@ -6401,7 +6397,7 @@ declare module Cesium {
          * @param t  (Required) A scalar value.
          * @param result  (Optional) The object in which the result will be stored.
          */
-        static getPoint(ray: Ray, t: Number, result?: Cartesian3): Cartesian3;
+        static getPoint(ray: Ray, t: number, result?: Cartesian3): Cartesian3;
     }
     /**
      * A two dimensional region specified as longitude and latitude coordinates.
@@ -6414,59 +6410,59 @@ declare module Cesium {
          * @param east  (Optional) The easternmost longitude, in radians, in the range [-Pi, Pi].
          * @param north  (Optional) The northernmost latitude, in radians, in the range [-Pi/2, Pi/2].
          */
-        constructor(west?: Number, south?: Number, east?: Number, north?: Number);
+        constructor(west?: number, south?: number, east?: number, north?: number);
         /**
          * The westernmost longitude in radians in the range [-Pi, Pi].
          */
-        west: Number;
+        west: number;
         /**
          * The southernmost latitude in radians in the range [-Pi/2, Pi/2].
          */
-        south: Number;
+        south: number;
         /**
          * The easternmost longitude in radians in the range [-Pi, Pi].
          */
-        east: Number;
+        east: number;
         /**
          * The northernmost latitude in radians in the range [-Pi/2, Pi/2].
          */
-        north: Number;
+        north: number;
         /**
          * Gets the width of the rectangle in radians.
          */
-        width: Number;
+        width: number;
         /**
          * Gets the height of the rectangle in radians.
          */
-        height: Number;
+        height: number;
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: Rectangle, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: Rectangle, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: Rectangle): Rectangle;
+        static unpack(array: number[], startingIndex?: number, result?: Rectangle): Rectangle;
         /**
          * Computes the width of a rectangle in radians.
          * @param rectangle  (Required) The rectangle to compute the width of.
          */
-        static computeWidth(rectangle: Rectangle): Number;
+        static computeWidth(rectangle: Rectangle): number;
         /**
          * Computes the height of a rectangle in radians.
          * @param rectangle  (Required) The rectangle to compute the height of.
          */
-        static computeHeight(rectangle: Rectangle): Number;
+        static computeHeight(rectangle: Rectangle): number;
         /**
          * Creates an rectangle given the boundary longitude and latitude in degrees.
          * @param west  (Optional) The westernmost longitude in degrees in the range [-180.0, 180.0].
@@ -6475,7 +6471,7 @@ declare module Cesium {
          * @param north  (Optional) The northernmost latitude in degrees in the range [-90.0, 90.0].
          * @param result  (Optional) The object onto which to store the result, or undefined if a new instance should be created.
          */
-        static fromDegrees(west?: Number, south?: Number, east?: Number, north?: Number, result?: Rectangle): Rectangle;
+        static fromDegrees(west?: number, south?: number, east?: number, north?: number, result?: Rectangle): Rectangle;
         /**
          * Creates the smallest possible Rectangle that encloses all positions in the provided array.
          * @param cartographics  (Required) The list of Cartographic instances.
@@ -6516,7 +6512,7 @@ declare module Cesium {
          * @param other  (Optional) The Rectangle to compare.
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          */
-        equalsEpsilon(other?: Rectangle, epsilon?: Number): Boolean;
+        equalsEpsilon(other?: Rectangle, epsilon?: number): Boolean;
         /**
          * Checks an Rectangle's properties and throws if they are not in valid ranges.
          * @param rectangle  (Required) The rectangle to validate
@@ -6593,7 +6589,7 @@ declare module Cesium {
          * @param surfaceHeight  (Optional) The height of the rectangle above the ellipsoid.
          * @param result  (Optional) The array of Cartesians onto which to store the result.
          */
-        static subsample(rectangle: Rectangle, ellipsoid?: Ellipsoid, surfaceHeight?: Number, result?: Cartesian3[]): Cartesian3[];
+        static subsample(rectangle: Rectangle, ellipsoid?: Ellipsoid, surfaceHeight?: number, result?: Cartesian3[]): Cartesian3[];
         /**
          * The largest possible rectangle.
          */
@@ -6611,21 +6607,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: RectangleGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: RectangleGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: RectangleGeometry): RectangleGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: RectangleGeometry): RectangleGeometry;
         /**
          * Computes the geometric representation of an rectangle, including its vertices, indices, and a bounding sphere.
          * @param rectangleGeometry  (Required) A description of the rectangle.
@@ -6644,21 +6640,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: RectangleOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: RectangleOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: RectangleOutlineGeometry): RectangleOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: RectangleOutlineGeometry): RectangleOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of an rectangle, including its vertices, indices, and a bounding sphere.
          * @param rectangleGeometry  (Required) A description of the rectangle outline.
@@ -6675,11 +6671,11 @@ declare module Cesium {
          * @param response  (Optional) The response included along with the error.
          * @param responseHeaders  (Optional) The response headers, represented either as an object literal or as a                       string in the format returned by XMLHttpRequest's getAllResponseHeaders() function.
          */
-        constructor(statusCode?: Number, response?: any, responseHeaders?: string|any);
+        constructor(statusCode?: number, response?: any, responseHeaders?: string|any);
         /**
          * The HTTP error status code, such as 404.  If the error does not have a particularHTTP code, this property will be undefined.
          */
-        statusCode: Number;
+        statusCode: number;
         /**
          * The response included along with the error.  If the error does not include a response,this property will be undefined.
          */
@@ -6730,19 +6726,19 @@ declare module Cesium {
          * @param type  (Required) The ScreenSpaceEventType of input event.
          * @param modifier  (Optional) A KeyboardEventModifier key that is held when a <code>type</code>event occurs.
          */
-        setInputAction(action: Function, type: Number, modifier?: Number): void;
+        setInputAction(action: Function, type: number, modifier?: number): void;
         /**
          * Returns the function to be executed on an input event.
          * @param type  (Required) The ScreenSpaceEventType of input event.
          * @param modifier  (Optional) A KeyboardEventModifier key that is held when a <code>type</code>event occurs.
          */
-        getInputAction(type: Number, modifier?: Number): void;
+        getInputAction(type: number, modifier?: number): void;
         /**
          * Removes the function to be executed on an input event.
          * @param type  (Required) The ScreenSpaceEventType of input event.
          * @param modifier  (Optional) A KeyboardEventModifier key that is held when a <code>type</code>event occurs.
          */
-        removeInputAction(type: Number, modifier?: Number): void;
+        removeInputAction(type: number, modifier?: number): void;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -6772,7 +6768,7 @@ declare module Cesium {
         /**
          * The number of components in the attributes, i.e., {@link ColorGeometryInstanceAttribute#value}.
          */
-        componentsPerAttribute: Number;
+        componentsPerAttribute: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format,indicate that the components should be mapped to the range [0, 1] (unsigned)or [-1, 1] (signed) when they are accessed as floating-point for rendering.
          */
@@ -6796,21 +6792,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: SimplePolylineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: SimplePolylineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: SimplePolylineGeometry): SimplePolylineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: SimplePolylineGeometry): SimplePolylineGeometry;
         /**
          * Computes the geometric representation of a simple polyline, including its vertices, indices, and a bounding sphere.
          * @param simplePolylineGeometry  (Required) A description of the polyline.
@@ -6829,21 +6825,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: SphereGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: SphereGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: SphereGeometry): SphereGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: SphereGeometry): SphereGeometry;
         /**
          * Computes the geometric representation of a sphere, including its vertices, indices, and a bounding sphere.
          * @param sphereGeometry  (Required) A description of the sphere.
@@ -6862,21 +6858,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: SphereOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: SphereOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: SphereOutlineGeometry): SphereOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: SphereOutlineGeometry): SphereOutlineGeometry;
         /**
          * Computes the geometric representation of an outline of a sphere, including its vertices, indices, and a bounding sphere.
          * @param sphereGeometry  (Required) A description of the sphere outline.
@@ -6893,7 +6889,7 @@ declare module Cesium {
          * @param cone  (Optional) The angular coordinate measured from the positive z-axis and toward the negative z-axis.
          * @param magnitude  (Optional) The linear coordinate measured from the origin.
          */
-        constructor(clock?: Number, cone?: Number, magnitude?: Number);
+        constructor(clock?: number, cone?: number, magnitude?: number);
         /**
          * Converts the provided Cartesian3 into Spherical coordinates.
          * @param cartesian3  (Required) The Cartesian3 to be converted to Spherical.
@@ -6924,7 +6920,7 @@ declare module Cesium {
          * @param right  (Required) The second Spherical to be compared.
          * @param epsilon  (Optional) The epsilon to compare against.
          */
-        static equalsEpsilon(left: Spherical, right: Spherical, epsilon?: Number): Boolean;
+        static equalsEpsilon(left: Spherical, right: Spherical, epsilon?: number): Boolean;
         /**
          * Returns true if this spherical is equal to the provided spherical, false otherwise.
          * @param other  (Required) The Spherical to be compared.
@@ -6940,7 +6936,7 @@ declare module Cesium {
          * @param other  (Required) The Spherical to be compared.
          * @param epsilon  (Required) The epsilon to compare against.
          */
-        equalsEpsilon(other: Spherical, epsilon: Number): Boolean;
+        equalsEpsilon(other: Spherical, epsilon: number): Boolean;
         /**
          * Returns a string representing this instance in the format (clock, cone, magnitude).
          */
@@ -6957,7 +6953,7 @@ declare module Cesium {
         /**
          * An array of times for the control points.
          */
-        times: Number[];
+        times: number[];
         /**
          * An array of control points.
          */
@@ -6967,13 +6963,13 @@ declare module Cesium {
          * @param time  (Required) The time at which to evaluate the curve.
          * @param result  (Optional) The object onto which to store the result.
          */
-        evaluate(time: Number, result?: Cartesian3|Quaternion): Cartesian3|Quaternion;
+        evaluate(time: number, result?: Cartesian3|Quaternion): Cartesian3|Quaternion;
         /**
          * Finds an index <code>i</code> in <code>times</code> such that the parameter<code>time</code> is in the interval <code>[times[i], times[i + 1]]</code>.
          * @param time  (Required) The time.
          * @param startIndex  (Required) The index from which to start the search.
          */
-        findTimeInterval(time: Number, startIndex: Number): Number;
+        findTimeInterval(time: number, startIndex: number): number;
     }
     /**
      * A wrapper around a web worker that allows scheduling tasks for a given worker,returning results asynchronously via a promise.The Worker is not constructed until a task is scheduled.
@@ -6984,7 +6980,7 @@ declare module Cesium {
          * @param workerName  (Required) The name of the worker.  This is expected to be a script                           in the Workers folder.
          * @param maximumActiveTasks  (Optional) The maximum number of active tasks.  Once exceeded,                                       scheduleTask will not queue any more tasks, allowing                                       work to be rescheduled in future frames.
          */
-        constructor(workerName: string, maximumActiveTasks?: Number);
+        constructor(workerName: string, maximumActiveTasks?: number);
         /**
          * Schedule a task to be processed by the web worker asynchronously.  If there are currently moretasks active than the maximum set by the constructor, will immediately return undefined.Otherwise, returns a promise that will resolve to the result posted back by the worker whenfinished.
          * @param parameters  (Required) Any input data that will be posted to the worker.
@@ -7018,7 +7014,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude in radians.
          * @param latitude  (Required) The latitude in radians.
          */
-        interpolateHeight(rectangle: Rectangle, longitude: Number, latitude: Number): Number;
+        interpolateHeight(rectangle: Rectangle, longitude: number, latitude: number): number;
         /**
          * Determines if a given child tile is available, based on the{@link TerrainData#childTileMask}.  The given child tile coordinates are assumedto be one of the four children of this tile.  If non-child tile coordinates aregiven, the availability of the southeast child tile is returned.
          * @param thisX  (Required) The tile X coordinate of this (the parent) tile.
@@ -7026,7 +7022,7 @@ declare module Cesium {
          * @param childX  (Required) The tile X coordinate of the child tile to check for availability.
          * @param childY  (Required) The tile Y coordinate of the child tile to check for availability.
          */
-        isChildAvailable(thisX: Number, thisY: Number, childX: Number, childY: Number): Boolean;
+        isChildAvailable(thisX: number, thisY: number, childX: number, childY: number): Boolean;
         /**
          * Upsamples this terrain data for use by a descendant tile.
          * @param tilingScheme  (Required) The tiling scheme of this terrain data.
@@ -7037,7 +7033,7 @@ declare module Cesium {
          * @param descendantY  (Required) The Y coordinate within the tiling scheme of the descendant tile for which we are upsampling.
          * @param descendantLevel  (Required) The level within the tiling scheme of the descendant tile for which we are upsampling.
          */
-        upsample(tilingScheme: TilingScheme, thisX: Number, thisY: Number, thisLevel: Number, descendantX: Number, descendantY: Number, descendantLevel: Number): Promise<TerrainData>;
+        upsample(tilingScheme: TilingScheme, thisX: number, thisY: number, thisLevel: number, descendantX: number, descendantY: number, descendantLevel: number): Promise<TerrainData>;
         /**
          * Gets a value indicating whether or not this terrain data was created by upsampling lower resolutionterrain data.  If this value is false, the data was obtained from some other source, suchas by downloading it from a remote server.  This method should return true for instancesreturned from a call to {@link TerrainData#upsample}.
          */
@@ -7084,18 +7080,18 @@ declare module Cesium {
          * @param width  (Required) The number of vertices in the regular grid in the horizontal direction.
          * @param height  (Required) The number of vertices in the regular grid in the vertical direction.
          */
-        static getRegularGridIndices(width: Number, height: Number): Uint16Array;
+        static getRegularGridIndices(width: number, height: number): Uint16Array;
         /**
          * Specifies the quality of terrain created from heightmaps.  A value of 1.0 willensure that adjacent heightmap vertices are separated by no more than{@link Globe.maximumScreenSpaceError} screen pixels and will probably go very slowly.A value of 0.5 will cut the estimated level zero geometric error in half, allowing twice thescreen pixels between adjacent heightmap vertices and thus rendering more quickly.
          */
-        static heightmapTerrainQuality: Number;
+        static heightmapTerrainQuality: number;
         /**
          * Determines an appropriate geometric error estimate when the geometry comes from a heightmap.
          * @param ellipsoid  (Required) The ellipsoid to which the terrain is attached.
          * @param tileImageWidth  (Required) The width, in pixels, of the heightmap associated with a single tile.
          * @param numberOfTilesAtLevelZero  (Required) The number of tiles in the horizontal direction at tile level zero.
          */
-        static getEstimatedLevelZeroGeometricErrorForAHeightmap(ellipsoid: Ellipsoid, tileImageWidth: Number, numberOfTilesAtLevelZero: Number): Number;
+        static getEstimatedLevelZeroGeometricErrorForAHeightmap(ellipsoid: Ellipsoid, tileImageWidth: number, numberOfTilesAtLevelZero: number): number;
         /**
          * Requests the geometry for a given tile.  This function should not be called before{@link TerrainProvider#ready} returns true.  The result must include terrain data andmay optionally include a water mask and an indication of which child tiles are available.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
@@ -7103,19 +7099,19 @@ declare module Cesium {
          * @param level  (Required) The level of the tile for which to request geometry.
          * @param throttleRequests  (Optional) True if the number of simultaneous requests should be limited,                 or false if the request should be initiated regardless of the number of requests                 already in progress.
          */
-        requestTileGeometry(x: Number, y: Number, level: Number, throttleRequests?: Boolean): Promise<TerrainData>;
+        requestTileGeometry(x: number, y: number, level: number, throttleRequests?: Boolean): Promise<TerrainData>;
         /**
          * Gets the maximum geometric error allowed in a tile at a given level.  This function should not becalled before {@link TerrainProvider#ready} returns true.
          * @param level  (Required) The tile level for which to get the maximum geometric error.
          */
-        getLevelMaximumGeometricError(level: Number): Number;
+        getLevelMaximumGeometricError(level: number): number;
         /**
          * Determines whether data for a tile is available to be loaded.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        getTileDataAvailable(x: Number, y: Number, level: Number): Boolean;
+        getTileDataAvailable(x: number, y: number, level: number): Boolean;
     }
     /**
      * Provides details about an error that occurred in an {@link ImageryProvider} or a {@link TerrainProvider}.
@@ -7131,7 +7127,7 @@ declare module Cesium {
          * @param timesRetried  (Optional) The number of times this operation has been retried.
          * @param error  (Optional) The error or exception that occurred, if any.
          */
-        constructor(provider: ImageryProvider|TerrainProvider, message: string, x?: Number, y?: Number, level?: Number, timesRetried?: Number, error?: Error);
+        constructor(provider: ImageryProvider|TerrainProvider, message: string, x?: number, y?: number, level?: number, timesRetried?: number, error?: Error);
         /**
          * The {@link ImageryProvider} or {@link TerrainProvider} that experienced the error.
          */
@@ -7143,19 +7139,19 @@ declare module Cesium {
         /**
          * The X coordinate of the tile that experienced the error.  If the error is not specificto a particular tile, this property will be undefined.
          */
-        x: Number;
+        x: number;
         /**
          * The Y coordinate of the tile that experienced the error.  If the error is not specificto a particular tile, this property will be undefined.
          */
-        y: Number;
+        y: number;
         /**
          * The level-of-detail of the tile that experienced the error.  If the error is not specificto a particular tile, this property will be undefined.
          */
-        level: Number;
+        level: number;
         /**
          * The number of times this operation has been retried.
          */
-        timesRetried: Number;
+        timesRetried: number;
         /**
          * True if the failed operation should be retried; otherwise, false.  The imagery or terrain providerwill set the initial value of this property before raising the event, but any listenerscan change it.  The value after the last listener is invoked will be acted upon.
          */
@@ -7176,7 +7172,7 @@ declare module Cesium {
          * @param retryFunction  (Required) The function to call to retry the operation.  If undefined, the       operation will not be retried.
          * @param errorDetails  (Optional) The error or exception that occurred, if any.
          */
-        static handleError(previousError: TileProviderError, provider: ImageryProvider|TerrainProvider, event: Event, message: string, x: Number, y: Number, level: Number, retryFunction: TileProviderError.RetryFunction, errorDetails?: Error): TileProviderError;
+        static handleError(previousError: TileProviderError, provider: ImageryProvider|TerrainProvider, event: Event, message: string, x: number, y: number, level: number, retryFunction: TileProviderError.RetryFunction, errorDetails?: Error): TileProviderError;
         /**
          * Handles success of an operation by resetting the retry count of a previous error, if any.  This way,if the error occurs again in the future, the listeners will be informed that it has not yet been retried.
          * @param previousError  (Required) The previous error, or undefined if this operation has       not previously resulted in an error.
@@ -7207,12 +7203,12 @@ declare module Cesium {
          * Gets the total number of tiles in the X direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfXTilesAtLevel(level: Number): Number;
+        getNumberOfXTilesAtLevel(level: number): number;
         /**
          * Gets the total number of tiles in the Y direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfYTilesAtLevel(level: Number): Number;
+        getNumberOfYTilesAtLevel(level: number): number;
         /**
          * Transforms an rectangle specified in geodetic radians to the native coordinate systemof this tiling scheme.
          * @param rectangle  (Required) The rectangle to transform.
@@ -7226,7 +7222,7 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToNativeRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToNativeRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Converts tile x, y coordinates and level to a cartographic rectangle in radians.
          * @param x  (Required) The integer x coordinate of the tile.
@@ -7234,14 +7230,14 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Calculates the tile x, y coordinates of the tile containinga given cartographic position.
          * @param position  (Required) The position.
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        positionToTileXY(position: Cartographic, level: Number, result?: Cartesian2): Cartesian2;
+        positionToTileXY(position: Cartographic, level: number, result?: Cartesian2): Cartesian2;
     }
     /**
      * An interval defined by a start and a stop time; optionally including those times as part of the interval.Arbitrary data can optionally be associated with each instance for used with {@link TimeIntervalCollection}.
@@ -7287,7 +7283,7 @@ declare module Cesium {
          * @param timeInterval  (Required) The interval to be converted.
          * @param precision  (Optional) The number of fractional digits used to represent the seconds component.  By default, the most precise representation is used.
          */
-        static toIso8601(timeInterval: TimeInterval, precision?: Number): string;
+        static toIso8601(timeInterval: TimeInterval, precision?: number): string;
         /**
          * Duplicates the provided instance.
          * @param timeInterval  (Optional) The instance to clone.
@@ -7308,7 +7304,7 @@ declare module Cesium {
          * @param epsilon  (Optional) The maximum number of seconds that should separate the two instances.
          * @param dataComparer  (Optional) A function which compares the data of the two intervals.  If omitted, reference equality is used.
          */
-        static equalsEpsilon(left?: TimeInterval, right?: TimeInterval, epsilon?: Number, dataComparer?: TimeInterval.DataComparer): Boolean;
+        static equalsEpsilon(left?: TimeInterval, right?: TimeInterval, epsilon?: number, dataComparer?: TimeInterval.DataComparer): Boolean;
         /**
          * Computes the intersection of two intervals, optionally merging their data.
          * @param left  (Required) The first interval.
@@ -7340,7 +7336,7 @@ declare module Cesium {
          * @param epsilon  (Optional) The epsilon to use for equality testing.
          * @param dataComparer  (Optional) A function which compares the data of the two intervals.  If omitted, reference equality is used.
          */
-        equalsEpsilon(right?: TimeInterval, epsilon?: Number, dataComparer?: TimeInterval.DataComparer): Boolean;
+        equalsEpsilon(right?: TimeInterval, epsilon?: number, dataComparer?: TimeInterval.DataComparer): Boolean;
         /**
          * Creates a string representing this TimeInterval in ISO8601 format.
          */
@@ -7382,7 +7378,7 @@ declare module Cesium {
         /**
          * Gets the number of intervals in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Gets whether or not the collection is empty.
          */
@@ -7397,7 +7393,7 @@ declare module Cesium {
          * Gets the interval at the specified index.
          * @param index  (Required) The index of the interval to retrieve.
          */
-        get(index: Number): TimeInterval;
+        get(index: number): TimeInterval;
         /**
          * Removes all intervals from the collection.
          */
@@ -7421,7 +7417,7 @@ declare module Cesium {
          * Finds and returns the index of the interval in the collection that contains the specified date.
          * @param date  (Required) The date to search for.
          */
-        indexOf(date: JulianDate): Number;
+        indexOf(date: JulianDate): number;
         /**
          * Returns the first interval in the collection that matches the specified parameters.All parameters are optional and <code>undefined</code> parameters are treated as a don't care condition.
          * @param options  (Optional) Object with the following properties:
@@ -7539,21 +7535,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        static packedLength: Number;
+        static packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: VertexFormat, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: VertexFormat, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: VertexFormat): VertexFormat;
+        static unpack(array: number[], startingIndex?: number, result?: VertexFormat): VertexFormat;
         /**
          * Duplicates a VertexFormat instance.
          * @param cartesian  (Required) The vertex format to duplicate.
@@ -7577,7 +7573,7 @@ declare module Cesium {
         /**
          * Gets or sets the amount of time in seconds the video's currentTimeand the clock's currentTime can diverge before a video seek is performed.Lower values make the synchronization more accurate but videoperformance might suffer.  Higher values provide better performancebut at the cost of accuracy.
          */
-        tolerance: Number;
+        tolerance: number;
         /**
          * Gets or sets the clock used to drive the video element.
          */
@@ -7639,19 +7635,19 @@ declare module Cesium {
          * @param level  (Required) The level of the tile for which to request geometry.
          * @param throttleRequests  (Optional) True if the number of simultaneous requests should be limited,                 or false if the request should be initiated regardless of the number of requests                 already in progress.
          */
-        requestTileGeometry(x: Number, y: Number, level: Number, throttleRequests?: Boolean): Promise<TerrainData>;
+        requestTileGeometry(x: number, y: number, level: number, throttleRequests?: Boolean): Promise<TerrainData>;
         /**
          * Gets the maximum geometric error allowed in a tile at a given level.
          * @param level  (Required) The tile level for which to get the maximum geometric error.
          */
-        getLevelMaximumGeometricError(level: Number): Number;
+        getLevelMaximumGeometricError(level: number): number;
         /**
          * Determines whether data for a tile is available to be loaded.
          * @param x  (Required) The X coordinate of the tile for which to request geometry.
          * @param y  (Required) The Y coordinate of the tile for which to request geometry.
          * @param level  (Required) The level of the tile for which to request geometry.
          */
-        getTileDataAvailable(x: Number, y: Number, level: Number): Boolean;
+        getTileDataAvailable(x: number, y: number, level: number): Boolean;
     }
     /**
      * A description of a wall, which is similar to a KML line string. A wall is defined by a series of points,which extrude down to the ground. Optionally, they can extrude downwards to a specified height.
@@ -7665,21 +7661,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: WallGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: WallGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: WallGeometry): WallGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: WallGeometry): WallGeometry;
         /**
          * A description of a wall, which is similar to a KML line string. A wall is defined by a series of points,which extrude down to the ground. Optionally, they can extrude downwards to a specified height.
          * @param options  (Required) Object with the following properties:
@@ -7703,21 +7699,21 @@ declare module Cesium {
         /**
          * The number of elements used to pack the object into an array.
          */
-        packedLength: Number;
+        packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        static pack(value: WallOutlineGeometry, array: Number[], startingIndex?: Number): Number[];
+        static pack(value: WallOutlineGeometry, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        static unpack(array: Number[], startingIndex?: Number, result?: WallOutlineGeometry): WallOutlineGeometry;
+        static unpack(array: number[], startingIndex?: number, result?: WallOutlineGeometry): WallOutlineGeometry;
         /**
          * A description of a walloutline. A wall is defined by a series of points,which extrude down to the ground. Optionally, they can extrude downwards to a specified height.
          * @param options  (Required) Object with the following properties:
@@ -7746,16 +7742,16 @@ declare module Cesium {
          * Converts a Mercator angle, in the range -PI to PI, to a geodetic latitudein the range -PI/2 to PI/2.
          * @param mercatorAngle  (Required) The angle to convert.
          */
-        static mercatorAngleToGeodeticLatitude(mercatorAngle: Number): Number;
+        static mercatorAngleToGeodeticLatitude(mercatorAngle: number): number;
         /**
          * Converts a geodetic latitude in radians, in the range -PI/2 to PI/2, to a Mercatorangle in the range -PI to PI.
          * @param latitude  (Required) The geodetic latitude in radians.
          */
-        static geodeticLatitudeToMercatorAngle(latitude: Number): Number;
+        static geodeticLatitudeToMercatorAngle(latitude: number): number;
         /**
          * The maximum latitude (both North and South) supported by a Web Mercator(EPSG:3857) projection.  Technically, the Mercator projection is definedfor any latitude up to (but not including) 90 degrees, but it makes senseto cut it off sooner because it grows exponentially with increasing latitude.The logic behind this particular cutoff value, which is the one used byGoogle Maps, Bing Maps, and Esri, is that it makes the projectionsquare.  That is, the rectangle is equal in the X and Y directions.The constant value is computed by calling:   WebMercatorProjection.mercatorAngleToGeodeticLatitude(Math.PI)
          */
-        static MaximumLatitude: Number;
+        static MaximumLatitude: number;
         /**
          * Converts geodetic ellipsoid coordinates, in radians, to the equivalent Web MercatorX, Y, Z coordinates expressed in meters and returned in a {@link Cartesian3}.  The heightis copied unmodified to the Z coordinate.
          * @param cartographic  (Required) The cartographic coordinates in radians.
@@ -7794,12 +7790,12 @@ declare module Cesium {
          * Gets the total number of tiles in the X direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfXTilesAtLevel(level: Number): Number;
+        getNumberOfXTilesAtLevel(level: number): number;
         /**
          * Gets the total number of tiles in the Y direction at a specified level-of-detail.
          * @param level  (Required) The level-of-detail.
          */
-        getNumberOfYTilesAtLevel(level: Number): Number;
+        getNumberOfYTilesAtLevel(level: number): number;
         /**
          * Transforms an rectangle specified in geodetic radians to the native coordinate systemof this tiling scheme.
          * @param rectangle  (Required) The rectangle to transform.
@@ -7813,7 +7809,7 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToNativeRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToNativeRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Converts tile x, y coordinates and level to a cartographic rectangle in radians.
          * @param x  (Required) The integer x coordinate of the tile.
@@ -7821,14 +7817,14 @@ declare module Cesium {
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        tileXYToRectangle(x: Number, y: Number, level: Number, result?: any): Rectangle;
+        tileXYToRectangle(x: number, y: number, level: number, result?: any): Rectangle;
         /**
          * Calculates the tile x, y coordinates of the tile containinga given cartographic position.
          * @param position  (Required) The position.
          * @param level  (Required) The tile level-of-detail.  Zero is the least detailed.
          * @param result  (Optional) The instance to which to copy the result, or undefined if a new instance       should be created.
          */
-        positionToTileXY(position: Cartographic, level: Number, result?: Cartesian2): Cartesian2;
+        positionToTileXY(position: Cartographic, level: number, result?: Cartesian2): Cartesian2;
     }
     /**
      * Describes a two dimensional icon located at the position of the containing {@link Entity}.<p><div align='center'><img src='images/Billboard.png' width='400' height='300' /><br />Example billboards</div></p>
@@ -8003,7 +7999,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -8269,7 +8265,7 @@ declare module Cesium {
          * @param collection  (Required) the collection to add.
          * @param index  (Optional) the index to add the collection at.  If omitted, the collection will                        added on top of all existing collections.
          */
-        addCollection(collection: EntityCollection, index?: Number): void;
+        addCollection(collection: EntityCollection, index?: number): void;
         /**
          * Removes a collection from this composite, if present.
          * @param collection  (Required) The collection to remove.
@@ -8293,12 +8289,12 @@ declare module Cesium {
          * Determines the index of a given collection in the composite.
          * @param collection  (Required) The collection to find the index of.
          */
-        indexOfCollection(collection: EntityCollection): Number;
+        indexOfCollection(collection: EntityCollection): number;
         /**
          * Gets a collection by index from the composite.
          * @param index  (Required) the index to retrieve.
          */
-        getCollection(index: Number): void;
+        getCollection(index: number): void;
         /**
          * Gets the number of collections in this composite.
          */
@@ -8584,7 +8580,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -8818,7 +8814,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -9133,7 +9129,7 @@ declare module Cesium {
         /**
          * Gets or sets the desired clock multiplier.See {@link Clock#multiplier}.
          */
-        multiplier: Number;
+        multiplier: number;
         /**
          * Duplicates a DataSourceClock instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -9165,7 +9161,7 @@ declare module Cesium {
         /**
          * Gets the number of data sources in this collection.
          */
-        length: Number;
+        length: number;
         /**
          * An event that is raised when a data source is added to the collection.Event handlers are passed the data source that was added.
          */
@@ -9199,12 +9195,12 @@ declare module Cesium {
          * Determines the index of a given data source in the collection.
          * @param dataSource  (Required) The data source to find the index of.
          */
-        indexOf(dataSource: DataSource): Number;
+        indexOf(dataSource: DataSource): number;
         /**
          * Gets a data source by index from the collection.
          * @param index  (Required) the index to retrieve.
          */
-        get(index: Number): void;
+        get(index: number): void;
         /**
          * Returns true if this object was destroyed; otherwise, false.If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -9328,7 +9324,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -9524,7 +9520,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -9809,11 +9805,11 @@ declare module Cesium {
         /**
          * Gets or sets the pixel range to extend the screen space bounding box.
          */
-        pixelRange: Number;
+        pixelRange: number;
         /**
          * Gets or sets the minimum number of screen space objects that can be clustered.
          */
-        minimumClusterSize: Number;
+        minimumClusterSize: number;
         /**
          * Gets the event that will be raised when a new cluster will be displayed. The signature of the event listener is {@link EntityCluster~newClusterCallback}.
          */
@@ -9975,7 +9971,7 @@ declare module Cesium {
         /**
          * Gets or sets the default size of the map pin created for each point, in pixels.
          */
-        static markerSize: Number;
+        static markerSize: number;
         /**
          * Gets or sets the default symbol of the map pin created for each point.This can be any valid {@link http://mapbox.com/maki/|Maki} identifier, any single character,or blank if no symbol is to be used.
          */
@@ -9983,19 +9979,19 @@ declare module Cesium {
         /**
          * Gets or sets the default color of the map pin created for each point.
          */
-        static markerColor: number;
+        static markerColor: Color;
         /**
          * Gets or sets the default color of polylines and polygon outlines.
          */
-        static stroke: number;
+        static stroke: Color;
         /**
          * Gets or sets the default width of polylines and polygon outlines.
          */
-        static strokeWidth: Number;
+        static strokeWidth: number;
         /**
          * Gets or sets default color for polygon interiors.
          */
-        static fill: number;
+        static fill: Color;
         /**
          * Gets or sets default of whether to clamp to the ground.
          */
@@ -10104,7 +10100,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets a value indicating if the geometry is time-varying.If true, all visualization is delegated to the {@link DynamicGeometryUpdater}returned by GeometryUpdater#createDynamicUpdater.
          */
@@ -10871,7 +10867,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -11345,7 +11341,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -11725,7 +11721,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -11951,7 +11947,7 @@ declare module Cesium {
          * @param referenceFrame  (Optional) The reference frame in which the position is defined.
          * @param numberOfDerivatives  (Optional) The number of derivatives that accompany each position; i.e. velocity, acceleration, etc...
          */
-        constructor(referenceFrame?: number, numberOfDerivatives?: Number);
+        constructor(referenceFrame?: number, numberOfDerivatives?: number);
         /**
          * Gets a value indicating if this property is constant.  A property is consideredconstant if getValue always returns the same result for the current definition.
          */
@@ -11967,7 +11963,7 @@ declare module Cesium {
         /**
          * Gets the degree of interpolation to perform when retrieving a value.
          */
-        interpolationDegree: Number;
+        interpolationDegree: number;
         /**
          * Gets the interpolation algorithm to use when retrieving a value.
          */
@@ -11983,7 +11979,7 @@ declare module Cesium {
         /**
          * Gets or sets the amount of time to extrapolate forward beforethe property becomes undefined.  A value of 0 will extrapolate forever.
          */
-        forwardExtrapolationDuration: Number;
+        forwardExtrapolationDuration: number;
         /**
          * Gets or sets the type of extrapolation to perform when a valueis requested at a time before any available samples.
          */
@@ -11991,7 +11987,7 @@ declare module Cesium {
         /**
          * Gets or sets the amount of time to extrapolate backwardbefore the property becomes undefined.  A value of 0 will extrapolate forever.
          */
-        backwardExtrapolationDuration: Number;
+        backwardExtrapolationDuration: number;
         /**
          * Gets the position at the provided time.
          * @param time  (Required) The time for which to retrieve the value.
@@ -12029,7 +12025,7 @@ declare module Cesium {
          * @param packedSamples  (Required) The array of packed samples.
          * @param epoch  (Optional) If any of the dates in packedSamples are numbers, they are considered an offset from this epoch, in seconds.
          */
-        addSamplesPackedArray(packedSamples: Number[], epoch?: JulianDate): void;
+        addSamplesPackedArray(packedSamples: number[], epoch?: JulianDate): void;
         /**
          * Compares this property to the provided property and returns<code>true</code> if they are equal, <code>false</code> otherwise.
          * @param other  (Optional) The other property.
@@ -12045,7 +12041,7 @@ declare module Cesium {
          * @param type  (Required) The type of property.
          * @param derivativeTypes  (Optional) When supplied, indicates that samples will contain derivative information of the specified types.
          */
-        constructor(type: Number|Packable, derivativeTypes?: Packable[]);
+        constructor(type: number|Packable, derivativeTypes?: Packable[]);
         /**
          * Gets a value indicating if this property is constant.  A property is consideredconstant if getValue always returns the same result for the current definition.
          */
@@ -12065,7 +12061,7 @@ declare module Cesium {
         /**
          * Gets the degree of interpolation to perform when retrieving a value.
          */
-        interpolationDegree: Number;
+        interpolationDegree: number;
         /**
          * Gets the interpolation algorithm to use when retrieving a value.
          */
@@ -12077,7 +12073,7 @@ declare module Cesium {
         /**
          * Gets or sets the amount of time to extrapolate forward beforethe property becomes undefined.  A value of 0 will extrapolate forever.
          */
-        forwardExtrapolationDuration: Number;
+        forwardExtrapolationDuration: number;
         /**
          * Gets or sets the type of extrapolation to perform when a valueis requested at a time before any available samples.
          */
@@ -12085,7 +12081,7 @@ declare module Cesium {
         /**
          * Gets or sets the amount of time to extrapolate backwardbefore the property becomes undefined.  A value of 0 will extrapolate forever.
          */
-        backwardExtrapolationDuration: Number;
+        backwardExtrapolationDuration: number;
         /**
          * Gets the value of the property at the provided time.
          * @param time  (Required) The time for which to retrieve the value.
@@ -12116,7 +12112,7 @@ declare module Cesium {
          * @param packedSamples  (Required) The array of packed samples.
          * @param epoch  (Optional) If any of the dates in packedSamples are numbers, they are considered an offset from this epoch, in seconds.
          */
-        addSamplesPackedArray(packedSamples: Number[], epoch?: JulianDate): void;
+        addSamplesPackedArray(packedSamples: number[], epoch?: JulianDate): void;
         /**
          * Compares this property to the provided property and returns<code>true</code> if they are equal, <code>false</code> otherwise.
          * @param other  (Optional) The other property.
@@ -12400,7 +12396,7 @@ declare module Cesium {
         /**
          * Gets the constant with of the geometry outline, in pixels.This value is only valid if isDynamic is false.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets the property specifying whether the geometrycasts or receives shadows from each light source.
          */
@@ -12601,19 +12597,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          */
@@ -12656,14 +12652,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link ArcGisMapServerImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * /**Asynchronously determines what features, if any, are located at a given longitude and latitude withina tile.  This function should not be called before {@link ImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
@@ -12672,7 +12668,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A viewport-aligned image positioned in the 3D scene, that is createdand rendered using a {@link BillboardCollection}.  A billboard is created and its initialproperties are set by calling {@link BillboardCollection#add}.<br /><br /><div align='center'><img src='images/Billboard.png' width='400' height='300' /><br />Example billboards</div>
@@ -12725,15 +12721,15 @@ declare module Cesium {
         /**
          * Gets or sets the uniform scale that is multiplied with the billboard's image size in pixels.A scale of <code>1.0</code> does not change the size of the billboard; a scale greater than<code>1.0</code> enlarges the billboard; a positive scale less than <code>1.0</code> shrinksthe billboard.<br /><br /><div align='center'><img src='images/Billboard.setScale.png' width='400' height='300' /><br/>From left to right in the above image, the scales are <code>0.5</code>, <code>1.0</code>,and <code>2.0</code>.</div>
          */
-        scale: Number;
+        scale: number;
         /**
          * Gets or sets the color that is multiplied with the billboard's texture.  This has two common use cases.  First,the same white texture may be used by many different billboards, each with a different color, to createcolored billboards.  Second, the color's alpha component can be used to make the billboard translucent as shown below.An alpha of <code>0.0</code> makes the billboard transparent, and <code>1.0</code> makes the billboard opaque.<br /><br /><div align='center'><table border='0' cellpadding='5'><tr><td align='center'><code>default</code><br/><img src='images/Billboard.setColor.Alpha255.png' width='250' height='188' /></td><td align='center'><code>alpha : 0.5</code><br/><img src='images/Billboard.setColor.Alpha127.png' width='250' height='188' /></td></tr></table></div><br />The red, green, blue, and alpha values are indicated by <code>value</code>'s <code>red</code>, <code>green</code>,<code>blue</code>, and <code>alpha</code> properties as shown in Example 1.  These components range from <code>0.0</code>(no intensity) to <code>1.0</code> (full intensity).
          */
-        color: number;
+        color: Color;
         /**
          * Gets or sets the rotation angle in radians.
          */
-        rotation: Number;
+        rotation: number;
         /**
          * Gets or sets the aligned axis in world space. The aligned axis is the unit vector that the billboard up vector points towards.The default is the zero vector, which means the billboard is aligned to the screen up vector.
          */
@@ -12741,11 +12737,11 @@ declare module Cesium {
         /**
          * Gets or sets a width for the billboard. If undefined, the image width will be used.
          */
-        width: Number;
+        width: number;
         /**
          * Gets or sets a height for the billboard. If undefined, the image height will be used.
          */
-        height: Number;
+        height: number;
         /**
          * Gets or sets if the billboard size is in meters or pixels. <code>true</code> to size the billboard in meters;otherwise, the size is in pixels.
          */
@@ -12810,7 +12806,7 @@ declare module Cesium {
         /**
          * Returns the number of billboards in this collection.  This is commonly used with{@link BillboardCollection#get} to iterate over all the billboardsin the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Creates and adds a billboard with the specified initial properties to the collection.The added billboard is returned so it can be modified or removed from the collection later.
          * @param billboard  (Optional) A template describing the billboard's properties as shown in Example 1.
@@ -12834,7 +12830,7 @@ declare module Cesium {
          * Returns the billboard in the collection at the specified index.  Indices are zero-basedand increase as billboards are added.  Removing a billboard shifts all billboards afterit to the left, changing their indices.  This function is commonly used with{@link BillboardCollection#length} to iterate over all the billboardsin the collection.
          * @param index  (Required) The zero-based index of the billboard.
          */
-        get(index: Number): Billboard;
+        get(index: number): Billboard;
         /**
          * Called when {@link Viewer} or {@link CesiumWidget} render the scene toget the draw commands needed to render this primitive.<p>Do not call this function directly.  This is documented just tolist the exceptions that may be propagated when the scene is rendered:</p>
          */
@@ -12860,7 +12856,7 @@ declare module Cesium {
         /**
          * The default {@link ImageryLayer#gamma} to use for imagery layers created for this provider.Changing this value after creating an {@link ImageryLayer} for this provider will haveno effect.  Instead, set the layer's {@link ImageryLayer#gamma} property.
          */
-        defaultGamma: Number;
+        defaultGamma: number;
         /**
          * Gets the name of the BingMaps server url hosting the imagery.
          */
@@ -12876,7 +12872,7 @@ declare module Cesium {
         /**
          * Gets the type of Bing Maps imagery to load.
          */
-        mapStyle: number;
+        mapStyle: string;
         /**
          * The culture to use when requesting Bing Maps imagery. Notall cultures are supported. See {@link http://msdn.microsoft.com/en-us/library/hh441729.aspx}for information on the supported cultures.
          */
@@ -12884,19 +12880,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          */
@@ -12935,14 +12931,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link BingMapsImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -12951,14 +12947,14 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
         /**
          * Converts a tiles (x, y, level) position into a quadkey used to request an imagefrom a Bing Maps server.
          * @param x  (Required) The tile's x coordinate.
          * @param y  (Required) The tile's y coordinate.
          * @param level  (Required) The tile's zoom level.
          */
-        static tileXYToQuadKey(x: Number, y: Number, level: Number): void;
+        static tileXYToQuadKey(x: number, y: number, level: number): void;
         /**
          * Converts a tile's quadkey used to request an image from a Bing Maps server into the(x, y, level) position.
          * @param quadkey  (Required) The tile's quad key
@@ -12997,19 +12993,19 @@ declare module Cesium {
         /**
          * The default amount to move the camera when an argument is notprovided to the move methods.
          */
-        defaultMoveAmount: Number;
+        defaultMoveAmount: number;
         /**
          * The default amount to rotate the camera when an argument is notprovided to the look methods.
          */
-        defaultLookAmount: Number;
+        defaultLookAmount: number;
         /**
          * The default amount to rotate the camera when an argument is notprovided to the rotate methods.
          */
-        defaultRotateAmount: Number;
+        defaultRotateAmount: number;
         /**
          * The default amount to move the camera when an argument is notprovided to the zoom methods.
          */
-        defaultZoomAmount: Number;
+        defaultZoomAmount: number;
         /**
          * If set, the camera will not be able to rotate past this axis in either direction.
          */
@@ -13017,7 +13013,7 @@ declare module Cesium {
         /**
          * The factor multiplied by the the map size used to determine where to clamp the camera positionwhen zooming out from the surface. The default is 1.5. Only valid for 2D and the map is rotatable.
          */
-        maximumZoomFactor: Number;
+        maximumZoomFactor: number;
         /**
          * The amount the camera has to change before the <code>changed</code> event is raised. The value is a percentage in the [0, 1] range.
          */
@@ -13029,7 +13025,7 @@ declare module Cesium {
         /**
          * A scalar to multiply to the camera position and add it back after setting the camera to view the rectangle.A value of zero means the camera will view the entire {@link Camera#DEFAULT_VIEW_RECTANGLE}, a value greater than zerowill move it further away from the extent, and a value less than zero will move it close to the extent.
          */
-        static DEFAULT_VIEW_FACTOR: Number;
+        static DEFAULT_VIEW_FACTOR: number;
         /**
          * Gets the camera's reference frame. The inverse of this transformation is appended to the view matrix.
          */
@@ -13069,15 +13065,15 @@ declare module Cesium {
         /**
          * Gets the camera heading in radians.
          */
-        heading: Number;
+        heading: number;
         /**
          * Gets the camera pitch in radians.
          */
-        pitch: Number;
+        pitch: number;
         /**
          * Gets the camera roll in radians.
          */
-        roll: Number;
+        roll: number;
         /**
          * Gets the event that will be raised at when the camera starts to move.
          */
@@ -13099,7 +13095,7 @@ declare module Cesium {
          * Fly the camera to the home view.  Use {@link Camera#.DEFAULT_VIEW_RECTANGLE} to setthe default view for the 3D scene.  The home view for 2D and columbus view shows theentire map.
          * @param duration  (Optional) The number of seconds to complete the camera flight to home. See {@link Camera#flyTo}
          */
-        flyHome(duration?: Number): void;
+        flyHome(duration?: number): void;
         /**
          * Transform a vector or point from world coordinates to the camera's reference frame.
          * @param cartesian  (Required) The vector or point to transform.
@@ -13141,113 +13137,113 @@ declare module Cesium {
          * @param direction  (Required) The direction to move.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        move(direction: Cartesian3, amount?: Number): void;
+        move(direction: Cartesian3, amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the camera's view vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveForward(amount?: Number): void;
+        moveForward(amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the opposite directionof the camera's view vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveBackward(amount?: Number): void;
+        moveBackward(amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the camera's up vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveUp(amount?: Number): void;
+        moveUp(amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the opposite directionof the camera's up vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveDown(amount?: Number): void;
+        moveDown(amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the camera's right vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveRight(amount?: Number): void;
+        moveRight(amount?: number): void;
         /**
          * Translates the camera's position by <code>amount</code> along the opposite directionof the camera's right vector.
          * @param amount  (Optional) The amount, in meters, to move. Defaults to <code>defaultMoveAmount</code>.
          */
-        moveLeft(amount?: Number): void;
+        moveLeft(amount?: number): void;
         /**
          * Rotates the camera around its up vector by amount, in radians, in the opposite directionof its right vector.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        lookLeft(amount?: Number): void;
+        lookLeft(amount?: number): void;
         /**
          * Rotates the camera around its up vector by amount, in radians, in the directionof its right vector.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        lookRight(amount?: Number): void;
+        lookRight(amount?: number): void;
         /**
          * Rotates the camera around its right vector by amount, in radians, in the directionof its up vector.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        lookUp(amount?: Number): void;
+        lookUp(amount?: number): void;
         /**
          * Rotates the camera around its right vector by amount, in radians, in the opposite directionof its up vector.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        lookDown(amount?: Number): void;
+        lookDown(amount?: number): void;
         /**
          * Rotate each of the camera's orientation vectors around <code>axis</code> by <code>angle</code>
          * @param axis  (Required) The axis to rotate around.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        look(axis: Cartesian3, angle?: Number): void;
+        look(axis: Cartesian3, angle?: number): void;
         /**
          * Rotate the camera counter-clockwise around its direction vector by amount, in radians.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        twistLeft(amount?: Number): void;
+        twistLeft(amount?: number): void;
         /**
          * Rotate the camera clockwise around its direction vector by amount, in radians.
          * @param amount  (Optional) The amount, in radians, to rotate by. Defaults to <code>defaultLookAmount</code>.
          */
-        twistRight(amount?: Number): void;
+        twistRight(amount?: number): void;
         /**
          * Rotates the camera around <code>axis</code> by <code>angle</code>. The distanceof the camera's position to the center of the camera's reference frame remains the same.
          * @param axis  (Required) The axis to rotate around given in world coordinates.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultRotateAmount</code>.
          */
-        rotate(axis: Cartesian3, angle?: Number): void;
+        rotate(axis: Cartesian3, angle?: number): void;
         /**
          * Rotates the camera around the center of the camera's reference frame by angle downwards.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultRotateAmount</code>.
          */
-        rotateDown(angle?: Number): void;
+        rotateDown(angle?: number): void;
         /**
          * Rotates the camera around the center of the camera's reference frame by angle upwards.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultRotateAmount</code>.
          */
-        rotateUp(angle?: Number): void;
+        rotateUp(angle?: number): void;
         /**
          * Rotates the camera around the center of the camera's reference frame by angle to the right.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultRotateAmount</code>.
          */
-        rotateRight(angle?: Number): void;
+        rotateRight(angle?: number): void;
         /**
          * Rotates the camera around the center of the camera's reference frame by angle to the left.
          * @param angle  (Optional) The angle, in radians, to rotate by. Defaults to <code>defaultRotateAmount</code>.
          */
-        rotateLeft(angle?: Number): void;
+        rotateLeft(angle?: number): void;
         /**
          * Zooms <code>amount</code> along the camera's view vector.
          * @param amount  (Optional) The amount to move. Defaults to <code>defaultZoomAmount</code>.
          */
-        zoomIn(amount?: Number): void;
+        zoomIn(amount?: number): void;
         /**
          * Zooms <code>amount</code> along the opposite direction ofthe camera's view vector.
          * @param amount  (Optional) The amount to move. Defaults to <code>defaultZoomAmount</code>.
          */
-        zoomOut(amount?: Number): void;
+        zoomOut(amount?: number): void;
         /**
          * Gets the magnitude of the camera position. In 3D, this is the vector magnitude. In 2D andColumbus view, this is the distance to the map.
          */
-        getMagnitude(): Number;
+        getMagnitude(): number;
         /**
          * Sets the camera position and orientation using a target and offset. The target must be given inworld coordinates. The offset can be either a cartesian or heading/pitch/range in the local east-north-up reference frame centered at the target.If the offset is a cartesian, then it is an offset from the center of the reference frame defined by the transformation matrix. If the offsetis heading/pitch/range, then the heading and the pitch angles are defined in the reference frame defined by the transformation matrix.The heading is the angle from y axis and increasing towards the x axis. Pitch is the rotation from the xy-plane. Positive pitchangles are below the plane. Negative pitch angles are above the plane. The range is the distance from the center.In 2D, there must be a top down view. The camera will be placed above the target looking down. The height above thetarget will be the magnitude of the offset. The heading will be determined from the offset. If the heading cannot bedetermined from the offset, the heading will be north.
          * @param target  (Required) The target position in world coordinates.
@@ -13283,14 +13279,14 @@ declare module Cesium {
          * Return the distance from the camera to the front of the bounding sphere.
          * @param boundingSphere  (Required) The bounding sphere in world coordinates.
          */
-        distanceToBoundingSphere(boundingSphere: BoundingSphere): Number;
+        distanceToBoundingSphere(boundingSphere: BoundingSphere): number;
         /**
          * Return the pixel size in meters.
          * @param boundingSphere  (Required) The bounding sphere in world coordinates.
          * @param drawingBufferWidth  (Required) The drawing buffer width.
          * @param drawingBufferHeight  (Required) The drawing buffer height.
          */
-        getPixelSize(boundingSphere: BoundingSphere, drawingBufferWidth: Number, drawingBufferHeight: Number): Number;
+        getPixelSize(boundingSphere: BoundingSphere, drawingBufferWidth: number, drawingBufferHeight: number): number;
         /**
          * Cancels the current camera flight if one is in progress.The camera is left at it's current location.
          */
@@ -13556,11 +13552,11 @@ declare module Cesium {
         /**
          * The length of the axes in meters.
          */
-        length: Number;
+        length: number;
         /**
          * The width of the axes in pixels.
          */
-        width: Number;
+        width: number;
         /**
          * Determines if this primitive will be shown.
          */
@@ -13682,11 +13678,11 @@ declare module Cesium {
         /**
          * A scalar that determines the density of the fog. Terrain that is in full fog are culled.The density of the fog increases as this number approaches 1.0 and becomes less dense as it approaches zero.The more dense the fog is, the more aggressively the terrain is culled. For example, if the camera is a height of1000.0m above the ellipsoid, increasing the value to 3.0e-3 will cause many tiles close to the viewer be culled.Decreasing the value will push the fog further from the viewer, but decrease performance as more of the terrain is rendered.
          */
-        density: Number;
+        density: number;
         /**
          * A factor used to increase the screen space error of terrain tiles when they are partially in fog. The effect is to reducethe number of terrain tiles requested for rendering. If set to zero, the feature will be disabled. If the value is increasedfor mountainous regions, less tiles will need to be requested, but the terrain meshes near the horizon may be a noticeablylower resolution. If the value is increased in a relatively flat area, there will be little noticeable change on the horizon.
          */
-        screenSpaceErrorFactor: Number;
+        screenSpaceErrorFactor: number;
     }
     /**
      * Monitors the frame rate (frames per second) in a {@link Scene} and raises an event if the frame rate islower than a threshold.  Later, if the frame rate returns to the required level, a separate event is raised.To avoid creating multiple FrameRateMonitors for a single {@link Scene}, use {@link FrameRateMonitor.fromScene}instead of constructing an instance explicitly.
@@ -13700,23 +13696,23 @@ declare module Cesium {
         /**
          * Gets or sets the length of the sliding window over which to compute the average frame rate, in seconds.
          */
-        samplingWindow: Number;
+        samplingWindow: number;
         /**
          * Gets or sets the length of time to wait at startup and each time the page becomes visible (i.e. when the userswitches back to the tab) before starting to measure performance, in seconds.
          */
-        quietPeriod: Number;
+        quietPeriod: number;
         /**
          * Gets or sets the length of the warmup period, in seconds.  During the warmup period, a separate(usually lower) frame rate is required.
          */
-        warmupPeriod: Number;
+        warmupPeriod: number;
         /**
          * Gets or sets the minimum frames-per-second that are required for acceptable performance duringthe warmup period.  If the frame rate averages less than this during any <code>samplingWindow</code> during the <code>warmupPeriod</code>, the<code>lowFrameRate</code> event will be raised and the page will redirect to the <code>redirectOnLowFrameRateUrl</code>, if any.
          */
-        minimumFrameRateDuringWarmup: Number;
+        minimumFrameRateDuringWarmup: number;
         /**
          * Gets or sets the minimum frames-per-second that are required for acceptable performance afterthe end of the warmup period.  If the frame rate averages less than this during any <code>samplingWindow</code> after the <code>warmupPeriod</code>, the<code>lowFrameRate</code> event will be raised and the page will redirect to the <code>redirectOnLowFrameRateUrl</code>, if any.
          */
-        minimumFrameRateAfterWarmup: Number;
+        minimumFrameRateAfterWarmup: number;
         /**
          * The default frame rate monitoring settings.  These settings are used when {@link FrameRateMonitor.fromScene}needs to create a new frame rate monitor, and for any settings that are not passed to the{@link FrameRateMonitor} constructor.
          */
@@ -13741,7 +13737,7 @@ declare module Cesium {
         /**
          * Gets the most recently computed average frames-per-second over the last <code>samplingWindow</code>.This property may be undefined if the frame rate has not been computed.
          */
-        lastFramesPerSecond: Number;
+        lastFramesPerSecond: number;
         /**
          * Pauses monitoring of the frame rate.  To resume monitoring, {@link FrameRateMonitor#unpause}must be called once for each time this function is called.
          */
@@ -13787,11 +13783,11 @@ declare module Cesium {
         /**
          * The current morph transition time between 2D/Columbus View and 3D,with 0.0 being 2D or Columbus View and 1.0 being 3D.
          */
-        morphTime: Number;
+        morphTime: number;
         /**
          * The current frame number.
          */
-        frameNumber: Number;
+        frameNumber: number;
         /**
          * The scene's current time.
          */
@@ -13827,7 +13823,7 @@ declare module Cesium {
         /**
          * A scalar used to exaggerate the terrain.
          */
-        terrainExaggeration: Number;
+        terrainExaggeration: number;
     }
     /**
      * Describes the format in which to request GetFeatureInfo from a Web Map Service (WMS) server.
@@ -13861,11 +13857,11 @@ declare module Cesium {
         /**
          * The maximum screen-space error used to drive level-of-detail refinement.  Highervalues will provide better performance but lower visual quality.
          */
-        maximumScreenSpaceError: Number;
+        maximumScreenSpaceError: number;
         /**
          * The size of the terrain tile cache, expressed as a number of tiles.  Any additionaltiles beyond this number will be freed, as long as they aren't needed for renderingthis frame.  A larger number will consume more memory but will show detail fasterwhen, for example, zooming out and then back in.
          */
-        tileCacheSize: Number;
+        tileCacheSize: number;
         /**
          * Enable lighting the globe with the sun as a light source.
          */
@@ -13873,11 +13869,11 @@ declare module Cesium {
         /**
          * The distance where everything becomes lit. This only takes effectwhen <code>enableLighting</code> is <code>true</code>.
          */
-        lightingFadeOutDistance: Number;
+        lightingFadeOutDistance: number;
         /**
          * The distance where lighting resumes. This only takes effectwhen <code>enableLighting</code> is <code>true</code>.
          */
-        lightingFadeInDistance: Number;
+        lightingFadeInDistance: number;
         /**
          * True if an animated wave effect should be shown in areas of the globecovered by water; otherwise, false.  This property is ignored if the<code>terrainProvider</code> does not provide a water mask.
          */
@@ -13901,7 +13897,7 @@ declare module Cesium {
         /**
          * Gets or sets the color of the globe when no imagery is available.
          */
-        baseColor: number;
+        baseColor: Color;
         /**
          * The terrain provider providing surface geometry for this globe.
          */
@@ -13925,7 +13921,7 @@ declare module Cesium {
          * Get the height of the surface at a given cartographic.
          * @param cartographic  (Required) The cartographic for which to find the height.
          */
-        getHeight(cartographic: Cartographic): Number;
+        getHeight(cartographic: Cartographic): number;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -13947,7 +13943,7 @@ declare module Cesium {
         /**
          * The default {@link ImageryLayer#gamma} to use for imagery layers created for this provider.By default, this is set to 1.9.  Changing this value after creating an {@link ImageryLayer} for this provider will haveno effect.  Instead, set the layer's {@link ImageryLayer#gamma} property.
          */
-        defaultGamma: Number;
+        defaultGamma: number;
         /**
          * Gets the URL of the Google Earth MapServer.
          */
@@ -13963,23 +13959,23 @@ declare module Cesium {
         /**
          * Gets the imagery channel (id) currently being used.
          */
-        channel: Number;
+        channel: number;
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
@@ -13987,7 +13983,7 @@ declare module Cesium {
         /**
          * Gets the version of the data used by this provider.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
-        version: Number;
+        version: number;
         /**
          * Gets the type of data that is being requested from the provider.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          */
@@ -14026,14 +14022,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link GoogleEarthImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -14042,7 +14038,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * An {@link ImageryProvider} that draws a wireframe grid on every tile with controllable background and glow.May be useful for custom rendering effects or debugging terrain.
@@ -14053,7 +14049,7 @@ declare module Cesium {
          * @param options  (Optional) Object with the following properties:
          * @param backgroundColor  (Optional) Background fill color.
          */
-        constructor(options?: IGridImageryProviderOptions, backgroundColor?: number);
+        constructor(options?: IGridImageryProviderOptions, backgroundColor?: Color);
         /**
          * Gets the proxy used by this provider.
          */
@@ -14061,19 +14057,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          */
@@ -14120,14 +14116,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link GridImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -14136,7 +14132,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A ground primitive represents geometry draped over the terrain in the {@link Scene}.  The geometry must be from a single {@link GeometryInstance}.Batching multiple geometries is not yet supported.<p>A primitive combines the geometry instance with an {@link Appearance} that describes the full shading, including{@link Material} and {@link RenderState}.  Roughly, the geometry instance defines the structure and placement,and the appearance defines the visual characteristics.  Decoupling geometry and appearance allows us to mixand match most of them and add a new geometry or appearance independently of each other. Only the {@link PerInstanceColorAppearance}is supported at this time.</p><p>Because of the cutting edge nature of this feature in WebGL, it requires the EXT_frag_depth extension, which is currently only supported in Chrome,Firefox, and Edge. Apple support is expected in iOS 9 and MacOS Safari 9. Android support varies by hardware and IE11 will most likely never supportit. You can use webglreport.com to verify support for your hardware.</p><p>Valid geometries are {@link CircleGeometry}, {@link CorridorGeometry}, {@link EllipseGeometry}, {@link PolygonGeometry}, and {@link RectangleGeometry}.</p>
@@ -14235,27 +14231,27 @@ declare module Cesium {
         /**
          * The alpha blending value of this layer, with 0.0 representing fully transparent and1.0 representing fully opaque.
          */
-        alpha: Number;
+        alpha: number;
         /**
          * The brightness of this layer.  1.0 uses the unmodified imagery color.  Less than 1.0makes the imagery darker while greater than 1.0 makes it brighter.
          */
-        brightness: Number;
+        brightness: number;
         /**
          * The contrast of this layer.  1.0 uses the unmodified imagery color.  Less than 1.0 reducesthe contrast while greater than 1.0 increases it.
          */
-        contrast: Number;
+        contrast: number;
         /**
          * The hue of this layer in radians. 0.0 uses the unmodified imagery color.
          */
-        hue: Number;
+        hue: number;
         /**
          * The saturation of this layer. 1.0 uses the unmodified imagery color. Less than 1.0 reduces thesaturation while greater than 1.0 increases it.
          */
-        saturation: Number;
+        saturation: number;
         /**
          * The gamma correction to apply to this layer.  1.0 uses the unmodified imagery color.
          */
-        gamma: Number;
+        gamma: number;
         /**
          * Determines if this layer is shown.
          */
@@ -14271,23 +14267,23 @@ declare module Cesium {
         /**
          * This value is used as the default brightness for the imagery layer if one is not provided during constructionor by the imagery provider. This value does not modify the brightness of the imagery.
          */
-        static DEFAULT_BRIGHTNESS: Number;
+        static DEFAULT_BRIGHTNESS: number;
         /**
          * This value is used as the default contrast for the imagery layer if one is not provided during constructionor by the imagery provider. This value does not modify the contrast of the imagery.
          */
-        static DEFAULT_CONTRAST: Number;
+        static DEFAULT_CONTRAST: number;
         /**
          * This value is used as the default hue for the imagery layer if one is not provided during constructionor by the imagery provider. This value does not modify the hue of the imagery.
          */
-        static DEFAULT_HUE: Number;
+        static DEFAULT_HUE: number;
         /**
          * This value is used as the default saturation for the imagery layer if one is not provided during constructionor by the imagery provider. This value does not modify the saturation of the imagery.
          */
-        static DEFAULT_SATURATION: Number;
+        static DEFAULT_SATURATION: number;
         /**
          * This value is used as the default gamma for the imagery layer if one is not provided during constructionor by the imagery provider. This value does not modify the gamma of the imagery.
          */
-        static DEFAULT_GAMMA: Number;
+        static DEFAULT_GAMMA: number;
         /**
          * Gets a value indicating whether this layer is the base layer in the{@link ImageryLayerCollection}.  The base layer is the one that underlies allothers.  It is special in that it is treated as if it has global rectangle, even ifit actually does not, by stretching the texels at the edges over the entireglobe.
          */
@@ -14332,19 +14328,19 @@ declare module Cesium {
         /**
          * Gets the number of layers in this collection.
          */
-        length: Number;
+        length: number;
         /**
          * Adds a layer to the collection.
          * @param layer  (Required) the layer to add.
          * @param index  (Optional) the index to add the layer at.  If omitted, the layer will                        added on top of all existing layers.
          */
-        add(layer: ImageryLayer, index?: Number): void;
+        add(layer: ImageryLayer, index?: number): void;
         /**
          * Creates a new layer using the given ImageryProvider and adds it to the collection.
          * @param imageryProvider  (Required) the imagery provider to create a new layer for.
          * @param index  (Optional) the index to add the layer at.  If omitted, the layer will                        added on top of all existing layers.
          */
-        addImageryProvider(imageryProvider: ImageryProvider, index?: Number): ImageryLayer;
+        addImageryProvider(imageryProvider: ImageryProvider, index?: number): ImageryLayer;
         /**
          * Removes a layer from this collection, if present.
          * @param layer  (Required) The layer to remove.
@@ -14365,12 +14361,12 @@ declare module Cesium {
          * Determines the index of a given layer in the collection.
          * @param layer  (Required) The layer to find the index of.
          */
-        indexOf(layer: ImageryLayer): Number;
+        indexOf(layer: ImageryLayer): number;
         /**
          * Gets a layer by index from the collection.
          * @param index  (Required) the index to retrieve.
          */
-        get(index: Number): ImageryLayer;
+        get(index: number): ImageryLayer;
         /**
          * Raises a layer up one position in the collection.
          * @param layer  (Required) the layer to move.
@@ -14456,27 +14452,27 @@ declare module Cesium {
         /**
          * The default alpha blending value of this provider, with 0.0 representing fully transparent and1.0 representing fully opaque.
          */
-        defaultAlpha: Number;
+        defaultAlpha: number;
         /**
          * The default brightness of this provider.  1.0 uses the unmodified imagery color.  Less than 1.0makes the imagery darker while greater than 1.0 makes it brighter.
          */
-        defaultBrightness: Number;
+        defaultBrightness: number;
         /**
          * The default contrast of this provider.  1.0 uses the unmodified imagery color.  Less than 1.0 reducesthe contrast while greater than 1.0 increases it.
          */
-        defaultContrast: Number;
+        defaultContrast: number;
         /**
          * The default hue of this provider in radians. 0.0 uses the unmodified imagery color.
          */
-        defaultHue: Number;
+        defaultHue: number;
         /**
          * The default saturation of this provider. 1.0 uses the unmodified imagery color. Less than 1.0 reduces thesaturation while greater than 1.0 increases it.
          */
-        defaultSaturation: Number;
+        defaultSaturation: number;
         /**
          * The default gamma correction to apply to this provider.  1.0 uses the unmodified imagery color.
          */
-        defaultGamma: Number;
+        defaultGamma: number;
         /**
          * Gets a value indicating whether or not the provider is ready for use.
          */
@@ -14492,19 +14488,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels.  This function shouldnot be called before {@link ImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link ImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link ImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link ImageryProvider#ready} returns true. Generally,a minimum level should only be used when the rectangle of the imagery is smallenough that the number of tiles at the minimum level is small.  An imageryprovider with more than a few tiles at the minimum level will lead torendering problems.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by the provider.  This function shouldnot be called before {@link ImageryProvider#ready} returns true.
          */
@@ -14535,14 +14531,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link ImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Asynchronously determines what features, if any, are located at a given longitude and latitude withina tile.  This function should not be called before {@link ImageryProvider#ready} returns true.This function is optional, so it may not exist on all ImageryProviders.
          * @param x  (Required) The tile X coordinate.
@@ -14551,7 +14547,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
         /**
          * Loads an image from a given URL.  If the server referenced by the URL already hastoo many requests pending, this function will instead return undefined, indicatingthat the request should be retried later.
          * @param url  (Required) The URL of the image.
@@ -14589,15 +14585,15 @@ declare module Cesium {
         /**
          * Gets or sets the fill color of this label.
          */
-        fillColor: number;
+        fillColor: Color;
         /**
          * Gets or sets the outline color of this label.
          */
-        outlineColor: number;
+        outlineColor: Color;
         /**
          * Gets or sets the outline width of this label.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets or sets the style of this label.
          */
@@ -14629,7 +14625,7 @@ declare module Cesium {
         /**
          * Gets or sets the uniform scale that is multiplied with the label's size in pixels.A scale of <code>1.0</code> does not change the size of the label; a scale greater than<code>1.0</code> enlarges the label; a positive scale less than <code>1.0</code> shrinksthe label.<br /><br />Applying a large scale value may pixelate the label.  To make text larger without pixelation,use a larger font size when calling {@link Label#font} instead.<br /><br /><div align='center'><img src='images/Label.setScale.png' width='400' height='300' /><br/>From left to right in the above image, the scales are <code>0.5</code>, <code>1.0</code>,and <code>2.0</code>.</div>
          */
-        scale: Number;
+        scale: number;
         /**
          * Gets or sets the condition specifying at what distance from the camera that this label will be displayed.
          */
@@ -14674,7 +14670,7 @@ declare module Cesium {
         /**
          * Returns the number of labels in this collection.  This is commonly used with{@link LabelCollection#get} to iterate over all the labelsin the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Creates and adds a label with the specified initial properties to the collection.The added label is returned so it can be modified or removed from the collection later.
          * @param options  (Optional) A template describing the label's properties as shown in Example 1.
@@ -14698,7 +14694,7 @@ declare module Cesium {
          * Returns the label in the collection at the specified index.  Indices are zero-basedand increase as labels are added.  Removing a label shifts all labels afterit to the left, changing their indices.  This function is commonly used with{@link LabelCollection#length} to iterate over all the labelsin the collection.
          * @param index  (Required) The zero-based index of the billboard.
          */
-        get(index: Number): Label;
+        get(index: number): Label;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -14736,19 +14732,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true. Generally,a minimum level should only be used when the rectangle of the imagery is smallenough that the number of tiles at the minimum level is small.  An imageryprovider with more than a few tiles at the minimum level will lead torendering problems.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by the provider.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true.
          */
@@ -14779,14 +14775,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link MapboxImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Asynchronously determines what features, if any, are located at a given longitude and latitude withina tile.  This function should not be called before {@link MapboxImageryProvider#ready} returns true.This function is optional, so it may not exist on all ImageryProviders.
          * @param x  (Required) The tile X coordinate.
@@ -14795,7 +14791,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A Material defines surface appearance through a combination of diffuse, specular,normal, emission, and alpha components. These values are specified using aJSON schema called Fabric which gets parsed and assembled into glsl shader codebehind-the-scenes. Check out the {@link https://github.com/AnalyticalGraphicsInc/cesium/wiki/Fabric|wiki page}for more details on Fabric.<br /><br /><style type="text/css"> #materialDescriptions code {     font-weight: normal;     font-family: Consolas, 'Lucida Console', Monaco, monospace;     color: #A35A00; } #materialDescriptions ul, #materialDescriptions ul ul {     list-style-type: none; } #materialDescriptions ul ul {     margin-bottom: 10px; } #materialDescriptions ul ul li {     font-weight: normal;     color: #000000;     text-indent: -2em;     margin-left: 2em; } #materialDescriptions ul li {     font-weight: bold;     color: #0053CF; }</style>Base material types and their uniforms:<div id='materialDescriptions'><ul> <li>Color</li> <ul>     <li><code>color</code>:  rgba color object.</li> </ul> <li>Image</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>DiffuseMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>AlphaMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channel</code>:  One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>SpecularMap</li> <ul>     <li><code>image</code>: path to image.</li>     <li><code>channel</code>: One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>: Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>EmissionMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li> </ul> <li>BumpMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channel</code>:  One character string containing r, g, b, or a for selecting the desired image channel. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li>     <li><code>strength</code>:  Bump strength value between 0.0 and 1.0 where 0.0 is small bumps and 1.0 is large bumps.</li> </ul> <li>NormalMap</li> <ul>     <li><code>image</code>:  path to image.</li>     <li><code>channels</code>:  Three character string containing any combination of r, g, b, and a for selecting the desired image channels. </li>     <li><code>repeat</code>:  Object with x and y values specifying the number of times to repeat the image.</li>     <li><code>strength</code>:  Bump strength value between 0.0 and 1.0 where 0.0 is small bumps and 1.0 is large bumps.</li> </ul> <li>Grid</li> <ul>     <li><code>color</code>:  rgba color object for the whole material.</li>     <li><code>cellAlpha</code>: Alpha value for the cells between grid lines.  This will be combined with color.alpha.</li>     <li><code>lineCount</code>:  Object with x and y values specifying the number of columns and rows respectively.</li>     <li><code>lineThickness</code>:  Object with x and y values specifying the thickness of grid lines (in pixels where available).</li>     <li><code>lineOffset</code>:  Object with x and y values specifying the offset of grid lines (range is 0 to 1).</li> </ul> <li>Stripe</li> <ul>     <li><code>horizontal</code>:  Boolean that determines if the stripes are horizontal or vertical.</li>     <li><code>evenColor</code>:  rgba color object for the stripe's first color.</li>     <li><code>oddColor</code>:  rgba color object for the stripe's second color.</li>     <li><code>offset</code>:  Number that controls at which point into the pattern to begin drawing; with 0.0 being the beginning of the even color, 1.0 the beginning of the odd color, 2.0 being the even color again, and any multiple or fractional values being in between.</li>     <li><code>repeat</code>:  Number that controls the total number of stripes, half light and half dark.</li> </ul> <li>Checkerboard</li> <ul>     <li><code>lightColor</code>:  rgba color object for the checkerboard's light alternating color.</li>     <li><code>darkColor</code>: rgba color object for the checkerboard's dark alternating color.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of columns and rows respectively.</li> </ul> <li>Dot</li> <ul>     <li><code>lightColor</code>:  rgba color object for the dot color.</li>     <li><code>darkColor</code>:  rgba color object for the background color.</li>     <li><code>repeat</code>:  Object with x and y values specifying the number of columns and rows of dots respectively.</li> </ul> <li>Water</li> <ul>     <li><code>baseWaterColor</code>:  rgba color object base color of the water.</li>     <li><code>blendColor</code>:  rgba color object used when blending from water to non-water areas.</li>     <li><code>specularMap</code>:  Single channel texture used to indicate areas of water.</li>     <li><code>normalMap</code>:  Normal map for water normal perturbation.</li>     <li><code>frequency</code>:  Number that controls the number of waves.</li>     <li><code>normalMap</code>:  Normal map for water normal perturbation.</li>     <li><code>animationSpeed</code>:  Number that controls the animations speed of the water.</li>     <li><code>amplitude</code>:  Number that controls the amplitude of water waves.</li>     <li><code>specularIntensity</code>:  Number that controls the intensity of specular reflections.</li> </ul> <li>RimLighting</li> <ul>     <li><code>color</code>:  diffuse color and alpha.</li>     <li><code>rimColor</code>:  diffuse color and alpha of the rim.</li>     <li><code>width</code>:  Number that determines the rim's width.</li> </ul> <li>Fade</li> <ul>     <li><code>fadeInColor</code>: diffuse color and alpha at <code>time</code></li>     <li><code>fadeOutColor</code>: diffuse color and alpha at <code>maximumDistance</code> from <code>time</code></li>     <li><code>maximumDistance</code>: Number between 0.0 and 1.0 where the <code>fadeInColor</code> becomes the <code>fadeOutColor</code>. A value of 0.0 gives the entire material a color of <code>fadeOutColor</code> and a value of 1.0 gives the the entire material a color of <code>fadeInColor</code></li>     <li><code>repeat</code>: true if the fade should wrap around the texture coodinates.</li>     <li><code>fadeDirection</code>: Object with x and y values specifying if the fade should be in the x and y directions.</li>     <li><code>time</code>: Object with x and y values between 0.0 and 1.0 of the <code>fadeInColor</code> position</li> </ul> <li>PolylineArrow</li> <ul>     <li><code>color</code>: diffuse color and alpha.</li> </ul> <li>PolylineGlow</li> <ul>     <li><code>color</code>: color and maximum alpha for the glow on the line.</li>     <li><code>glowPower</code>: strength of the glow, as a percentage of the total line width (less than 1.0).</li> </ul> <li>PolylineOutline</li> <ul>     <li><code>color</code>: diffuse color and alpha for the interior of the line.</li>     <li><code>outlineColor</code>: diffuse color and alpha for the outline.</li>     <li><code>outlineWidth</code>: width of the outline in pixels.</li> </ul></ul></div>
@@ -15007,15 +15003,15 @@ declare module Cesium {
         /**
          * A uniform scale applied to this model before the {@link Model#modelMatrix}.Values greater than <code>1.0</code> increase the size of the model; valuesless than <code>1.0</code> decrease.
          */
-        scale: Number;
+        scale: number;
         /**
          * The approximate minimum pixel size of the model regardless of zoom.This can be used to ensure that a model is visible even when the viewerzooms out.  When <code>0.0</code>, no minimum size is enforced.
          */
-        minimumPixelSize: Number;
+        minimumPixelSize: number;
         /**
          * The maximum scale size for a model. This can be used to givean upper limit to the {@link Model#minimumPixelSize}, ensuring that the modelis never an unreasonable scale.
          */
-        maximumScale: Number;
+        maximumScale: number;
         /**
          * User-defined object returned when the model is picked.
          */
@@ -15071,7 +15067,7 @@ declare module Cesium {
         /**
          * Return the number of pending texture loads.
          */
-        pendingTextureLoads: Number;
+        pendingTextureLoads: number;
         /**
          * Gets or sets the condition specifying at what distance from the camera that this model will be displayed.
          */
@@ -15144,7 +15140,7 @@ declare module Cesium {
         /**
          * The delay, in seconds, from {@link ModelAnimation#startTime} to start playing.
          */
-        delay: Number;
+        delay: number;
         /**
          * The scene time to stop playing this animation.  When this is <code>undefined</code>,the animation is played for its full duration and perhaps repeated depending on{@link ModelAnimation#loop}.
          */
@@ -15152,7 +15148,7 @@ declare module Cesium {
         /**
          * Values greater than <code>1.0</code> increase the speed that the animation is played relativeto the scene clock speed; values less than <code>1.0</code> decrease the speed.  A value of<code>1.0</code> plays the animation at the speed in the glTF animation mapped to the sceneclock speed.  For example, if the scene is played at 2x real-time, a two-second glTF animationwill play in one second even if <code>speedup</code> is <code>1.0</code>.
          */
-        speedup: Number;
+        speedup: number;
         /**
          * When <code>true</code>, the animation is played in reverse.
          */
@@ -15181,7 +15177,7 @@ declare module Cesium {
         /**
          * The number of animations in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Creates and adds an animation with the specified initial properties to the collection.<p>This raises the {@link ModelAnimationCollection#animationAdded} event so, for example, a UI can stay in sync.</p>
          * @param options  (Required) Object with the following properties:
@@ -15210,7 +15206,7 @@ declare module Cesium {
          * Returns the animation in the collection at the specified index.  Indices are zero-basedand increase as animations are added.  Removing an animation shifts all animations afterit to the left, changing their indices.  This function is commonly used to iterate overall the animations in the collection.
          * @param index  (Required) The zero-based index of the animation.
          */
-        get(index: Number): ModelAnimation;
+        get(index: number): ModelAnimation;
     }
     /**
      * A model's material with modifiable parameters.  A glTF materialcontains parameters defined by the material's technique with valuesdefined by the technique and potentially overridden by the material.This class allows changing these values at runtime.<p>Use {@link Model#getMaterial} to create an instance.</p>
@@ -15349,27 +15345,27 @@ declare module Cesium {
         /**
          * The left clipping plane.
          */
-        left: Number;
+        left: number;
         /**
          * The right clipping plane.
          */
-        right: Number;
+        right: number;
         /**
          * The top clipping plane.
          */
-        top: Number;
+        top: number;
         /**
          * The bottom clipping plane.
          */
-        bottom: Number;
+        bottom: number;
         /**
          * The distance of the near plane.
          */
-        near: Number;
+        near: number;
         /**
          * The distance of the far plane.
          */
-        far: Number;
+        far: number;
         /**
          * Gets the orthographic projection matrix computed from the view frustum.
          */
@@ -15388,7 +15384,7 @@ declare module Cesium {
          * @param distance  (Required) The distance to the near plane in meters.
          * @param result  (Required) The object onto which to store the result.
          */
-        getPixelDimensions(drawingBufferWidth: Number, drawingBufferHeight: Number, distance: Number, result: Cartesian2): Cartesian2;
+        getPixelDimensions(drawingBufferWidth: number, drawingBufferHeight: number, distance: number, result: Cartesian2): Cartesian2;
         /**
          * Returns a duplicate of a OrthographicFrustum instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -15477,27 +15473,27 @@ declare module Cesium {
         /**
          * The angle of the field of view (FOV), in radians.  This angle will be usedas the horizontal FOV if the width is greater than the height, otherwiseit will be the vertical FOV.
          */
-        fov: Number;
+        fov: number;
         /**
          * The aspect ratio of the frustum's width to it's height.
          */
-        aspectRatio: Number;
+        aspectRatio: number;
         /**
          * The distance of the near plane.
          */
-        near: Number;
+        near: number;
         /**
          * The distance of the far plane.
          */
-        far: Number;
+        far: number;
         /**
          * Offsets the frustum in the x direction.
          */
-        xOffset: Number;
+        xOffset: number;
         /**
          * Offsets the frustum in the y direction.
          */
-        yOffset: Number;
+        yOffset: number;
         /**
          * Gets the perspective projection matrix computed from the view frustum.
          */
@@ -15509,7 +15505,7 @@ declare module Cesium {
         /**
          * Gets the angle of the vertical field of view, in radians.
          */
-        fovy: Number;
+        fovy: number;
         /**
          * Creates a culling volume for this frustum.
          * @param position  (Required) The eye position.
@@ -15524,7 +15520,7 @@ declare module Cesium {
          * @param distance  (Required) The distance to the near plane in meters.
          * @param result  (Required) The object onto which to store the result.
          */
-        getPixelDimensions(drawingBufferWidth: Number, drawingBufferHeight: Number, distance: Number, result: Cartesian2): Cartesian2;
+        getPixelDimensions(drawingBufferWidth: number, drawingBufferHeight: number, distance: number, result: Cartesian2): Cartesian2;
         /**
          * Returns a duplicate of a PerspectiveFrustum instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -15547,27 +15543,27 @@ declare module Cesium {
         /**
          * Defines the left clipping plane.
          */
-        left: Number;
+        left: number;
         /**
          * Defines the right clipping plane.
          */
-        right: Number;
+        right: number;
         /**
          * Defines the top clipping plane.
          */
-        top: Number;
+        top: number;
         /**
          * Defines the bottom clipping plane.
          */
-        bottom: Number;
+        bottom: number;
         /**
          * The distance of the near plane.
          */
-        near: Number;
+        near: number;
         /**
          * The distance of the far plane.
          */
-        far: Number;
+        far: number;
         /**
          * Gets the perspective projection matrix computed from the view frustum.
          */
@@ -15590,7 +15586,7 @@ declare module Cesium {
          * @param distance  (Required) The distance to the near plane in meters.
          * @param result  (Required) The object onto which to store the result.
          */
-        getPixelDimensions(drawingBufferWidth: Number, drawingBufferHeight: Number, distance: Number, result: Cartesian2): Cartesian2;
+        getPixelDimensions(drawingBufferWidth: number, drawingBufferHeight: number, distance: number, result: Cartesian2): Cartesian2;
         /**
          * Returns a duplicate of a PerspectiveOffCenterFrustum instance.
          * @param result  (Optional) The object onto which to store the result.
@@ -15629,19 +15625,19 @@ declare module Cesium {
         /**
          * Gets or sets the inner size of the point in pixels.
          */
-        pixelSize: Number;
+        pixelSize: number;
         /**
          * Gets or sets the inner color of the point.The red, green, blue, and alpha values are indicated by <code>value</code>'s <code>red</code>, <code>green</code>,<code>blue</code>, and <code>alpha</code> properties as shown in Example 1.  These components range from <code>0.0</code>(no intensity) to <code>1.0</code> (full intensity).
          */
-        color: number;
+        color: Color;
         /**
          * Gets or sets the outline color of the point.
          */
-        outlineColor: number;
+        outlineColor: Color;
         /**
          * Gets or sets the outline width in pixels.  This width adds to pixelSize,increasing the total size of the point.
          */
-        outlineWidth: Number;
+        outlineWidth: number;
         /**
          * Gets or sets the condition specifying at what distance from the camera that this point will be displayed.
          */
@@ -15682,7 +15678,7 @@ declare module Cesium {
         /**
          * Returns the number of points in this collection.  This is commonly used with{@link PointPrimitiveCollection#get} to iterate over all the pointsin the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Creates and adds a point with the specified initial properties to the collection.The added point is returned so it can be modified or removed from the collection later.
          * @param pointPrimitive  (Optional) A template describing the point's properties as shown in Example 1.
@@ -15706,7 +15702,7 @@ declare module Cesium {
          * Returns the point in the collection at the specified index.  Indices are zero-basedand increase as points are added.  Removing a point shifts all points afterit to the left, changing their indices.  This function is commonly used with{@link PointPrimitiveCollection#length} to iterate over all the pointsin the collection.
          * @param index  (Required) The zero-based index of the point.
          */
-        get(index: Number): PointPrimitive;
+        get(index: number): PointPrimitive;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -15740,7 +15736,7 @@ declare module Cesium {
         /**
          * Gets or sets the width of the polyline.
          */
-        width: Number;
+        width: number;
         /**
          * Gets or sets whether a line segment will be added between the first and last polyline positions.
          */
@@ -15774,7 +15770,7 @@ declare module Cesium {
         /**
          * Returns the number of polylines in this collection.  This is commonly used with{@link PolylineCollection#get} to iterate over all the polylinesin the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Creates and adds a polyline with the specified initial properties to the collection.The added polyline is returned so it can be modified or removed from the collection later.
          * @param polyline  (Optional) A template describing the polyline's properties as shown in Example 1.
@@ -15798,7 +15794,7 @@ declare module Cesium {
          * Returns the polyline in the collection at the specified index.  Indices are zero-basedand increase as polylines are added.  Removing a polyline shifts all polylines afterit to the left, changing their indices.  This function is commonly used with{@link PolylineCollection#length} to iterate over all the polylinesin the collection.
          * @param index  (Required) The zero-based index of the polyline.
          */
-        get(index: Number): Polyline;
+        get(index: number): Polyline;
         /**
          * Called when {@link Viewer} or {@link CesiumWidget} render the scene toget the draw commands needed to render this primitive.<p>Do not call this function directly.  This is documented just tolist the exceptions that may be propagated when the scene is rendered:</p>
          */
@@ -16027,7 +16023,7 @@ declare module Cesium {
         /**
          * Gets the number of primitives in the collection.
          */
-        length: Number;
+        length: number;
         /**
          * Adds a primitive to the collection.
          * @param primitive  (Required) The primitive to add.
@@ -16071,7 +16067,7 @@ declare module Cesium {
          * Returns the primitive in the collection at the specified index.
          * @param index  (Required) The zero-based index of the primitive to return.
          */
-        get(index: Number): any;
+        get(index: number): any;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -16129,19 +16125,19 @@ declare module Cesium {
         /**
          * The background color, which is only visible if there is no sky box, i.e., {@link Scene#skyBox} is undefined.
          */
-        backgroundColor: number;
+        backgroundColor: Color;
         /**
          * The current morph transition time between 2D/Columbus View and 3D,with 0.0 being 2D or Columbus View and 1.0 being 3D.
          */
-        morphTime: Number;
+        morphTime: number;
         /**
          * The far-to-near ratio of the multi-frustum. The default is 1,000.0.
          */
-        farToNearRatio: Number;
+        farToNearRatio: number;
         /**
          * Determines the uniform depth size in meters of each frustum of the multifrustum in 2D. If a primitive or model closeto the surface shows z-fighting, decreasing this will eliminate the artifact, but decrease performance. On theother hand, increasing this will increase performance but may cause z-fighting among primitives close to thesurface.
          */
-        nearToFarDistance2D: Number;
+        nearToFarDistance2D: number;
         /**
          * This property is for debugging only; it is not for production use.<p>A function that determines what commands are executed.  As shown in the examples below,the function receives the command's <code>owner</code> as an argument, and returns a boolean indicating if thecommand should be executed.</p><p>The default is <code>undefined</code>, indicating that all commands are executed.</p>
          */
@@ -16165,7 +16161,7 @@ declare module Cesium {
         /**
          * This property is for debugging only; it is not for production use.<p>Indicates which frustum will have depth information displayed.</p>
          */
-        debugShowDepthFrustum: Number;
+        debugShowDepthFrustum: number;
         /**
          * When <code>true</code>, enables Fast Approximate Anti-aliasing even when order independent translucencyis unsupported.
          */
@@ -16189,19 +16185,19 @@ declare module Cesium {
         /**
          * The drawingBufferWidth of the underlying GL context.
          */
-        drawingBufferHeight: Number;
+        drawingBufferHeight: number;
         /**
          * The drawingBufferHeight of the underlying GL context.
          */
-        drawingBufferWidth: Number;
+        drawingBufferWidth: number;
         /**
          * The maximum aliased line width, in pixels, supported by this WebGL implementation.  It will be at least one.
          */
-        maximumAliasedLineWidth: Number;
+        maximumAliasedLineWidth: number;
         /**
          * The maximum length in pixels of one edge of a cube map, supported by this WebGL implementation.  It will be at least 16.
          */
-        maximumCubeMapSize: Number;
+        maximumCubeMapSize: number;
         /**
          * Returns true if the pickPosition function is supported.
          */
@@ -16277,7 +16273,7 @@ declare module Cesium {
         /**
          * Gets the scalar used to exaggerate the terrain.
          */
-        terrainExaggeration: Number;
+        terrainExaggeration: number;
         /**
          * When <code>true</code>, splits the scene into two viewports with steroscopic views for the left and right eyes.Used for cardboard and WebVR.
          */
@@ -16302,7 +16298,7 @@ declare module Cesium {
          * @param windowPosition  (Required) Window coordinates to perform picking on.
          * @param limit  (Optional) If supplied, stop drilling after collecting this many picks.
          */
-        drillPick(windowPosition: Cartesian2, limit?: Number): any[];
+        drillPick(windowPosition: Cartesian2, limit?: number): any[];
         /**
          * Instantly completes an active transition.
          */
@@ -16311,17 +16307,17 @@ declare module Cesium {
          * Asynchronously transitions the scene to 2D.
          * @param duration  (Optional) The amount of time, in seconds, for transition animations to complete.
          */
-        morphTo2D(duration?: Number): void;
+        morphTo2D(duration?: number): void;
         /**
          * Asynchronously transitions the scene to Columbus View.
          * @param duration  (Optional) The amount of time, in seconds, for transition animations to complete.
          */
-        morphToColumbusView(duration?: Number): void;
+        morphToColumbusView(duration?: number): void;
         /**
          * Asynchronously transitions the scene to 3D.
          * @param duration  (Optional) The amount of time, in seconds, for transition animations to complete.
          */
-        morphTo3D(duration?: Number): void;
+        morphTo3D(duration?: number): void;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -16367,31 +16363,31 @@ declare module Cesium {
         /**
          * A parameter in the range <code>[0, 1)</code> used to determine how longthe camera will continue to spin because of inertia.With value of zero, the camera will have no inertia.
          */
-        inertiaSpin: Number;
+        inertiaSpin: number;
         /**
          * A parameter in the range <code>[0, 1)</code> used to determine how longthe camera will continue to translate because of inertia.With value of zero, the camera will have no inertia.
          */
-        inertiaTranslate: Number;
+        inertiaTranslate: number;
         /**
          * A parameter in the range <code>[0, 1)</code> used to determine how longthe camera will continue to zoom because of inertia.With value of zero, the camera will have no inertia.
          */
-        inertiaZoom: Number;
+        inertiaZoom: number;
         /**
          * A parameter in the range <code>[0, 1)</code> used to limit the rangeof various user inputs to a percentage of the window width/height per animation frame.This helps keep the camera under control in low-frame-rate situations.
          */
-        maximumMovementRatio: Number;
+        maximumMovementRatio: number;
         /**
          * Sets the duration, in seconds, of the bounce back animations in 2D and Columbus view.
          */
-        bounceAnimationTime: Number;
+        bounceAnimationTime: number;
         /**
          * The minimum magnitude, in meters, of the camera position when zooming. Defaults to 20.0.
          */
-        minimumZoomDistance: Number;
+        minimumZoomDistance: number;
         /**
          * The maximum magnitude, in meters, of the camera position when zooming. Defaults to positive infinity.
          */
-        maximumZoomDistance: Number;
+        maximumZoomDistance: number;
         /**
          * The input that allows the user to pan around the map. This only applies in 2D and Columbus view modes.<p>The type came be a {@link CameraEventType}, <code>undefined</code>, an object with <code>eventType</code>and <code>modifier</code> properties with types <code>CameraEventType</code> and {@link KeyboardEventModifier},or an array of any of the preceding.</p>
          */
@@ -16415,15 +16411,15 @@ declare module Cesium {
         /**
          * The minimum height the camera must be before picking the terrain instead of the ellipsoid.
          */
-        minimumPickingTerrainHeight: Number;
+        minimumPickingTerrainHeight: number;
         /**
          * The minimum height the camera must be before testing for collision with terrain.
          */
-        minimumCollisionTerrainHeight: Number;
+        minimumCollisionTerrainHeight: number;
         /**
          * The minimum height the camera must be before switching from rotating a track ball tofree look when clicks originate on the sky on in space.
          */
-        minimumTrackBallHeight: Number;
+        minimumTrackBallHeight: number;
         /**
          * Enables or disables camera collision detection with terrain.
          */
@@ -16449,11 +16445,11 @@ declare module Cesium {
         /**
          * Determines the darkness of the shadows.
          */
-        darkness: Number;
+        darkness: number;
         /**
          * Determines the maximum distance of the shadow map. Only applicable for cascaded shadows. Larger distances may result in lower quality shadows.
          */
-        maximumDistance: Number;
+        maximumDistance: number;
         /**
          * Determines if the shadow map will be shown.
          */
@@ -16465,7 +16461,7 @@ declare module Cesium {
         /**
          * The width and height, in pixels, of each shadow map.
          */
-        size: Number;
+        size: number;
     }
     /**
      * Provides a single, top-level imagery tile.  The single image is assumed to use a{@link GeographicTilingScheme}.
@@ -16487,19 +16483,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          */
@@ -16538,14 +16534,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link SingleTileImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -16554,7 +16550,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * An atmosphere drawn around the limb of the provided ellipsoid.  Based on{@link http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter16.html|Accurate Atmospheric Scattering}in GPU Gems 2.<p>This is only supported in 3D.  atmosphere is faded out when morphing to 2D or Columbus view.</p>
@@ -16572,15 +16568,15 @@ declare module Cesium {
         /**
          * The hue shift to apply to the atmosphere. Defaults to 0.0 (no shift).A hue shift of 1.0 indicates a complete rotation of the hues available.
          */
-        hueShift: Number;
+        hueShift: number;
         /**
          * The saturation shift to apply to the atmosphere. Defaults to 0.0 (no shift).A saturation shift of -1.0 is monochrome.
          */
-        saturationShift: Number;
+        saturationShift: number;
         /**
          * The brightness shift to apply to the atmosphere. Defaults to 0.0 (no shift).A brightness shift of -1.0 is complete darkness, which will let space show through.
          */
-        brightnessShift: Number;
+        brightnessShift: number;
         /**
          * Gets the ellipsoid the atmosphere is drawn around.
          */
@@ -16639,7 +16635,7 @@ declare module Cesium {
         /**
          * Gets or sets a number that controls how "bright" the Sun's lens flare appearsto be.  Zero shows just the Sun's disc without any flare.Use larger values for a more pronounced flare around the Sun.
          */
-        glowFactor: Number;
+        glowFactor: number;
         /**
          * Returns true if this object was destroyed; otherwise, false.<br /><br />If this object was destroyed, it should not be used; calling any function other than<code>isDestroyed</code> will result in a {@link DeveloperError} exception.
          */
@@ -16665,19 +16661,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          */
@@ -16716,14 +16712,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link TileCoordinatesImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -16732,7 +16728,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A policy for discarding tile images according to some criteria.  This type describes aninterface and is not intended to be instantiated directly.
@@ -16780,19 +16776,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link UrlTemplateImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link UrlTemplateImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested, or undefined if there is no limit.This function should not be called before {@link UrlTemplateImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link UrlTemplateImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link UrlTemplateImageryProvider#ready} returns true.
          */
@@ -16836,14 +16832,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link UrlTemplateImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Asynchronously determines what features, if any, are located at a given longitude and latitude withina tile.  This function should not be called before {@link ImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
@@ -16852,7 +16848,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * A viewport aligned quad.
@@ -16913,19 +16909,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          */
@@ -16964,14 +16960,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link WebMapServiceImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Asynchronously determines what features, if any, are located at a given longitude and latitude withina tile.  This function should not be called before {@link ImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
@@ -16980,7 +16976,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * Provides tiled imagery served by {@link http://www.opengeospatial.org/standards/wmts|WMTS 1.0.0} compliant servers.This provider supports HTTP KVP-encoded and RESTful GetTile requests, but does not yet support the SOAP encoding.
@@ -17002,19 +16998,19 @@ declare module Cesium {
         /**
          * Gets the width of each tile, in pixels. This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          */
-        tileWidth: Number;
+        tileWidth: number;
         /**
          * Gets the height of each tile, in pixels.  This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          */
-        tileHeight: Number;
+        tileHeight: number;
         /**
          * Gets the maximum level-of-detail that can be requested.  This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          */
-        maximumLevel: Number;
+        maximumLevel: number;
         /**
          * Gets the minimum level-of-detail that can be requested.  This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          */
-        minimumLevel: Number;
+        minimumLevel: number;
         /**
          * Gets the tiling scheme used by this provider.  This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          */
@@ -17057,14 +17053,14 @@ declare module Cesium {
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level;
          */
-        getTileCredits(x: Number, y: Number, level: Number): Credit[];
+        getTileCredits(x: number, y: number, level: number): Credit[];
         /**
          * Requests the image for a given tile.  This function shouldnot be called before {@link WebMapTileServiceImageryProvider#ready} returns true.
          * @param x  (Required) The tile X coordinate.
          * @param y  (Required) The tile Y coordinate.
          * @param level  (Required) The tile level.
          */
-        requestImage(x: Number, y: Number, level: Number): Promise<HTMLImageElement|HTMLCanvasElement>;
+        requestImage(x: number, y: number, level: number): Promise<HTMLImageElement|HTMLCanvasElement>;
         /**
          * Picking features is not currently supported by this imagery provider, so this function simply returnsundefined.
          * @param x  (Required) The tile X coordinate.
@@ -17073,7 +17069,7 @@ declare module Cesium {
          * @param longitude  (Required) The longitude at which to pick features.
          * @param latitude  (Required) The latitude at which to pick features.
          */
-        pickFeatures(x: Number, y: Number, level: Number, longitude: Number, latitude: Number): Promise<ImageryLayerFeatureInfo[]>;
+        pickFeatures(x: number, y: number, level: number, longitude: number, latitude: number): Promise<ImageryLayerFeatureInfo[]>;
     }
     /**
      * <span style="display: block; text-align: center;"><img src="images/AnimationWidget.png" width="211" height="142" alt="" /><br />Animation widget</span><br /><br />The Animation widget provides buttons for play, pause, and reverse, along with thecurrent time and date, surrounded by a "shuttle ring" for controlling the speed of animation.<br /><br />The "shuttle ring" concept is borrowed from video editing, where typically a"jog wheel" can be rotated to move past individual animation frames very slowly, anda surrounding shuttle ring can be twisted to control direction and speed of fast playback.Cesium typically treats time as continuous (not broken into pre-defined animation frames),so this widget offers no jog wheel.  Instead, the shuttle ring is capable of both fast andvery slow playback.  Click and drag the shuttle ring pointer itself (shown above in green),or click in the rest of the ring area to nudge the pointer to the next preset speed in that direction.<br /><br />The Animation widget also provides a "realtime" button (in the upper-left) that keepsanimation time in sync with the end user's system clock, typically displaying"today" or "right now."  This mode is not available in {@link ClockRange.CLAMPED} or{@link ClockRange.LOOP_STOP} mode if the current time is outside of {@link Clock}'s startTime and endTime.
@@ -17142,7 +17138,7 @@ declare module Cesium {
         /**
          * Gets or sets the current shuttle ring angle.  This property is observable.
          */
-        shuttleRingAngle: Number;
+        shuttleRingAngle: number;
         /**
          * Gets or sets the default date formatter used by new instances.
          */
@@ -17150,7 +17146,7 @@ declare module Cesium {
         /**
          * Gets or sets the default array of known clock multipliers associated with new instances of the shuttle ring.
          */
-        static defaultTicks: Number[];
+        static defaultTicks: number[];
         /**
          * Gets or sets the default time formatter used by new instances.
          */
@@ -17158,12 +17154,12 @@ declare module Cesium {
         /**
          * Gets a copy of the array of positive known clock multipliers to associate with the shuttle ring.
          */
-        getShuttleRingTicks(): Number[];
+        getShuttleRingTicks(): number[];
         /**
          * Sets the array of positive known clock multipliers to associate with the shuttle ring.These values will have negative equivalents created for them and sets both the minimumand maximum range of values for the shuttle ring as well as the values that are snappedto when a single click is made.  The values need not be in order, as they will be sortedautomatically, and duplicate values will be removed.
          * @param positiveTicks  (Required) The list of known positive clock multipliers to associate with the shuttle ring.
          */
-        setShuttleRingTicks(positiveTicks: Number[]): void;
+        setShuttleRingTicks(positiveTicks: number[]): void;
         /**
          * Gets a command that decreases the speed of animation.
          */
@@ -17383,7 +17379,7 @@ declare module Cesium {
         /**
          * Gets or sets the index of the depth frustum to display.  This property is observable.
          */
-        depthFrustum: Number;
+        depthFrustum: number;
         /**
          * Gets or sets the index of the depth frustum text.  This property is observable.
          */
@@ -17622,7 +17618,7 @@ declare module Cesium {
         /**
          * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>is true. If undefined, the browser's {@link requestAnimationFrame} implementationdetermines the frame rate.  If defined, this value must be greater than 0.  A value higherthan the underlying requestAnimationFrame implementation will have no effect.
          */
-        targetFrameRate: Number;
+        targetFrameRate: number;
         /**
          * Gets or sets whether or not this widget should control the render loop.If set to true the widget will use {@link requestAnimationFrame} toperform rendering and resizing of the widget, as well as drive thesimulation clock. If set to false, you must manually call the<code>resize</code>, <code>render</code> methods as part of a customrender loop.  If an error occurs during rendering, {@link Scene}'s<code>renderError</code> event will be raised and this propertywill be set to false.  It must be set back to true to continue renderingafter the error.
          */
@@ -17630,7 +17626,7 @@ declare module Cesium {
         /**
          * Gets or sets a scaling factor for rendering resolution.  Values less than 1.0 can improveperformance on less powerful devices while values greater than 1.0 will render at a higherresolution and then scale down, resulting in improved visual fidelity.For example, if the widget is laid out at a size of 640x480, setting this value to 0.5will cause the scene to be rendered at 320x240 and then scaled up while settingit to 2.0 will cause the scene to be rendered at 1280x960 and then scaled down.
          */
-        resolutionScale: Number;
+        resolutionScale: number;
         /**
          * Show an error panel to the user containing a title and a longer error message,which can be dismissed using an OK button.  This panel is displayed automaticallywhen a render loop error occurs, if showRenderLoopErrors was not false when thewidget was constructed.
          * @param title  (Required) The title to be displayed on the error panel.  This string is interpreted as text.
@@ -17683,7 +17679,7 @@ declare module Cesium {
         /**
          * Gets or sets the clock multiplier.See {@link Clock#multiplier}.This property is observable.
          */
-        multiplier: Number;
+        multiplier: number;
         /**
          * Gets or sets the clock step setting.See {@link Clock#clockStep}.This property is observable.
          */
@@ -17853,7 +17849,7 @@ declare module Cesium {
         /**
          * Gets or sets the the duration of the camera flight in seconds.A value of zero causes the camera to instantly switch to the geocoding location.The duration will be computed based on the distance when undefined.
          */
-        flightDuration: Number;
+        flightDuration: number;
         /**
          * Gets the Bing maps url.
          */
@@ -17885,7 +17881,7 @@ declare module Cesium {
          * @param scene  (Required) The Scene instance to use.
          * @param duration  (Optional) The time, in seconds, it takes to complete the camera flight home.
          */
-        constructor(container: Element|string, scene: Scene, duration?: Number);
+        constructor(container: Element|string, scene: Scene, duration?: number);
         /**
          * Gets the parent container.
          */
@@ -17912,7 +17908,7 @@ declare module Cesium {
          * @param scene  (Required) The scene instance to use.
          * @param duration  (Optional) The duration of the camera flight in seconds.
          */
-        constructor(scene: Scene, duration?: Number);
+        constructor(scene: Scene, duration?: number);
         /**
          * Gets or sets the tooltip.  This property is observable.
          */
@@ -17928,7 +17924,7 @@ declare module Cesium {
         /**
          * Gets or sets the the duration of the camera flight in seconds.A value of zero causes the camera to instantly switch to home view.The duration will be computed based on the distance when undefined.
          */
-        duration: Number;
+        duration: number;
     }
     /**
      * A widget for displaying information or a description.
@@ -17971,7 +17967,7 @@ declare module Cesium {
         /**
          * Gets or sets the maximum height of the info box in pixels.  This property is observable.
          */
-        maxHeight: Number;
+        maxHeight: number;
         /**
          * Gets or sets whether the camera tracking icon is enabled.
          */
@@ -18000,7 +17996,7 @@ declare module Cesium {
          * Gets the maximum height of sections within the info box, minus an offset, in CSS-ready form.
          * @param offset  (Required) The offset in pixels.
          */
-        maxHeightOffset(offset: Number): string;
+        maxHeightOffset(offset: number): string;
         /**
          * Gets an {@link Event} that is fired when the user clicks the camera icon.
          */
@@ -18131,7 +18127,7 @@ declare module Cesium {
          * @param scene  (Required) The Scene instance to use.
          * @param duration  (Optional) The time, in seconds, it takes for the scene to transition.
          */
-        constructor(container: Element|string, scene: Scene, duration?: Number);
+        constructor(container: Element|string, scene: Scene, duration?: number);
         /**
          * Gets the parent container.
          */
@@ -18158,7 +18154,7 @@ declare module Cesium {
          * @param scene  (Required) The Scene to morph
          * @param duration  (Optional) The duration of scene morph animations, in seconds
          */
-        constructor(scene: Scene, duration?: Number);
+        constructor(scene: Scene, duration?: number);
         /**
          * Gets or sets the current SceneMode.  This property is observable.
          */
@@ -18190,7 +18186,7 @@ declare module Cesium {
         /**
          * Gets or sets the the duration of scene mode transition animations in seconds.A value of zero causes the scene to instantly change modes.
          */
-        duration: Number;
+        duration: number;
         /**
          * Gets the command to toggle the drop down box.
          */
@@ -18476,7 +18472,7 @@ declare module Cesium {
         /**
          * Gets or sets the target frame rate of the widget when <code>useDefaultRenderLoop</code>is true. If undefined, the browser's {@link requestAnimationFrame} implementationdetermines the frame rate.  If defined, this value must be greater than 0.  A value higherthan the underlying requestAnimationFrame implementation will have no effect.
          */
-        targetFrameRate: Number;
+        targetFrameRate: number;
         /**
          * Gets or sets whether or not this widget should control the render loop.If set to true the widget will use {@link requestAnimationFrame} toperform rendering and resizing of the widget, as well as drive thesimulation clock. If set to false, you must manually call the<code>resize</code>, <code>render</code> methodsas part of a custom render loop.  If an error occurs during rendering, {@link Scene}'s<code>renderError</code> event will be raised and this propertywill be set to false.  It must be set back to true to continue renderingafter the error.
          */
@@ -18484,7 +18480,7 @@ declare module Cesium {
         /**
          * Gets or sets a scaling factor for rendering resolution.  Values less than 1.0 can improveperformance on less powerful devices while values greater than 1.0 will render at a higherresolution and then scale down, resulting in improved visual fidelity.For example, if the widget is laid out at a size of 640x480, setting this value to 0.5will cause the scene to be rendered at 320x240 and then scaled up while settingit to 2.0 will cause the scene to be rendered at 1280x960 and then scaled down.
          */
-        resolutionScale: Number;
+        resolutionScale: number;
         /**
          * Gets or sets whether or not data sources can temporarily pauseanimation in order to avoid showing an incomplete picture to the user.For example, if asynchronous primitives are being processed in thebackground, the clock will not advance until the geometry is ready.
          */
@@ -18623,23 +18619,23 @@ declare module Cesium {
         /**
          * The fill color.
          */
-        fillColor?: number;
+        fillColor?: Color;
         /**
          * The stroke color.
          */
-        strokeColor?: number;
+        strokeColor?: Color;
         /**
          * The stroke width.
          */
-        strokeWidth?: Number;
+        strokeWidth?: number;
         /**
          * The background color of the canvas.
          */
-        backgroundColor?: number;
+        backgroundColor?: Color;
         /**
          * The pixel size of the padding to add around the text.
          */
-        padding?: Number;
+        padding?: number;
     }
     interface ILoadJsonpOptions {
         /**
@@ -18701,11 +18697,11 @@ declare module Cesium {
         /**
          * The minimum level-of-detail supported by the imagery provider.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The ellipsoid.  If not specified, the WGS84 ellipsoid is used.
          */
@@ -18723,7 +18719,7 @@ declare module Cesium {
         /**
          * The length of each line segment in meters.  This can be negative to point the vector in the opposite direction.
          */
-        length?: Number;
+        length?: number;
         /**
          * The model matrix that transforms to transform the geometry from model to world coordinates.
          */
@@ -18749,11 +18745,11 @@ declare module Cesium {
         /**
          * The minimum level-of-detail supported by the imagery provider.  Take care when specifying                this that the number of tiles at the minimum level is small, such as four or less.  A larger number is likely                to result in rendering problems.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The rectangle, in radians, covered by the image.
          */
@@ -18769,11 +18765,11 @@ declare module Cesium {
         /**
          * Pixel width of image tiles.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * Pixel height of image tiles.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * Older versions of gdal2tiles.py flipped X and Y values in tilemapresource.xml.Specifying this option will do the same, allowing for loading of these incorrect tilesets.
          */
@@ -18861,7 +18857,7 @@ declare module Cesium {
         /**
          * An array of strictly increasing, unit-less, floating-point times at each point.               The values are in no way connected to the clock time. They are the parameterization for the curve.
          */
-        times: Number[];
+        times: number[];
         /**
          * The array of {@link Cartesian3} control points.
          */
@@ -18909,7 +18905,7 @@ declare module Cesium {
         /**
          * The radius in meters.
          */
-        radius: Number;
+        radius: number;
         /**
          * The ellipsoid the circle will be on.
          */
@@ -18917,11 +18913,11 @@ declare module Cesium {
         /**
          * The distance in meters between the circle and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The angular distance between points on the circle in radians.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -18929,11 +18925,11 @@ declare module Cesium {
         /**
          * The distance in meters between the circle's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
          */
-        stRotation?: Number;
+        stRotation?: number;
     }
     interface ICircleOutlineGeometryOptions {
         /**
@@ -18943,7 +18939,7 @@ declare module Cesium {
         /**
          * The radius in meters.
          */
-        radius: Number;
+        radius: number;
         /**
          * The ellipsoid the circle will be on.
          */
@@ -18951,19 +18947,19 @@ declare module Cesium {
         /**
          * The distance in meters between the circle and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The angular distance between points on the circle in radians.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The distance in meters between the circle's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * Number of lines to draw between the top and bottom of an extruded circle.
          */
-        numberOfVerticalLines?: Number;
+        numberOfVerticalLines?: number;
     }
     interface IClockOptions {
         /**
@@ -18981,7 +18977,7 @@ declare module Cesium {
         /**
          * Determines how much time advances when {@link Clock#tick} is called, negative values allow for advancing backwards.
          */
-        multiplier?: Number;
+        multiplier?: number;
         /**
          * Determines if calls to {@link Clock#tick} are frame dependent or system clock dependent.
          */
@@ -19007,7 +19003,7 @@ declare module Cesium {
         /**
          * The distance between the edges of the corridor in meters.
          */
-        width: Number;
+        width: number;
         /**
          * The ellipsoid to be used as a reference.
          */
@@ -19015,15 +19011,15 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The distance in meters between the ellipsoid surface and the positions.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the ellipsoid surface and the extruded face.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19041,7 +19037,7 @@ declare module Cesium {
         /**
          * The distance between the edges of the corridor outline.
          */
-        width: Number;
+        width: number;
         /**
          * The ellipsoid to be used as a reference.
          */
@@ -19049,15 +19045,15 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The distance in meters between the positions and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * Determines the style of the corners.
          */
@@ -19067,19 +19063,19 @@ declare module Cesium {
         /**
          * The length of the cylinder.
          */
-        length: Number;
+        length: number;
         /**
          * The radius of the top of the cylinder.
          */
-        topRadius: Number;
+        topRadius: number;
         /**
          * The radius of the bottom of the cylinder.
          */
-        bottomRadius: Number;
+        bottomRadius: number;
         /**
          * The number of edges around the perimeter of the cylinder.
          */
-        slices?: Number;
+        slices?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19089,23 +19085,23 @@ declare module Cesium {
         /**
          * The length of the cylinder.
          */
-        length: Number;
+        length: number;
         /**
          * The radius of the top of the cylinder.
          */
-        topRadius: Number;
+        topRadius: number;
         /**
          * The radius of the bottom of the cylinder.
          */
-        bottomRadius: Number;
+        bottomRadius: number;
         /**
          * The number of edges around the perimeter of the cylinder.
          */
-        slices?: Number;
+        slices?: number;
         /**
          * Number of lines to draw between the top and bottom surfaces of the cylinder.
          */
-        numberOfVerticalLines?: Number;
+        numberOfVerticalLines?: number;
     }
     interface IEllipseGeometryOptions {
         /**
@@ -19115,11 +19111,11 @@ declare module Cesium {
         /**
          * The length of the ellipse's semi-major axis in meters.
          */
-        semiMajorAxis: Number;
+        semiMajorAxis: number;
         /**
          * The length of the ellipse's semi-minor axis in meters.
          */
-        semiMinorAxis: Number;
+        semiMinorAxis: number;
         /**
          * The ellipsoid the ellipse will be on.
          */
@@ -19127,23 +19123,23 @@ declare module Cesium {
         /**
          * The distance in meters between the ellipse and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the ellipse's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The angle of rotation counter-clockwise from north.
          */
-        rotation?: Number;
+        rotation?: number;
         /**
          * The rotation of the texture coordinates counter-clockwise from north.
          */
-        stRotation?: Number;
+        stRotation?: number;
         /**
          * The angular distance between points on the ellipse in radians.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19157,11 +19153,11 @@ declare module Cesium {
         /**
          * The length of the ellipse's semi-major axis in meters.
          */
-        semiMajorAxis: Number;
+        semiMajorAxis: number;
         /**
          * The length of the ellipse's semi-minor axis in meters.
          */
-        semiMinorAxis: Number;
+        semiMinorAxis: number;
         /**
          * The ellipsoid the ellipse will be on.
          */
@@ -19169,23 +19165,23 @@ declare module Cesium {
         /**
          * The distance in meters between the ellipse and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the ellipse's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The angle from north (counter-clockwise) in radians.
          */
-        rotation?: Number;
+        rotation?: number;
         /**
          * The angular distance between points on the ellipse in radians.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * Number of lines to draw between the top and bottom surface of an extruded ellipse.
          */
-        numberOfVerticalLines?: Number;
+        numberOfVerticalLines?: number;
     }
     interface IEllipsoidGeometryOptions {
         /**
@@ -19195,11 +19191,11 @@ declare module Cesium {
         /**
          * The number of times to partition the ellipsoid into stacks.
          */
-        stackPartitions?: Number;
+        stackPartitions?: number;
         /**
          * The number of times to partition the ellipsoid into radial slices.
          */
-        slicePartitions?: Number;
+        slicePartitions?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19213,15 +19209,15 @@ declare module Cesium {
         /**
          * The count of stacks for the ellipsoid (1 greater than the number of parallel lines).
          */
-        stackPartitions?: Number;
+        stackPartitions?: number;
         /**
          * The count of slices for the ellipsoid (Equal to the number of radial lines).
          */
-        slicePartitions?: Number;
+        slicePartitions?: number;
         /**
          * The number of points per line, determining the granularity of the curvature.
          */
-        subdivisions?: Number;
+        subdivisions?: number;
     }
     interface IEllipsoidTerrainProviderOptions {
         /**
@@ -19245,11 +19241,11 @@ declare module Cesium {
         /**
          * The number of tiles in the X direction at level zero ofthe tile tree.
          */
-        numberOfLevelZeroTilesX?: Number;
+        numberOfLevelZeroTilesX?: number;
         /**
          * The number of tiles in the Y direction at level zero ofthe tile tree.
          */
-        numberOfLevelZeroTilesY?: Number;
+        numberOfLevelZeroTilesY?: number;
     }
     interface IGeometryOptions {
         /**
@@ -19277,7 +19273,7 @@ declare module Cesium {
         /**
          * A number between 1 and 4 that defines the number of components in an attributes.
          */
-        componentsPerAttribute?: Number;
+        componentsPerAttribute?: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format, indicate that the components should be mapped to the range [0, 1] (unsigned) or [-1, 1] (signed) when they are accessed as floating-point for rendering.
          */
@@ -19313,7 +19309,7 @@ declare module Cesium {
         /**
          * A number between 1 and 4 that defines the number of components in an attributes.
          */
-        componentsPerAttribute?: Number;
+        componentsPerAttribute?: number;
         /**
          * When <code>true</code> and <code>componentDatatype</code> is an integer format, indicate that the components should be mapped to the range [0, 1] (unsigned) or [-1, 1] (signed) when they are accessed as floating-point for rendering.
          */
@@ -19321,7 +19317,7 @@ declare module Cesium {
         /**
          * The value for the attribute.
          */
-        value?: Number[];
+        value?: number[];
     }
     interface IHeightmapTerrainDataOptions {
         /**
@@ -19331,15 +19327,15 @@ declare module Cesium {
         /**
          * The width (longitude direction) of the heightmap, in samples.
          */
-        width: Number;
+        width: number;
         /**
          * The height (latitude direction) of the heightmap, in samples.
          */
-        height: Number;
+        height: number;
         /**
          * A bit mask indicating which of this tile's four children exist.                If a child's bit is set, geometry will be requested for that tile as well when it                is needed.  If the bit is cleared, the child tile is not requested and geometry is                instead upsampled from the parent.  The bit values are as follows:                <table>                 <tr><th>Bit Position</th><th>Bit Value</th><th>Child Tile</th></tr>                 <tr><td>0</td><td>1</td><td>Southwest</td></tr>                 <tr><td>1</td><td>2</td><td>Southeast</td></tr>                 <tr><td>2</td><td>4</td><td>Northwest</td></tr>                 <tr><td>3</td><td>8</td><td>Northeast</td></tr>                </table>
          */
-        childTileMask?: Number;
+        childTileMask?: number;
         /**
          * An object describing the structure of the height data.
          */
@@ -19347,23 +19343,23 @@ declare module Cesium {
         /**
          * The factor by which to multiply height samples in order to obtain                the height above the heightOffset, in meters.  The heightOffset is added to the resulting                height after multiplying by the scale.
          */
-        heightScale?: Number;
+        heightScale?: number;
         /**
          * The offset to add to the scaled height to obtain the final                height in meters.  The offset is added after the height sample is multiplied by the                heightScale.
          */
-        heightOffset?: Number;
+        heightOffset?: number;
         /**
          * The number of elements in the buffer that make up a single height                sample.  This is usually 1, indicating that each element is a separate height sample.  If                it is greater than 1, that number of elements together form the height sample, which is                computed according to the structure.elementMultiplier and structure.isBigEndian properties.
          */
-        elementsPerHeight?: Number;
+        elementsPerHeight?: number;
         /**
          * The number of elements to skip to get from the first element of                one height to the first element of the next height.
          */
-        stride?: Number;
+        stride?: number;
         /**
          * The multiplier used to compute the height value when the                stride property is greater than 1.  For example, if the stride is 4 and the strideMultiplier                is 256, the height is computed as follows:                `height = buffer[index] + buffer[index + 1] * 256 + buffer[index + 2] * 256 * 256 + buffer[index + 3] * 256 * 256 * 256`                This is assuming that the isBigEndian property is false.  If it is true, the order of the                elements is reversed.
          */
-        elementMultiplier?: Number;
+        elementMultiplier?: number;
         /**
          * Indicates endianness of the elements in the buffer when the                 stride property is greater than 1.  If this property is false, the first element is the                 low-order element.  If it is true, the first element is the high-order element.
          */
@@ -19371,11 +19367,11 @@ declare module Cesium {
         /**
          * The lowest value that can be stored in the height buffer.  Any heights that are lower                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be 0 because a `Uint16Array` cannot store negative numbers.  If this parameter is                not specified, no minimum value is enforced.
          */
-        lowestEncodedHeight?: Number;
+        lowestEncodedHeight?: number;
         /**
          * The highest value that can be stored in the height buffer.  Any heights that are higher                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be `256 * 256 - 1` or 65535 because a `Uint16Array` cannot store numbers larger                than 65535.  If this parameter is not specified, no maximum value is enforced.
          */
-        highestEncodedHeight?: Number;
+        highestEncodedHeight?: number;
         /**
          * True if this instance was created by upsampling another instance;                 otherwise, false.
          */
@@ -19385,7 +19381,7 @@ declare module Cesium {
         /**
          * An array of strictly increasing, unit-less, floating-point times at each point.               The values are in no way connected to the clock time. They are the parameterization for the curve.
          */
-        times: Number[];
+        times: number[];
         /**
          * The array of {@link Cartesian3} control points.
          */
@@ -19403,7 +19399,7 @@ declare module Cesium {
         /**
          * An array of strictly increasing, unit-less, floating-point times at each point.               The values are in no way connected to the clock time. They are the parameterization for the curve.
          */
-        times: Number[];
+        times: number[];
         /**
          * The array of {@link Cartesian3} control points.
          */
@@ -19417,11 +19413,11 @@ declare module Cesium {
         /**
          * The distance in meters between the polygon and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the polygon's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19429,7 +19425,7 @@ declare module Cesium {
         /**
          * The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
          */
-        stRotation?: Number;
+        stRotation?: number;
         /**
          * The ellipsoid to be used as a reference.
          */
@@ -19437,7 +19433,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * Use the height of options.positions for each position instead of using options.height to determine the height.
          */
@@ -19459,11 +19455,11 @@ declare module Cesium {
         /**
          * The distance in meters between the polygon and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The distance in meters between the polygon's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19475,7 +19471,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * Use the height of options.positions for each position instead of using options.height to determine the height.
          */
@@ -19489,7 +19485,7 @@ declare module Cesium {
         /**
          * The width in pixels.
          */
-        width?: Number;
+        width?: number;
         /**
          * An Array of {@link Color} defining the per vertex or per segment colors.
          */
@@ -19505,7 +19501,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude if options.followSurface=true. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19531,7 +19527,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19557,7 +19553,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * Determines the style of the corners.
          */
@@ -19575,11 +19571,11 @@ declare module Cesium {
         /**
          * The minimum terrain height within the tile, in meters above the ellipsoid.
          */
-        minimumHeight: Number;
+        minimumHeight: number;
         /**
          * The maximum terrain height within the tile, in meters above the ellipsoid.
          */
-        maximumHeight: Number;
+        maximumHeight: number;
         /**
          * A sphere bounding all of the vertices in the mesh.
          */
@@ -19595,39 +19591,39 @@ declare module Cesium {
         /**
          * The indices of the vertices on the western edge of the tile.
          */
-        westIndices: Number[];
+        westIndices: number[];
         /**
          * The indices of the vertices on the southern edge of the tile.
          */
-        southIndices: Number[];
+        southIndices: number[];
         /**
          * The indices of the vertices on the eastern edge of the tile.
          */
-        eastIndices: Number[];
+        eastIndices: number[];
         /**
          * The indices of the vertices on the northern edge of the tile.
          */
-        northIndices: Number[];
+        northIndices: number[];
         /**
          * The height of the skirt to add on the western edge of the tile.
          */
-        westSkirtHeight: Number;
+        westSkirtHeight: number;
         /**
          * The height of the skirt to add on the southern edge of the tile.
          */
-        southSkirtHeight: Number;
+        southSkirtHeight: number;
         /**
          * The height of the skirt to add on the eastern edge of the tile.
          */
-        eastSkirtHeight: Number;
+        eastSkirtHeight: number;
         /**
          * The height of the skirt to add on the northern edge of the tile.
          */
-        northSkirtHeight: Number;
+        northSkirtHeight: number;
         /**
          * A bit mask indicating which of this tile's four children exist.                If a child's bit is set, geometry will be requested for that tile as well when it                is needed.  If the bit is cleared, the child tile is not requested and geometry is                instead upsampled from the parent.  The bit values are as follows:                <table>                 <tr><th>Bit Position</th><th>Bit Value</th><th>Child Tile</th></tr>                 <tr><td>0</td><td>1</td><td>Southwest</td></tr>                 <tr><td>1</td><td>2</td><td>Southeast</td></tr>                 <tr><td>2</td><td>4</td><td>Northwest</td></tr>                 <tr><td>3</td><td>8</td><td>Northeast</td></tr>                </table>
          */
-        childTileMask?: Number;
+        childTileMask?: number;
         /**
          * True if this instance was created by upsampling another instance;                 otherwise, false.
          */
@@ -19645,7 +19641,7 @@ declare module Cesium {
         /**
          * An array of strictly increasing, unit-less, floating-point times at each point.               The values are in no way connected to the clock time. They are the parameterization for the curve.
          */
-        times: Number[];
+        times: number[];
         /**
          * The array of {@link Quaternion} control points.
          */
@@ -19675,23 +19671,23 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The distance in meters between the rectangle and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The rotation of the rectangle, in radians. A positive rotation is counter-clockwise.
          */
-        rotation?: Number;
+        rotation?: number;
         /**
          * The rotation of the texture coordinates, in radians. A positive rotation is counter-clockwise.
          */
-        stRotation?: Number;
+        stRotation?: number;
         /**
          * The distance in meters between the rectangle's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
         /**
          * Specifies whether the rectangle has a top cover when extruded.
          */
@@ -19713,19 +19709,19 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The distance in meters between the rectangle and the ellipsoid surface.
          */
-        height?: Number;
+        height?: number;
         /**
          * The rotation of the rectangle, in radians. A positive rotation is counter-clockwise.
          */
-        rotation?: Number;
+        rotation?: number;
         /**
          * The distance in meters between the rectangle's extruded face and the ellipsoid surface.
          */
-        extrudedHeight?: Number;
+        extrudedHeight?: number;
     }
     interface ISimplePolylineGeometryOptions {
         /**
@@ -19747,7 +19743,7 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude if options.followSurface=true. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * The ellipsoid to be used as a reference.
          */
@@ -19757,15 +19753,15 @@ declare module Cesium {
         /**
          * The radius of the sphere.
          */
-        radius?: Number;
+        radius?: number;
         /**
          * The number of times to partition the ellipsoid into stacks.
          */
-        stackPartitions?: Number;
+        stackPartitions?: number;
         /**
          * The number of times to partition the ellipsoid into radial slices.
          */
-        slicePartitions?: Number;
+        slicePartitions?: number;
         /**
          * The vertex attributes to be computed.
          */
@@ -19775,19 +19771,19 @@ declare module Cesium {
         /**
          * The radius of the sphere.
          */
-        radius?: Number;
+        radius?: number;
         /**
          * The count of stacks for the sphere (1 greater than the number of parallel lines).
          */
-        stackPartitions?: Number;
+        stackPartitions?: number;
         /**
          * The count of slices for the sphere (Equal to the number of radial lines).
          */
-        slicePartitions?: Number;
+        slicePartitions?: number;
         /**
          * The number of points per line, determining the granularity of the curvature .
          */
-        subdivisions?: Number;
+        subdivisions?: number;
     }
     interface ITimeIntervalOptions {
         /**
@@ -19827,7 +19823,7 @@ declare module Cesium {
         /**
          * The maximum amount of time, in seconds, that the clock and video can diverge.
          */
-        tolerance?: Number;
+        tolerance?: number;
     }
     interface IVRTheWorldTerrainProviderOptions {
         /**
@@ -19855,15 +19851,15 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * An array parallel to <code>positions</code> that give the maximum height of the       wall at <code>positions</code>. If undefined, the height of each position in used.
          */
-        maximumHeights?: Number[];
+        maximumHeights?: number[];
         /**
          * An array parallel to <code>positions</code> that give the minimum height of the       wall at <code>positions</code>. If undefined, the height at each position is 0.0.
          */
-        minimumHeights?: Number[];
+        minimumHeights?: number[];
         /**
          * The ellipsoid for coordinate manipulation
          */
@@ -19881,15 +19877,15 @@ declare module Cesium {
         /**
          * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        granularity?: Number;
+        granularity?: number;
         /**
          * An array parallel to <code>positions</code> that give the maximum height of the       wall at <code>positions</code>. If undefined, the height of each position in used.
          */
-        maximumHeights?: Number[];
+        maximumHeights?: number[];
         /**
          * An array parallel to <code>positions</code> that give the minimum height of the       wall at <code>positions</code>. If undefined, the height at each position is 0.0.
          */
-        minimumHeights?: Number[];
+        minimumHeights?: number[];
         /**
          * The ellipsoid for coordinate manipulation
          */
@@ -19903,11 +19899,11 @@ declare module Cesium {
         /**
          * The number of tiles in the X direction at level zero of       the tile tree.
          */
-        numberOfLevelZeroTilesX?: Number;
+        numberOfLevelZeroTilesX?: number;
         /**
          * The number of tiles in the Y direction at level zero of       the tile tree.
          */
-        numberOfLevelZeroTilesY?: Number;
+        numberOfLevelZeroTilesY?: number;
         /**
          * The southwest corner of the rectangle covered by the       tiling scheme, in meters.  If this parameter or rectangleNortheastInMeters is not specified, the entire       globe is covered in the longitude direction and an equal distance is covered in the latitude       direction, resulting in a square projection.
          */
@@ -20395,11 +20391,11 @@ declare module Cesium {
         /**
          * The pixel range to extend the screen space bounding box.
          */
-        pixelRange?: Number;
+        pixelRange?: number;
         /**
          * The minimum number of screen space objects that can be clustered.
          */
-        minimumClusterSize?: Number;
+        minimumClusterSize?: number;
         /**
          * Whether or not to cluster the billboards of an entity.
          */
@@ -21057,15 +21053,15 @@ declare module Cesium {
         /**
          * The width of each tile in pixels.  This parameter is ignored when accessing a tiled server.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * The height of each tile in pixels.  This parameter is ignored when accessing a tiled server.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * The maximum tile level to request, or undefined if there is no maximum.  This parameter is ignored when accessing                                       a tiled server.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
     }
     interface IBillboardCollectionOptions {
         /**
@@ -21149,7 +21145,7 @@ declare module Cesium {
         /**
          * The color of the debug outline.
          */
-        color?: number;
+        color?: Color;
         /**
          * Whether the primitive updates when the underlying camera changes.
          */
@@ -21167,11 +21163,11 @@ declare module Cesium {
         /**
          * The length of the axes in meters.
          */
-        length?: Number;
+        length?: number;
         /**
          * The width of the axes in pixels.
          */
-        width?: Number;
+        width?: number;
         /**
          * The 4x4 matrix that defines the reference frame, i.e., origin plus axes, to visualize.
          */
@@ -21241,23 +21237,23 @@ declare module Cesium {
         /**
          * The length of the sliding window over which to compute the average frame rate, in seconds.
          */
-        samplingWindow?: Number;
+        samplingWindow?: number;
         /**
          * The length of time to wait at startup and each time the page becomes visible (i.e. when the user       switches back to the tab) before starting to measure performance, in seconds.
          */
-        quietPeriod?: Number;
+        quietPeriod?: number;
         /**
          * The length of the warmup period, in seconds.  During the warmup period, a separate       (usually lower) frame rate is required.
          */
-        warmupPeriod?: Number;
+        warmupPeriod?: number;
         /**
          * The minimum frames-per-second that are required for acceptable performance during       the warmup period.  If the frame rate averages less than this during any samplingWindow during the warmupPeriod, the       lowFrameRate event will be raised and the page will redirect to the redirectOnLowFrameRateUrl, if any.
          */
-        minimumFrameRateDuringWarmup?: Number;
+        minimumFrameRateDuringWarmup?: number;
         /**
          * The minimum frames-per-second that are required for acceptable performance after       the end of the warmup period.  If the frame rate averages less than this during any samplingWindow after the warmupPeriod, the       lowFrameRate event will be raised and the page will redirect to the redirectOnLowFrameRateUrl, if any.
          */
-        minimumFrameRateAfterWarmup?: Number;
+        minimumFrameRateAfterWarmup?: number;
     }
     interface IGoogleEarthImageryProviderOptions {
         /**
@@ -21267,7 +21263,7 @@ declare module Cesium {
         /**
          * The channel (id) to be used when requesting data from the server.       The channel number can be found by looking at the json file located at:       earth.localdomain/default_map/query?request=Json&vars=geeServerDefs The /default_map path may       differ depending on your Google Earth Enterprise server configuration. Look for the "id" that       is associated with a "ImageryMaps" requestType. There may be more than one id available.       Example:       {         layers: [           {             id: 1002,             requestType: "ImageryMaps"           },           {             id: 1007,             requestType: "VectorMapsRaster"           }         ]       }
          */
-        channel: Number;
+        channel: number;
         /**
          * The path of the Google Earth server hosting the imagery.
          */
@@ -21275,7 +21271,7 @@ declare module Cesium {
         /**
          * The maximum level-of-detail supported by the Google Earth       Enterprise server, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The policy that determines if a tile       is invalid and should be discarded. To ensure that no tiles are discarded, construct and pass       a {@link NeverTileDiscardPolicy} for this parameter.
          */
@@ -21301,31 +21297,31 @@ declare module Cesium {
         /**
          * The number of grids cells.
          */
-        cells?: Number;
+        cells?: number;
         /**
          * The color to draw grid lines.
          */
-        color?: number;
+        color?: Color;
         /**
          * The color to draw glow for grid lines.
          */
-        glowColor?: number;
+        glowColor?: Color;
         /**
          * The width of lines used for rendering the line glow effect.
          */
-        glowWidth?: Number;
+        glowWidth?: number;
         /**
          * The width of the tile for level-of-detail selection purposes.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * The height of the tile for level-of-detail selection purposes.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * The size of the canvas used for rendering.
          */
-        canvasSize?: Number;
+        canvasSize?: number;
     }
     interface IGroundPrimitiveOptions {
         /**
@@ -21377,27 +21373,27 @@ declare module Cesium {
         /**
          * The alpha blending value of this layer, from 0.0 to 1.0.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates of the                         imagery tile for which the alpha is required, and it is expected to return                         the alpha value to use for the tile.
          */
-        alpha?: Number|Function;
+        alpha?: number|Function;
         /**
          * The brightness of this layer.  1.0 uses the unmodified imagery                         color.  Less than 1.0 makes the imagery darker while greater than 1.0 makes it brighter.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates of the                         imagery tile for which the brightness is required, and it is expected to return                         the brightness value to use for the tile.  The function is executed for every                         frame and for every tile, so it must be fast.
          */
-        brightness?: Number|Function;
+        brightness?: number|Function;
         /**
          * The contrast of this layer.  1.0 uses the unmodified imagery color.                         Less than 1.0 reduces the contrast while greater than 1.0 increases it.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates of the                         imagery tile for which the contrast is required, and it is expected to return                         the contrast value to use for the tile.  The function is executed for every                         frame and for every tile, so it must be fast.
          */
-        contrast?: Number|Function;
+        contrast?: number|Function;
         /**
          * The hue of this layer.  0.0 uses the unmodified imagery color.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates                         of the imagery tile for which the hue is required, and it is expected to return                         the contrast value to use for the tile.  The function is executed for every                         frame and for every tile, so it must be fast.
          */
-        hue?: Number|Function;
+        hue?: number|Function;
         /**
          * The saturation of this layer.  1.0 uses the unmodified imagery color.                         Less than 1.0 reduces the saturation while greater than 1.0 increases it.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates                         of the imagery tile for which the saturation is required, and it is expected to return                         the contrast value to use for the tile.  The function is executed for every                         frame and for every tile, so it must be fast.
          */
-        saturation?: Number|Function;
+        saturation?: number|Function;
         /**
          * The gamma correction to apply to this layer.  1.0 uses the unmodified imagery color.                         This can either be a simple number or a function with the signature                         <code>function(frameState, layer, x, y, level)</code>.  The function is passed the                         current frame state, this layer, and the x, y, and level coordinates of the                         imagery tile for which the gamma is required, and it is expected to return                         the gamma value to use for the tile.  The function is executed for every                         frame and for every tile, so it must be fast.
          */
-        gamma?: Number|Function;
+        gamma?: number|Function;
         /**
          * True if the layer is shown; otherwise, false.
          */
@@ -21405,15 +21401,15 @@ declare module Cesium {
         /**
          * The maximum anisotropy level to use       for texture filtering.  If this parameter is not specified, the maximum anisotropy supported       by the WebGL stack will be used.  Larger values make the imagery look better in horizon       views.
          */
-        maximumAnisotropy?: Number;
+        maximumAnisotropy?: number;
         /**
          * The minimum terrain level-of-detail at which to show this imagery layer,                or undefined to show it at all levels.  Level zero is the least-detailed level.
          */
-        minimumTerrainLevel?: Number;
+        minimumTerrainLevel?: number;
         /**
          * The maximum terrain level-of-detail at which to show this imagery layer,                or undefined to show it at all levels.  Level zero is the least-detailed level.
          */
-        maximumTerrainLevel?: Number;
+        maximumTerrainLevel?: number;
     }
     interface ILabelCollectionOptions {
         /**
@@ -21457,11 +21453,11 @@ declare module Cesium {
         /**
          * The minimum level-of-detail supported by the imagery provider.  Take care when specifying                this that the number of tiles at the minimum level is small, such as four or less.  A larger number is likely                to result in rendering problems.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The rectangle, in radians, covered by the image.
          */
@@ -21543,15 +21539,15 @@ declare module Cesium {
         /**
          * A uniform scale applied to this model.
          */
-        scale?: Number;
+        scale?: number;
         /**
          * The approximate minimum pixel size of the model regardless of zoom.
          */
-        minimumPixelSize?: Number;
+        minimumPixelSize?: number;
         /**
          * The maximum scale size of a model. An upper limit for minimumPixelSize.
          */
-        maximumScale?: Number;
+        maximumScale?: number;
         /**
          * A user-defined object to return when the model is picked with {@link Scene#pick}.
          */
@@ -21659,7 +21655,7 @@ declare module Cesium {
         /**
          * The width of the polyline in pixels.
          */
-        width?: Number;
+        width?: number;
         /**
          * Whether a line segment will be added between the last and first line positions to make this line a loop.
          */
@@ -21823,7 +21819,7 @@ declare module Cesium {
         /**
          * A scalar used to exaggerate the terrain. Note that terrain exaggeration will not modify any other primitive as they are positioned relative to the ellipsoid.
          */
-        terrainExaggeration?: Number;
+        terrainExaggeration?: number;
         /**
          * Determines if shadows are cast by the sun.
          */
@@ -21861,15 +21857,15 @@ declare module Cesium {
         /**
          * The number of cascades to use for the shadow map. Supported values are one and four.
          */
-        numberOfCascades?: Number;
+        numberOfCascades?: number;
         /**
          * The maximum distance used for generating cascaded shadows. Lower values improve shadow quality.
          */
-        maximumDistance?: Number;
+        maximumDistance?: number;
         /**
          * The width and height, in pixels, of each shadow map.
          */
-        size?: Number;
+        size?: number;
         /**
          * Whether percentage-closer-filtering is enabled for producing softer shadows.
          */
@@ -21877,7 +21873,7 @@ declare module Cesium {
         /**
          * The shadow darkness.
          */
-        darkness?: Number;
+        darkness?: number;
     }
     interface ISingleTileImageryProviderOptions {
         /**
@@ -21923,15 +21919,15 @@ declare module Cesium {
         /**
          * The color to draw the tile box and label.
          */
-        color?: number;
+        color?: Color;
         /**
          * The width of the tile for level-of-detail selection purposes.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * The height of the tile for level-of-detail selection purposes.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
     }
     interface IUrlTemplateImageryProviderOptions {
         /**
@@ -21961,11 +21957,11 @@ declare module Cesium {
         /**
          * The minimum level-of-detail supported by the imagery provider.  Take care when specifying                this that the number of tiles at the minimum level is small, such as four or less.  A larger number is likely                to result in rendering problems.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The rectangle, in radians, covered by the image.
          */
@@ -21981,11 +21977,11 @@ declare module Cesium {
         /**
          * Pixel width of image tiles.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * Pixel height of image tiles.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * true if the images provided by this imagery provider                 include an alpha channel; otherwise, false.  If this property is false, an alpha channel, if                 present, will be ignored.  If this property is true, any images without an alpha channel will                 be treated as if their alpha is 1.0 everywhere.  When this property is false, memory usage                 and texture upload time are potentially reduced.
          */
@@ -22039,19 +22035,19 @@ declare module Cesium {
         /**
          * The width of each tile in pixels.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * The height of each tile in pixels.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * The minimum level-of-detail supported by the imagery provider.  Take care when       specifying this that the number of tiles at the minimum level is small, such as four or less.  A larger number is       likely to result in rendering problems.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.       If not specified, there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * A credit for the data source, which is displayed on the canvas.
          */
@@ -22093,11 +22089,11 @@ declare module Cesium {
         /**
          * The tile width in pixels.
          */
-        tileWidth?: Number;
+        tileWidth?: number;
         /**
          * The tile height in pixels.
          */
-        tileHeight?: Number;
+        tileHeight?: number;
         /**
          * The tiling scheme corresponding to the organization of the tiles in the TileMatrixSet.
          */
@@ -22113,11 +22109,11 @@ declare module Cesium {
         /**
          * The minimum level-of-detail supported by the imagery provider.
          */
-        minimumLevel?: Number;
+        minimumLevel?: number;
         /**
          * The maximum level-of-detail supported by the imagery provider, or undefined if there is no limit.
          */
-        maximumLevel?: Number;
+        maximumLevel?: number;
         /**
          * The ellipsoid.  If not specified, the WGS84 ellipsoid is used.
          */
@@ -22241,7 +22237,7 @@ declare module Cesium {
         /**
          * The target frame rate when using the default render loop.
          */
-        targetFrameRate?: Number;
+        targetFrameRate?: number;
         /**
          * If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
          */
@@ -22257,7 +22253,7 @@ declare module Cesium {
         /**
          * A scalar used to exaggerate the terrain. Note that terrain exaggeration will not modify any other primitive as they are positioned relative to the ellipsoid.
          */
-        terrainExaggeration?: Number;
+        terrainExaggeration?: number;
         /**
          * Determines if shadows are cast by the sun.
          */
@@ -22291,7 +22287,7 @@ declare module Cesium {
         /**
          * The duration of the camera flight to an entered location, in seconds.
          */
-        flightDuration?: Number;
+        flightDuration?: number;
     }
     interface IGeocoderViewModelOptions {
         /**
@@ -22309,7 +22305,7 @@ declare module Cesium {
         /**
          * The duration of the camera flight to an entered location, in seconds.
          */
-        flightDuration?: Number;
+        flightDuration?: number;
     }
     interface INavigationHelpButtonOptions {
         /**
@@ -22455,7 +22451,7 @@ declare module Cesium {
         /**
          * The target frame rate when using the default render loop.
          */
-        targetFrameRate?: Number;
+        targetFrameRate?: number;
         /**
          * If true, this widget will automatically display an HTML panel to the user containing the error, if a render loop error occurs.
          */
@@ -22495,7 +22491,7 @@ declare module Cesium {
         /**
          * A scalar used to exaggerate the terrain. Note that terrain exaggeration will not modify any other primitive as they are positioned relative to the ellipsoid.
          */
-        terrainExaggeration?: Number;
+        terrainExaggeration?: number;
         /**
          * Determines if shadows are cast by the sun.
          */
@@ -22518,15 +22514,15 @@ declare module Cesium {
             /**
              * The width of the heightmap, in height samples.
              */
-            width: Number;
+            width: number;
             /**
              * The height of the heightmap, in height samples.
              */
-            height: Number;
+            height: number;
             /**
              * The height of skirts to drape at the edges of the heightmap.
              */
-            skirtHeight: Number;
+            skirtHeight: number;
             /**
              * An rectangle in the native coordinates of the heightmap's projection.  For                a heightmap with a geographic projection, this is degrees.  For the web mercator                projection, this is meters.
              */
@@ -22534,7 +22530,7 @@ declare module Cesium {
             /**
              * The scale used to exaggerate the terrain.
              */
-            exaggeration?: Number;
+            exaggeration?: number;
             /**
              * The rectangle covered by the heightmap, in geodetic coordinates with north, south, east and                west properties in radians.  Either rectangle or nativeRectangle must be provided.  If both                are provided, they're assumed to be consistent.
              */
@@ -22558,31 +22554,31 @@ declare module Cesium {
             /**
              * The factor by which to multiply height samples in order to obtain                the height above the heightOffset, in meters.  The heightOffset is added to the resulting                height after multiplying by the scale.
              */
-            heightScale?: Number;
+            heightScale?: number;
             /**
              * The offset to add to the scaled height to obtain the final                height in meters.  The offset is added after the height sample is multiplied by the                heightScale.
              */
-            heightOffset?: Number;
+            heightOffset?: number;
             /**
              * The number of elements in the buffer that make up a single height                sample.  This is usually 1, indicating that each element is a separate height sample.  If                it is greater than 1, that number of elements together form the height sample, which is                computed according to the structure.elementMultiplier and structure.isBigEndian properties.
              */
-            elementsPerHeight?: Number;
+            elementsPerHeight?: number;
             /**
              * The number of elements to skip to get from the first element of                one height to the first element of the next height.
              */
-            stride?: Number;
+            stride?: number;
             /**
              * The multiplier used to compute the height value when the                stride property is greater than 1.  For example, if the stride is 4 and the strideMultiplier                is 256, the height is computed as follows:                `height = buffer[index] + buffer[index + 1] * 256 + buffer[index + 2] * 256 * 256 + buffer[index + 3] * 256 * 256 * 256`                This is assuming that the isBigEndian property is false.  If it is true, the order of the                elements is reversed.
              */
-            elementMultiplier?: Number;
+            elementMultiplier?: number;
             /**
              * The lowest value that can be stored in the height buffer.  Any heights that are lower                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be 0 because a `Uint16Array` cannot store negative numbers.  If this parameter is                not specified, no minimum value is enforced.
              */
-            lowestEncodedHeight?: Number;
+            lowestEncodedHeight?: number;
             /**
              * The highest value that can be stored in the height buffer.  Any heights that are higher                than this value after encoding with the `heightScale` and `heightOffset` are clamped to this value.  For example, if the height                buffer is a `Uint16Array`, this value should be `256 * 256 - 1` or 65535 because a `Uint16Array` cannot store numbers larger                than 65535.  If this parameter is not specified, no maximum value is enforced.
              */
-            highestEncodedHeight?: Number;
+            highestEncodedHeight?: number;
             /**
              * Indicates endianness of the elements in the buffer when the                 stride property is greater than 1.  If this property is false, the first element is the                 low-order element.  If it is true, the first element is the high-order element.
              */
@@ -22594,29 +22590,29 @@ declare module Cesium {
             /**
              * Lists triads of numbers corresponding to the indices of the vertices                       in the vertex buffer that define the geometry's triangles.
              */
-            indices: Number[];
+            indices: number[];
             /**
              * The maximum value of the elements in <code>args.indices</code>.                                    If not supplied, this value will be computed.
              */
-            maximumIndex?: Number;
+            maximumIndex?: number;
             /**
              * The number of vertices that can be stored in the cache at any one time.
              */
-            cacheSize?: Number;
+            cacheSize?: number;
         }
         interface ITipsifyTipsifyOptions {
             /**
              * Lists triads of numbers corresponding to the indices of the vertices                       in the vertex buffer that define the geometry's triangles.
              */
-            indices: Number[];
+            indices: number[];
             /**
              * The maximum value of the elements in <code>args.indices</code>.                                    If not supplied, this value will be computed.
              */
-            maximumIndex?: Number;
+            maximumIndex?: number;
             /**
              * The number of vertices that can be stored in the cache at any one time.
              */
-            cacheSize?: Number;
+            cacheSize?: number;
         }
     }
     module Buffer {
@@ -22632,7 +22628,7 @@ declare module Cesium {
             /**
              * A <code>Number</code> defining the size of the buffer in bytes. Required if options.typedArray is not given.
              */
-            sizeInBytes?: Number;
+            sizeInBytes?: number;
             /**
              * Specifies the expected usage pattern of the buffer. On some GL implementations, this can significantly affect performance. See {@link BufferUsage}.
              */
@@ -22650,7 +22646,7 @@ declare module Cesium {
             /**
              * A <code>Number</code> defining the size of the buffer in bytes. Required if options.typedArray is not given.
              */
-            sizeInBytes?: Number;
+            sizeInBytes?: number;
             /**
              * Specifies the expected usage pattern of the buffer. On some GL implementations, this can significantly affect performance. See {@link BufferUsage}.
              */
@@ -22737,51 +22733,51 @@ declare module Cesium {
             /**
              * If specified, the red component to use instead of a randomized value.
              */
-            red?: Number;
+            red?: number;
             /**
              * The maximum red value to generate if none was specified.
              */
-            minimumRed?: Number;
+            minimumRed?: number;
             /**
              * The minimum red value to generate if none was specified.
              */
-            maximumRed?: Number;
+            maximumRed?: number;
             /**
              * If specified, the green component to use instead of a randomized value.
              */
-            green?: Number;
+            green?: number;
             /**
              * The maximum green value to generate if none was specified.
              */
-            minimumGreen?: Number;
+            minimumGreen?: number;
             /**
              * The minimum green value to generate if none was specified.
              */
-            maximumGreen?: Number;
+            maximumGreen?: number;
             /**
              * If specified, the blue component to use instead of a randomized value.
              */
-            blue?: Number;
+            blue?: number;
             /**
              * The maximum blue value to generate if none was specified.
              */
-            minimumBlue?: Number;
+            minimumBlue?: number;
             /**
              * The minimum blue value to generate if none was specified.
              */
-            maximumBlue?: Number;
+            maximumBlue?: number;
             /**
              * If specified, the alpha component to use instead of a randomized value.
              */
-            alpha?: Number;
+            alpha?: number;
             /**
              * The maximum alpha value to generate if none was specified.
              */
-            minimumAlpha?: Number;
+            minimumAlpha?: number;
             /**
              * The minimum alpha value to generate if none was specified.
              */
-            maximumAlpha?: Number;
+            maximumAlpha?: number;
         }
     }
     module HermiteSpline {
@@ -22789,7 +22785,7 @@ declare module Cesium {
             /**
              * The array of control point times.
              */
-            times: Number[];
+            times: number[];
             /**
              * The array of control points.
              */
@@ -22803,7 +22799,7 @@ declare module Cesium {
             /**
              * The array of control point times.
              */
-            times: Number[];
+            times: number[];
             /**
              * The array of control points.
              */
@@ -22813,7 +22809,7 @@ declare module Cesium {
             /**
              * The array of control point times.
              */
-            times: Number[];
+            times: number[];
             /**
              * The array of control points.
              */
@@ -22837,11 +22833,11 @@ declare module Cesium {
             /**
              * The height of the polygon.
              */
-            height?: Number;
+            height?: number;
             /**
              * The height of the polygon extrusion.
              */
-            extrudedHeight?: Number;
+            extrudedHeight?: number;
             /**
              * The vertex attributes to be computed.
              */
@@ -22849,7 +22845,7 @@ declare module Cesium {
             /**
              * The rotation of the texture coordiantes, in radians. A positive rotation is counter-clockwise.
              */
-            stRotation?: Number;
+            stRotation?: number;
             /**
              * The ellipsoid to be used as a reference.
              */
@@ -22857,7 +22853,7 @@ declare module Cesium {
             /**
              * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
              */
-            granularity?: Number;
+            granularity?: number;
             /**
              * Use the height of options.positions for each position instead of using options.height to determine the height.
              */
@@ -22881,11 +22877,11 @@ declare module Cesium {
             /**
              * The height of the polygon.
              */
-            height?: Number;
+            height?: number;
             /**
              * The height of the polygon extrusion.
              */
-            extrudedHeight?: Number;
+            extrudedHeight?: number;
             /**
              * The ellipsoid to be used as a reference.
              */
@@ -22893,7 +22889,7 @@ declare module Cesium {
             /**
              * The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
              */
-            granularity?: Number;
+            granularity?: number;
             /**
              * Use the height of options.positions for each position instead of using options.height to determine the height.
              */
@@ -22957,11 +22953,11 @@ declare module Cesium {
             /**
              * A constant that defines the maximum height of the       wall at <code>positions</code>. If undefined, the height of each position in used.
              */
-            maximumHeight?: Number;
+            maximumHeight?: number;
             /**
              * A constant that defines the minimum height of the       wall at <code>positions</code>. If undefined, the height at each position is 0.0.
              */
-            minimumHeight?: Number;
+            minimumHeight?: number;
             /**
              * The ellipsoid for coordinate manipulation
              */
@@ -22981,11 +22977,11 @@ declare module Cesium {
             /**
              * A constant that defines the maximum height of the       wall at <code>positions</code>. If undefined, the height of each position in used.
              */
-            maximumHeight?: Number;
+            maximumHeight?: number;
             /**
              * A constant that defines the minimum height of the       wall at <code>positions</code>. If undefined, the height at each position is 0.0.
              */
-            minimumHeight?: Number;
+            minimumHeight?: number;
             /**
              * The ellipsoid for coordinate manipulation
              */
@@ -23015,7 +23011,7 @@ declare module Cesium {
             /**
              * The default size of the map pin created for each point, in pixels.
              */
-            markerSize?: Number;
+            markerSize?: number;
             /**
              * The default symbol of the map pin created for each point.
              */
@@ -23023,19 +23019,19 @@ declare module Cesium {
             /**
              * The default color of the map pin created for each point.
              */
-            markerColor?: number;
+            markerColor?: Color;
             /**
              * The default color of polylines and polygon outlines.
              */
-            stroke?: number;
+            stroke?: Color;
             /**
              * The default width of polylines and polygon outlines.
              */
-            strokeWidth?: Number;
+            strokeWidth?: number;
             /**
              * The default color for polygon interiors.
              */
-            fill?: number;
+            fill?: Color;
             /**
              * true if we want the geometry features (polygons or linestrings) clamped to the ground. If true, lines will use corridors so use Entity.corridor instead of Entity.polyline.
              */
@@ -23079,7 +23075,7 @@ declare module Cesium {
             /**
              * The new interpolation degree.  If undefined, the existing property will be unchanged.
              */
-            interpolationDegree?: Number;
+            interpolationDegree?: number;
         }
     }
     module SampledProperty {
@@ -23091,7 +23087,7 @@ declare module Cesium {
             /**
              * The new interpolation degree.  If undefined, the existing property will be unchanged.
              */
-            interpolationDegree?: Number;
+            interpolationDegree?: number;
         }
     }
     module Camera {
@@ -23121,7 +23117,7 @@ declare module Cesium {
             /**
              * The duration of the flight in seconds. If omitted, Cesium attempts to calculate an ideal duration based on the distance to be traveled by the flight.
              */
-            duration?: Number;
+            duration?: number;
             /**
              * The function to execute when the flight is complete.
              */
@@ -23137,17 +23133,17 @@ declare module Cesium {
             /**
              * The maximum height at the peak of the flight.
              */
-            maximumHeight?: Number;
+            maximumHeight?: number;
             /**
              * Controls how the time is interpolated over the duration of the flight.
              */
-            easingFunction?: number|EasingFunction.Callback;
+            easingFunction?: EasingFunction.Callback|EasingFunction.Callback;
         }
         interface ICameraFlyToBoundingSphereOptions {
             /**
              * The duration of the flight in seconds. If omitted, Cesium attempts to calculate an ideal duration based on the distance to be traveled by the flight.
              */
-            duration?: Number;
+            duration?: number;
             /**
              * The offset from the target in the local east-north-up reference frame centered at the target.
              */
@@ -23167,11 +23163,11 @@ declare module Cesium {
             /**
              * The maximum height at the peak of the flight.
              */
-            maximumHeight?: Number;
+            maximumHeight?: number;
             /**
              * Controls how the time is interpolated over the duration of the flight.
              */
-            easingFunction?: number|EasingFunction.Callback;
+            easingFunction?: EasingFunction.Callback|EasingFunction.Callback;
         }
         /**
          * A function that will execute when a flight completes.
@@ -23203,15 +23199,15 @@ declare module Cesium {
             /**
              * A uniform scale applied to this model.
              */
-            scale?: Number;
+            scale?: number;
             /**
              * The approximate minimum pixel size of the model regardless of zoom.
              */
-            minimumPixelSize?: Number;
+            minimumPixelSize?: number;
             /**
              * The maximum scale for the model.
              */
-            maximumScale?: Number;
+            maximumScale?: number;
             /**
              * A user-defined object to return when the model is picked with {@link Scene#pick}.
              */
@@ -23255,7 +23251,7 @@ declare module Cesium {
             /**
              * The delay, in seconds, from <code>startTime</code> to start playing.
              */
-            delay?: Number;
+            delay?: number;
             /**
              * The scene time to stop playing the animation.  When this is <code>undefined</code>, the animation is played for its full duration.
              */
@@ -23267,7 +23263,7 @@ declare module Cesium {
             /**
              * Values greater than <code>1.0</code> increase the speed that the animation is played relative to the scene clock speed; values less than <code>1.0</code> decrease the speed.
              */
-            speedup?: Number;
+            speedup?: number;
             /**
              * When <code>true</code>, the animation is played in reverse.
              */
@@ -23285,7 +23281,7 @@ declare module Cesium {
             /**
              * The delay, in seconds, from <code>startTime</code> to start playing.
              */
-            delay?: Number;
+            delay?: number;
             /**
              * The scene time to stop playing the animations.  When this is <code>undefined</code>, the animations are played for its full duration.
              */
@@ -23297,7 +23293,7 @@ declare module Cesium {
             /**
              * Values greater than <code>1.0</code> increase the speed that the animations play relative to the scene clock speed; values less than <code>1.0</code> decrease the speed.
              */
-            speedup?: Number;
+            speedup?: number;
             /**
              * When <code>true</code>, the animations are played in reverse.
              */
@@ -23313,11 +23309,11 @@ declare module Cesium {
             /**
              * The duration of the flight in seconds.
              */
-            duration?: Number;
+            duration?: number;
             /**
              * The maximum height at the peak of the flight.
              */
-            maximumHeight?: Number;
+            maximumHeight?: number;
             /**
              * The offset from the target in the local east-north-up reference frame centered at the target.
              */
@@ -23332,13 +23328,13 @@ declare module Cesium {
         /**
          * A function used to compare two items while performing a binary search.
          */
-        type Comparator = (a: any, b: any) => Number;
+        type Comparator = (a: any, b: any) => number;
     }
     module EasingFunction {
         /**
          * Function interface for implementing a custom easing function.
          */
-        type Callback = (time: Number) => Number;
+        type Callback = (time: number) => number;
         /**
          * Linear easing.
          */
@@ -23486,19 +23482,19 @@ declare module Cesium {
         /**
          * A function used to compare two items while performing a merge sort.
          */
-        type Comparator = (a: any, b: any, userDefinedObject?: any) => Number;
+        type Comparator = (a: any, b: any, userDefinedObject?: any) => number;
     }
     module Queue {
         /**
          * A function used to compare two items while sorting a queue.
          */
-        type Comparator = (a: any, b: any) => Number;
+        type Comparator = (a: any, b: any) => number;
     }
     module requestAnimationFrame {
         /**
          * A function that will be called when the next frame should be drawn.
          */
-        type Callback = (timestamp: Number) => void;
+        type Callback = (timestamp: number) => void;
     }
     module throttleRequestByServer {
         /**
@@ -23508,7 +23504,7 @@ declare module Cesium {
         /**
          * Specifies the maximum number of requests that can be simultaneously open to a single server.  If this value is higher thanthe number of requests per server actually allowed by the web browser, Cesium's ability to prioritize requests will be adverselyaffected.
          */
-        var maximumRequestsPerServer: Number;
+        var maximumRequestsPerServer: number;
     }
     module TileProviderError {
         /**
@@ -23619,68 +23615,68 @@ declare module Cesium {
         /**
          * {@link Clock#tick} will always advances the clock in its current direction.
          */
-        var UNBOUNDED: Number;
+        var UNBOUNDED: number;
         /**
          * When {@link Clock#startTime} or {@link Clock#stopTime} is reached,{@link Clock#tick} will not advance {@link Clock#currentTime} any further.
          */
-        var CLAMPED: Number;
+        var CLAMPED: number;
         /**
          * When {@link Clock#stopTime} is reached, {@link Clock#tick} will advance{@link Clock#currentTime} to the opposite end of the interval.  Whentime is moving backwards, {@link Clock#tick} will not advance past{@link Clock#startTime}
          */
-        var LOOP_STOP: Number;
+        var LOOP_STOP: number;
     }
     module ClockStep {
         /**
          * {@link Clock#tick} advances the current time by a fixed step,which is the number of seconds specified by {@link Clock#multiplier}.
          */
-        var TICK_DEPENDENT: Number;
+        var TICK_DEPENDENT: number;
         /**
          * {@link Clock#tick} advances the current time by the amount of systemtime elapsed since the previous call multiplied by {@link Clock#multiplier}.
          */
-        var SYSTEM_CLOCK_MULTIPLIER: Number;
+        var SYSTEM_CLOCK_MULTIPLIER: number;
         /**
          * {@link Clock#tick} sets the clock to the current system time;ignoring all other settings.
          */
-        var SYSTEM_CLOCK: Number;
+        var SYSTEM_CLOCK: number;
     }
     module ComponentDatatype {
         /**
          * 8-bit signed byte corresponding to <code>gl.BYTE</code> and the typeof an element in <code>Int8Array</code>.
          */
-        var BYTE: Number;
+        var BYTE: number;
         /**
          * 8-bit unsigned byte corresponding to <code>UNSIGNED_BYTE</code> and the typeof an element in <code>Uint8Array</code>.
          */
-        var UNSIGNED_BYTE: Number;
+        var UNSIGNED_BYTE: number;
         /**
          * 16-bit signed short corresponding to <code>SHORT</code> and the typeof an element in <code>Int16Array</code>.
          */
-        var SHORT: Number;
+        var SHORT: number;
         /**
          * 16-bit unsigned short corresponding to <code>UNSIGNED_SHORT</code> and the typeof an element in <code>Uint16Array</code>.
          */
-        var UNSIGNED_SHORT: Number;
+        var UNSIGNED_SHORT: number;
         /**
          * 32-bit signed int corresponding to <code>INT</code> and the typeof an element in <code>Int32Array</code>.
          */
-        var INT: Number;
+        var INT: number;
         /**
          * 32-bit unsigned int corresponding to <code>UNSIGNED_INT</code> and the typeof an element in <code>Uint32Array</code>.
          */
-        var UNSIGNED_INT: Number;
+        var UNSIGNED_INT: number;
         /**
          * 32-bit floating-point corresponding to <code>FLOAT</code> and the typeof an element in <code>Float32Array</code>.
          */
-        var FLOAT: Number;
+        var FLOAT: number;
         /**
          * 64-bit floating-point corresponding to <code>gl.DOUBLE</code> (in Desktop OpenGL;this is not supported in WebGL, and is emulated in Cesium via {@link GeometryPipeline.encodeAttribute})and the type of an element in <code>Float64Array</code>.
          */
-        var DOUBLE: Number;
+        var DOUBLE: number;
         /**
          * Returns the size, in bytes, of the corresponding datatype.
          * @param componentDatatype  (Required) The component datatype to get the size of.
          */
-        function getSizeInBytes(componentDatatype: number): Number;
+        function getSizeInBytes(componentDatatype: number): number;
         /**
          * Gets the {@link ComponentDatatype} for the provided TypedArray instance.
          * @param array  (Required) The typed array.
@@ -23696,7 +23692,7 @@ declare module Cesium {
          * @param componentDatatype  (Required) The component data type.
          * @param valuesOrLength  (Required) The length of the array to create or an array.
          */
-        function createTypedArray(componentDatatype: number, valuesOrLength: Number|any[]): Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array;
+        function createTypedArray(componentDatatype: number, valuesOrLength: number|any[]): Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array;
         /**
          * Creates a typed view of an array of bytes.
          * @param componentDatatype  (Required) The type of the view to create.
@@ -23704,7 +23700,7 @@ declare module Cesium {
          * @param byteOffset  (Optional) The offset, in bytes, to the first element in the view.
          * @param length  (Optional) The number of elements in the view.
          */
-        function createArrayBufferView(componentDatatype: number, buffer: ArrayBuffer, byteOffset?: Number, length?: Number): Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array;
+        function createArrayBufferView(componentDatatype: number, buffer: ArrayBuffer, byteOffset?: number, length?: number): Int8Array|Uint8Array|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array;
         /**
          * Get the ComponentDatatype from its name.
          * @param name  (Required) The name of the ComponentDatatype.
@@ -23715,15 +23711,15 @@ declare module Cesium {
         /**
          * <img src="images/CornerTypeRounded.png" style="vertical-align: middle;" width="186" height="189" />Corner has a smooth edge.
          */
-        var ROUNDED: Number;
+        var ROUNDED: number;
         /**
          * <img src="images/CornerTypeMitered.png" style="vertical-align: middle;" width="186" height="189" />Corner point is the intersection of adjacent edges.
          */
-        var MITERED: Number;
+        var MITERED: number;
         /**
          * <img src="images/CornerTypeBeveled.png" style="vertical-align: middle;" width="186" height="189" />Corner is clipped.
          */
-        var BEVELED: Number;
+        var BEVELED: number;
     }
     module CubicRealPolynomial {
         /**
@@ -23733,7 +23729,7 @@ declare module Cesium {
          * @param c  (Required) The coefficient of the 1st order monomial.
          * @param d  (Required) The coefficient of the 0th order monomial.
          */
-        function computeDiscriminant(a: Number, b: Number, c: Number, d: Number): Number;
+        function computeDiscriminant(a: number, b: number, c: number, d: number): number;
         /**
          * Provides the real valued roots of the cubic polynomial with the provided coefficients.
          * @param a  (Required) The coefficient of the 3rd order monomial.
@@ -23741,7 +23737,7 @@ declare module Cesium {
          * @param c  (Required) The coefficient of the 1st order monomial.
          * @param d  (Required) The coefficient of the 0th order monomial.
          */
-        function computeRealRoots(a: Number, b: Number, c: Number, d: Number): Number[];
+        function computeRealRoots(a: number, b: number, c: number, d: number): number[];
     }
     module defaultValue {
         /**
@@ -23753,15 +23749,15 @@ declare module Cesium {
         /**
          * No extrapolation occurs.
          */
-        var NONE: Number;
+        var NONE: number;
         /**
          * The first or last value is used when outside the range of sample data.
          */
-        var HOLD: Number;
+        var HOLD: number;
         /**
          * The value is extrapolated.
          */
-        var EXTRAPOLATE: Number;
+        var EXTRAPOLATE: number;
     }
     module FeatureDetection {
         /**
@@ -23825,7 +23821,7 @@ declare module Cesium {
          * @param attributeName  (Optional) The name of the attribute.
          * @param length  (Optional) The length of each line segment in meters.  This can be negative to point the vector in the opposite direction.
          */
-        function createLineSegmentsForVectors(geometry: Geometry, attributeName?: string, length?: Number): Geometry;
+        function createLineSegmentsForVectors(geometry: Geometry, attributeName?: string, length?: number): Geometry;
         /**
          * Creates an object that maps attribute names to unique locations (indices)for matching vertex attributes and shader programs.
          * @param geometry  (Required) The geometry, which is not modified, to create the object for.
@@ -23841,7 +23837,7 @@ declare module Cesium {
          * @param geometry  (Required) The geometry to modify.
          * @param cacheCapacity  (Optional) The number of vertices that can be held in the GPU's vertex cache.
          */
-        function reorderForPostVertexCache(geometry: Geometry, cacheCapacity?: Number): Geometry;
+        function reorderForPostVertexCache(geometry: Geometry, cacheCapacity?: number): Geometry;
         /**
          * Splits a geometry into multiple geometries, if necessary, to ensure that indices in the<code>indices</code> fit into unsigned shorts.  This is used to meet the WebGL requirementswhen unsigned int indices are not supported.<p>If the geometry does not have any <code>indices</code>, this function has no effect.</p>
          * @param geometry  (Required) The geometry to be split into multiple geometries.
@@ -23891,7 +23887,7 @@ declare module Cesium {
          * @param degree  (Required) The desired degree of interpolation.
          * @param inputOrder  (Optional) The order of the inputs (0 means just the data, 1 means the data and its derivative, etc).
          */
-        function getRequiredDataPoints(degree: Number, inputOrder?: Number): Number;
+        function getRequiredDataPoints(degree: number, inputOrder?: number): number;
         /**
          * Interpolates values using Hermite Polynomial Approximation.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -23900,7 +23896,7 @@ declare module Cesium {
          * @param yStride  (Required) The number of dependent variable values in yTable corresponding toeach independent variable value in xTable.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolateOrderZero(x: Number, xTable: Number[], yTable: Number[], yStride: Number, result?: Number[]): Number[];
+        function interpolateOrderZero(x: number, xTable: number[], yTable: number[], yStride: number, result?: number[]): number[];
         /**
          * Interpolates values using Hermite Polynomial Approximation.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -23911,26 +23907,26 @@ declare module Cesium {
          * @param outputOrder  (Required) The number of derivatives desired for output.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolate(x: Number, xTable: Number[], yTable: Number[], yStride: Number, inputOrder: Number, outputOrder: Number, result?: Number[]): Number[];
+        function interpolate(x: number, xTable: number[], yTable: number[], yStride: number, inputOrder: number, outputOrder: number, result?: number[]): number[];
     }
     module IndexDatatype {
         /**
          * 8-bit unsigned byte corresponding to <code>UNSIGNED_BYTE</code> and the typeof an element in <code>Uint8Array</code>.
          */
-        var UNSIGNED_BYTE: Number;
+        var UNSIGNED_BYTE: number;
         /**
          * 16-bit unsigned short corresponding to <code>UNSIGNED_SHORT</code> and the typeof an element in <code>Uint16Array</code>.
          */
-        var UNSIGNED_SHORT: Number;
+        var UNSIGNED_SHORT: number;
         /**
          * 32-bit unsigned int corresponding to <code>UNSIGNED_INT</code> and the typeof an element in <code>Uint32Array</code>.
          */
-        var UNSIGNED_INT: Number;
+        var UNSIGNED_INT: number;
         /**
          * Returns the size, in bytes, of the corresponding datatype.
          * @param indexDatatype  (Required) The index datatype to get the size of.
          */
-        function getSizeInBytes(indexDatatype: number): Number;
+        function getSizeInBytes(indexDatatype: number): number;
         /**
          * Validates that the provided index datatype is a valid {@link IndexDatatype}.
          * @param indexDatatype  (Required) The index datatype to validate.
@@ -23941,7 +23937,7 @@ declare module Cesium {
          * @param numberOfVertices  (Required) Number of vertices that the indices will reference.
          * @param indicesLengthOrArray  (Required) Passed through to the typed array constructor.
          */
-        function createTypedArray(numberOfVertices: Number, indicesLengthOrArray: any): Uint16Array|Uint32Array;
+        function createTypedArray(numberOfVertices: number, indicesLengthOrArray: any): Uint16Array|Uint32Array;
         /**
          * Creates a typed array from a source array buffer.  The resulting typed array will store indices, using either <code><Uint16Array</code>or <code>Uint32Array</code> depending on the number of vertices.
          * @param numberOfVertices  (Required) Number of vertices that the indices will reference.
@@ -23949,7 +23945,7 @@ declare module Cesium {
          * @param byteOffset  (Required) Passed through to the typed array constructor.
          * @param length  (Required) Passed through to the typed array constructor.
          */
-        function createTypedArrayFromArrayBuffer(numberOfVertices: Number, sourceArray: ArrayBuffer, byteOffset: Number, length: Number): Uint16Array|Uint32Array;
+        function createTypedArrayFromArrayBuffer(numberOfVertices: number, sourceArray: ArrayBuffer, byteOffset: number, length: number): Uint16Array|Uint32Array;
     }
     module InterpolationAlgorithm {
         /**
@@ -23960,7 +23956,7 @@ declare module Cesium {
          * Given the desired degree, returns the number of data points required for interpolation.
          * @param degree  (Required) The desired degree of interpolation.
          */
-        function getRequiredDataPoints(degree: Number): Number;
+        function getRequiredDataPoints(degree: number): number;
         /**
          * Performs zero order interpolation.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -23969,7 +23965,7 @@ declare module Cesium {
          * @param yStride  (Required) The number of dependent variable values in yTable corresponding toeach independent variable value in xTable.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolateOrderZero(x: Number, xTable: Number[], yTable: Number[], yStride: Number, result?: Number[]): Number[];
+        function interpolateOrderZero(x: number, xTable: number[], yTable: number[], yStride: number, result?: number[]): number[];
         /**
          * Performs higher order interpolation.  Not all interpolators need to support high-order interpolation,if this function remains undefined on implementing objects, interpolateOrderZero will be used instead.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -23980,21 +23976,21 @@ declare module Cesium {
          * @param outputOrder  (Required) The number of derivatives desired for output.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolate(x: Number, xTable: Number[], yTable: Number[], yStride: Number, inputOrder: Number, outputOrder: Number, result?: Number[]): Number[];
+        function interpolate(x: number, xTable: number[], yTable: number[], yStride: number, inputOrder: number, outputOrder: number, result?: number[]): number[];
     }
     module Intersect {
         /**
          * Represents that an object is not contained within the frustum.
          */
-        var OUTSIDE: Number;
+        var OUTSIDE: number;
         /**
          * Represents that an object intersects one of the frustum's planes.
          */
-        var INTERSECTING: Number;
+        var INTERSECTING: number;
         /**
          * Represents that an object is fully within the frustum.
          */
-        var INSIDE: Number;
+        var INSIDE: number;
     }
     module Intersections2D {
         /**
@@ -24006,7 +24002,7 @@ declare module Cesium {
          * @param u2  (Required) The coordinate of the third vertex in the triangle, in counter-clockwise order.
          * @param result  (Optional) The array into which to copy the result.  If this parameter is not supplied,                           a new array is constructed and returned.
          */
-        function clipTriangleAtAxisAlignedThreshold(threshold: Number, keepAbove: Boolean, u0: Number, u1: Number, u2: Number, result?: Number[]): Number[];
+        function clipTriangleAtAxisAlignedThreshold(threshold: number, keepAbove: Boolean, u0: number, u1: number, u2: number, result?: number[]): number[];
         /**
          * Compute the barycentric coordinates of a 2D position within a 2D triangle.
          * @param x  (Required) The x coordinate of the position for which to find the barycentric coordinates.
@@ -24019,7 +24015,7 @@ declare module Cesium {
          * @param y3  (Required) The y coordinate of the triangle's third vertex.
          * @param result  (Optional) The instance into to which to copy the result.  If this parameter                    is undefined, a new instance is created and returned.
          */
-        function computeBarycentricCoordinates(x: Number, y: Number, x1: Number, y1: Number, x2: Number, y2: Number, x3: Number, y3: Number, result?: Cartesian3): Cartesian3;
+        function computeBarycentricCoordinates(x: number, y: number, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, result?: Cartesian3): Cartesian3;
     }
     module IntersectionTests {
         /**
@@ -24037,7 +24033,7 @@ declare module Cesium {
          * @param p2  (Required) The third vertex of the triangle.
          * @param cullBackFaces  (Optional) If <code>true</code>, will only compute an intersection with the front face of the triangle                 and return undefined for intersections with the back face.
          */
-        function rayTriangleParametric(ray: Ray, p0: Cartesian3, p1: Cartesian3, p2: Cartesian3, cullBackFaces?: Boolean): Number;
+        function rayTriangleParametric(ray: Ray, p0: Cartesian3, p1: Cartesian3, p2: Cartesian3, cullBackFaces?: Boolean): number;
         /**
          * Computes the intersection of a ray and a triangle as a Cartesian3 coordinate.
          * @param ray  (Required) The ray.
@@ -24121,22 +24117,22 @@ declare module Cesium {
         /**
          * Represents the shift key being held down.
          */
-        var SHIFT: Number;
+        var SHIFT: number;
         /**
          * Represents the control key being held down.
          */
-        var CTRL: Number;
+        var CTRL: number;
         /**
          * Represents the alt key being held down.
          */
-        var ALT: Number;
+        var ALT: number;
     }
     module LagrangePolynomialApproximation {
         /**
          * Given the desired degree, returns the number of data points required for interpolation.
          * @param degree  (Required) The desired degree of interpolation.
          */
-        function getRequiredDataPoints(degree: Number): Number;
+        function getRequiredDataPoints(degree: number): number;
         /**
          * Interpolates values using Lagrange Polynomial Approximation.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -24145,14 +24141,14 @@ declare module Cesium {
          * @param yStride  (Required) The number of dependent variable values in yTable corresponding toeach independent variable value in xTable.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolateOrderZero(x: Number, xTable: Number[], yTable: Number[], yStride: Number, result?: Number[]): Number[];
+        function interpolateOrderZero(x: number, xTable: number[], yTable: number[], yStride: number, result?: number[]): number[];
     }
     module LinearApproximation {
         /**
          * Given the desired degree, returns the number of data points required for interpolation.Since linear interpolation can only generate a first degree polynomial, this functionalways returns 2.
          * @param degree  (Required) The desired degree of interpolation.
          */
-        function getRequiredDataPoints(degree: Number): Number;
+        function getRequiredDataPoints(degree: number): number;
         /**
          * Interpolates values using linear approximation.
          * @param x  (Required) The independent variable for which the dependent variables will be interpolated.
@@ -24161,7 +24157,7 @@ declare module Cesium {
          * @param yStride  (Required) The number of dependent variable values in yTable corresponding toeach independent variable value in xTable.
          * @param result  (Optional) An existing array into which to store the result.
          */
-        function interpolateOrderZero(x: Number, xTable: Number[], yTable: Number[], yStride: Number, result?: Number[]): Number[];
+        function interpolateOrderZero(x: number, xTable: number[], yTable: number[], yStride: number, result?: number[]): number[];
     }
     module MapboxApi {
         /**
@@ -24173,222 +24169,222 @@ declare module Cesium {
         /**
          * 0.1
          */
-        var EPSILON1: Number;
+        var EPSILON1: number;
         /**
          * 0.01
          */
-        var EPSILON2: Number;
+        var EPSILON2: number;
         /**
          * 0.001
          */
-        var EPSILON3: Number;
+        var EPSILON3: number;
         /**
          * 0.0001
          */
-        var EPSILON4: Number;
+        var EPSILON4: number;
         /**
          * 0.00001
          */
-        var EPSILON5: Number;
+        var EPSILON5: number;
         /**
          * 0.000001
          */
-        var EPSILON6: Number;
+        var EPSILON6: number;
         /**
          * 0.0000001
          */
-        var EPSILON7: Number;
+        var EPSILON7: number;
         /**
          * 0.00000001
          */
-        var EPSILON8: Number;
+        var EPSILON8: number;
         /**
          * 0.000000001
          */
-        var EPSILON9: Number;
+        var EPSILON9: number;
         /**
          * 0.0000000001
          */
-        var EPSILON10: Number;
+        var EPSILON10: number;
         /**
          * 0.00000000001
          */
-        var EPSILON11: Number;
+        var EPSILON11: number;
         /**
          * 0.000000000001
          */
-        var EPSILON12: Number;
+        var EPSILON12: number;
         /**
          * 0.0000000000001
          */
-        var EPSILON13: Number;
+        var EPSILON13: number;
         /**
          * 0.00000000000001
          */
-        var EPSILON14: Number;
+        var EPSILON14: number;
         /**
          * 0.000000000000001
          */
-        var EPSILON15: Number;
+        var EPSILON15: number;
         /**
          * 0.0000000000000001
          */
-        var EPSILON16: Number;
+        var EPSILON16: number;
         /**
          * 0.00000000000000001
          */
-        var EPSILON17: Number;
+        var EPSILON17: number;
         /**
          * 0.000000000000000001
          */
-        var EPSILON18: Number;
+        var EPSILON18: number;
         /**
          * 0.0000000000000000001
          */
-        var EPSILON19: Number;
+        var EPSILON19: number;
         /**
          * 0.00000000000000000001
          */
-        var EPSILON20: Number;
+        var EPSILON20: number;
         /**
          * 3.986004418e14
          */
-        var GRAVITATIONALPARAMETER: Number;
+        var GRAVITATIONALPARAMETER: number;
         /**
          * Radius of the sun in meters: 6.955e8
          */
-        var SOLAR_RADIUS: Number;
+        var SOLAR_RADIUS: number;
         /**
          * The mean radius of the moon, according to the "Report of the IAU/IAG Working Group onCartographic Coordinates and Rotational Elements of the Planets and satellites: 2000",Celestial Mechanics 82: 83-110, 2002.
          */
-        var LUNAR_RADIUS: Number;
+        var LUNAR_RADIUS: number;
         /**
          * 64 * 1024
          */
-        var SIXTY_FOUR_KILOBYTES: Number;
+        var SIXTY_FOUR_KILOBYTES: number;
         /**
          * Returns the sign of the value; 1 if the value is positive, -1 if the value isnegative, or 0 if the value is 0.
          * @param value  (Required) The value to return the sign of.
          */
-        function sign(value: Number): Number;
+        function sign(value: number): number;
         /**
          * Returns 1.0 if the given value is positive or zero, and -1.0 if it is negative.This is similar to {@link CesiumMath#sign} except that returns 1.0 instead of0.0 when the input value is 0.0.
          * @param value  (Required) The value to return the sign of.
          */
-        function signNotZero(value: Number): Number;
+        function signNotZero(value: number): number;
         /**
          * Converts a scalar value in the range [-1.0, 1.0] to a SNORM in the range [0, rangeMax]
          * @param value  (Required) The scalar value in the range [-1.0, 1.0]
          * @param rangeMax  (Optional) The maximum value in the mapped range, 255 by default.
          */
-        function toSNorm(value: Number, rangeMax?: Number): Number;
+        function toSNorm(value: number, rangeMax?: number): number;
         /**
          * Converts a SNORM value in the range [0, rangeMax] to a scalar in the range [-1.0, 1.0].
          * @param value  (Required) SNORM value in the range [0, 255]
          * @param rangeMax  (Optional) The maximum value in the SNORM range, 255 by default.
          */
-        function fromSNorm(value: Number, rangeMax?: Number): Number;
+        function fromSNorm(value: number, rangeMax?: number): number;
         /**
          * Returns the hyperbolic sine of a number.The hyperbolic sine of <em>value</em> is defined to be(<em>e<sup>x</sup>&nbsp;-&nbsp;e<sup>-x</sup></em>)/2.0where <i>e</i> is Euler's number, approximately 2.71828183.<p>Special cases:  <ul>    <li>If the argument is NaN, then the result is NaN.</li>    <li>If the argument is infinite, then the result is an infinity    with the same sign as the argument.</li>    <li>If the argument is zero, then the result is a zero with the    same sign as the argument.</li>  </ul></p>
          * @param value  (Required) The number whose hyperbolic sine is to be returned.
          */
-        function sinh(value: Number): Number;
+        function sinh(value: number): number;
         /**
          * Returns the hyperbolic cosine of a number.The hyperbolic cosine of <strong>value</strong> is defined to be(<em>e<sup>x</sup>&nbsp;+&nbsp;e<sup>-x</sup></em>)/2.0where <i>e</i> is Euler's number, approximately 2.71828183.<p>Special cases:  <ul>    <li>If the argument is NaN, then the result is NaN.</li>    <li>If the argument is infinite, then the result is positive infinity.</li>    <li>If the argument is zero, then the result is 1.0.</li>  </ul></p>
          * @param value  (Required) The number whose hyperbolic cosine is to be returned.
          */
-        function cosh(value: Number): Number;
+        function cosh(value: number): number;
         /**
          * Computes the linear interpolation of two values.
          * @param p  (Required) The start value to interpolate.
          * @param q  (Required) The end value to interpolate.
          * @param time  (Required) The time of interpolation generally in the range <code>[0.0, 1.0]</code>.
          */
-        function lerp(p: Number, q: Number, time: Number): Number;
+        function lerp(p: number, q: number, time: number): number;
         /**
          * pi
          */
-        var PI: Number;
+        var PI: number;
         /**
          * 1/pi
          */
-        var ONE_OVER_PI: Number;
+        var ONE_OVER_PI: number;
         /**
          * pi/2
          */
-        var PI_OVER_TWO: Number;
+        var PI_OVER_TWO: number;
         /**
          * pi/3
          */
-        var PI_OVER_THREE: Number;
+        var PI_OVER_THREE: number;
         /**
          * pi/4
          */
-        var PI_OVER_FOUR: Number;
+        var PI_OVER_FOUR: number;
         /**
          * pi/6
          */
-        var PI_OVER_SIX: Number;
+        var PI_OVER_SIX: number;
         /**
          * 3pi/2
          */
-        var THREE_PI_OVER_TWO: Number;
+        var THREE_PI_OVER_TWO: number;
         /**
          * 2pi
          */
-        var TWO_PI: Number;
+        var TWO_PI: number;
         /**
          * 1/2pi
          */
-        var ONE_OVER_TWO_PI: Number;
+        var ONE_OVER_TWO_PI: number;
         /**
          * The number of radians in a degree.
          */
-        var RADIANS_PER_DEGREE: Number;
+        var RADIANS_PER_DEGREE: number;
         /**
          * The number of degrees in a radian.
          */
-        var DEGREES_PER_RADIAN: Number;
+        var DEGREES_PER_RADIAN: number;
         /**
          * The number of radians in an arc second.
          */
-        var RADIANS_PER_ARCSECOND: Number;
+        var RADIANS_PER_ARCSECOND: number;
         /**
          * Converts degrees to radians.
          * @param degrees  (Required) The angle to convert in degrees.
          */
-        function toRadians(degrees: Number): Number;
+        function toRadians(degrees: number): number;
         /**
          * Converts radians to degrees.
          * @param radians  (Required) The angle to convert in radians.
          */
-        function toDegrees(radians: Number): Number;
+        function toDegrees(radians: number): number;
         /**
          * Converts a longitude value, in radians, to the range [<code>-Math.PI</code>, <code>Math.PI</code>).
          * @param angle  (Required) The longitude value, in radians, to convert to the range [<code>-Math.PI</code>, <code>Math.PI</code>).
          */
-        function convertLongitudeRange(angle: Number): Number;
+        function convertLongitudeRange(angle: number): number;
         /**
          * Convenience function that clamps a latitude value, in radians, to the range [<code>-Math.PI/2</code>, <code>Math.PI/2</code>).Useful for sanitizing data before use in objects requiring correct range.
          * @param angle  (Required) The latitude value, in radians, to clamp to the range [<code>-Math.PI/2</code>, <code>Math.PI/2</code>).
          */
-        function clampToLatitudeRange(angle: Number): Number;
+        function clampToLatitudeRange(angle: number): number;
         /**
          * Produces an angle in the range -Pi <= angle <= Pi which is equivalent to the provided angle.
          * @param angle  (Required) in radians
          */
-        function negativePiToPi(angle: Number): Number;
+        function negativePiToPi(angle: number): number;
         /**
          * Produces an angle in the range 0 <= angle <= 2Pi which is equivalent to the provided angle.
          * @param angle  (Required) in radians
          */
-        function zeroToTwoPi(angle: Number): Number;
+        function zeroToTwoPi(angle: number): number;
         /**
          * The modulo operation that also works for negative dividends.
          * @param m  (Required) The dividend.
          * @param n  (Required) The divisor.
          */
-        function mod(m: Number, n: Number): Number;
+        function mod(m: number, n: number): number;
         /**
          * Determines if two values are equal using an absolute or relative tolerance test. This is usefulto avoid problems due to roundoff error when comparing floating-point values directly. The values arefirst compared using an absolute tolerance test. If that fails, a relative tolerance test is performed.Use this test if you are unsure of the magnitudes of left and right.
          * @param left  (Required) The first value to compare.
@@ -24396,93 +24392,93 @@ declare module Cesium {
          * @param relativeEpsilon  (Required) The maximum inclusive delta between <code>left</code> and <code>right</code> for the relative tolerance test.
          * @param absoluteEpsilon  (Optional) The maximum inclusive delta between <code>left</code> and <code>right</code> for the absolute tolerance test.
          */
-        function equalsEpsilon(left: Number, right: Number, relativeEpsilon: Number, absoluteEpsilon?: Number): Boolean;
+        function equalsEpsilon(left: number, right: number, relativeEpsilon: number, absoluteEpsilon?: number): Boolean;
         /**
          * Computes the factorial of the provided number.
          * @param n  (Required) The number whose factorial is to be computed.
          */
-        function factorial(n: Number): Number;
+        function factorial(n: number): number;
         /**
          * Increments a number with a wrapping to a minimum value if the number exceeds the maximum value.
          * @param n  (Optional) The number to be incremented.
          * @param maximumValue  (Optional) The maximum incremented value before rolling over to the minimum value.
          * @param minimumValue  (Optional) The number reset to after the maximum value has been exceeded.
          */
-        function incrementWrap(n?: Number, maximumValue?: Number, minimumValue?: Number): Number;
+        function incrementWrap(n?: number, maximumValue?: number, minimumValue?: number): number;
         /**
          * Determines if a positive integer is a power of two.
          * @param n  (Required) The positive integer to test.
          */
-        function isPowerOfTwo(n: Number): Boolean;
+        function isPowerOfTwo(n: number): Boolean;
         /**
          * Computes the next power-of-two integer greater than or equal to the provided positive integer.
          * @param n  (Required) The positive integer to test.
          */
-        function nextPowerOfTwo(n: Number): Number;
+        function nextPowerOfTwo(n: number): number;
         /**
          * Constraint a value to lie between two values.
          * @param value  (Required) The value to constrain.
          * @param min  (Required) The minimum value.
          * @param max  (Required) The maximum value.
          */
-        function clamp(value: Number, min: Number, max: Number): Number;
+        function clamp(value: number, min: number, max: number): number;
         /**
          * Sets the seed used by the random number generatorin {@link CesiumMath#nextRandomNumber}.
          * @param seed  (Required) An integer used as the seed.
          */
-        function setRandomNumberSeed(seed: Number): void;
+        function setRandomNumberSeed(seed: number): void;
         /**
          * Generates a random number in the range of [0.0, 1.0)using a Mersenne twister.
          */
-        function nextRandomNumber(): Number;
+        function nextRandomNumber(): number;
         /**
          * Computes <code>Math.acos(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]so that the function will never return NaN.
          * @param value  (Required) The value for which to compute acos.
          */
-        function acosClamped(value: Number): Number;
+        function acosClamped(value: number): number;
         /**
          * Computes <code>Math.asin(value)</acode>, but first clamps <code>value</code> to the range [-1.0, 1.0]so that the function will never return NaN.
          * @param value  (Required) The value for which to compute asin.
          */
-        function asinClamped(value: Number): Number;
+        function asinClamped(value: number): number;
         /**
          * Finds the chord length between two points given the circle's radius and the angle between the points.
          * @param angle  (Required) The angle between the two points.
          * @param radius  (Required) The radius of the circle.
          */
-        function chordLength(angle: Number, radius: Number): Number;
+        function chordLength(angle: number, radius: number): number;
         /**
          * Finds the logarithm of a number to a base.
          * @param number  (Required) The number.
          * @param base  (Required) The base.
          */
-        function logBase(number: Number, base: Number): Number;
+        function logBase(number: number, base: number): number;
     }
     module Packable {
         /**
          * The number of elements used to pack the object into an array.
          */
-        var packedLength: Number;
+        var packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        function pack(value: any, array: Number[], startingIndex?: Number): void;
+        function pack(value: any, array: number[], startingIndex?: number): void;
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        function unpack(array: Number[], startingIndex?: Number, result?: any): any;
+        function unpack(array: number[], startingIndex?: number, result?: any): any;
     }
     module PackableForInterpolation {
         /**
          * The number of elements used to store the object into an array in its interpolatable form.
          */
-        var packedInterpolationLength: Number;
+        var packedInterpolationLength: number;
         /**
          * Converts a packed array into a form suitable for interpolation.
          * @param packedArray  (Required) The packed array.
@@ -24490,7 +24486,7 @@ declare module Cesium {
          * @param lastIndex  (Optional) The index of the last element to be converted.
          * @param result  (Optional) The object into which to store the result.
          */
-        function convertPackedArrayForInterpolation(packedArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: Number[]): void;
+        function convertPackedArrayForInterpolation(packedArray: number[], startingIndex?: number, lastIndex?: number, result?: number[]): void;
         /**
          * Retrieves an instance from a packed array converted with {@link PackableForInterpolation.convertPackedArrayForInterpolation}.
          * @param array  (Required) The array previously packed for interpolation.
@@ -24499,37 +24495,37 @@ declare module Cesium {
          * @param lastIndex  (Optional) The lastIndex used to convert the array.
          * @param result  (Optional) The object into which to store the result.
          */
-        function unpackInterpolationResult(array: Number[], sourceArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: any): any;
+        function unpackInterpolationResult(array: number[], sourceArray: number[], startingIndex?: number, lastIndex?: number, result?: any): any;
     }
     module PixelFormat {
         /**
          * A pixel format containing a depth value.
          */
-        var DEPTH_COMPONENT: Number;
+        var DEPTH_COMPONENT: number;
         /**
          * A pixel format containing a depth and stencil value, most often used with {@link PixelDatatype.UNSIGNED_INT_24_8}.
          */
-        var DEPTH_STENCIL: Number;
+        var DEPTH_STENCIL: number;
         /**
          * A pixel format containing an alpha channel.
          */
-        var ALPHA: Number;
+        var ALPHA: number;
         /**
          * A pixel format containing red, green, and blue channels.
          */
-        var RGB: Number;
+        var RGB: number;
         /**
          * A pixel format containing red, green, blue, and alpha channels.
          */
-        var RGBA: Number;
+        var RGBA: number;
         /**
          * A pixel format containing a luminance (intensity) channel.
          */
-        var LUMINANCE: Number;
+        var LUMINANCE: number;
         /**
          * A pixel format containing luminance (intensity) and alpha channels.
          */
-        var LUMINANCE_ALPHA: Number;
+        var LUMINANCE_ALPHA: number;
     }
     module PolygonPipeline {
         /**
@@ -24545,7 +24541,7 @@ declare module Cesium {
          * @param positions  (Required) Cartesian2 array containing the vertices of the polygon
          * @param holes  (Optional) An array of the staring indices of the holes.
          */
-        function triangulate(positions: Cartesian2[], holes?: Number[]): Number[];
+        function triangulate(positions: Cartesian2[], holes?: number[]): number[];
         /**
          * Subdivides positions and raises points to the surface of the ellipsoid.
          * @param ellipsoid  (Required) The ellipsoid the polygon in on.
@@ -24553,7 +24549,7 @@ declare module Cesium {
          * @param indices  (Required) An array of indices that determines the triangles in the polygon.
          * @param granularity  (Optional) The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          */
-        function computeSubdivision(ellipsoid: Ellipsoid, positions: Cartesian3[], indices: Number[], granularity?: Number): void;
+        function computeSubdivision(ellipsoid: Ellipsoid, positions: Cartesian3[], indices: number[], granularity?: number): void;
         /**
          * Scales each position of a geometry's position attribute to a height, in place.
          * @param positions  (Required) The array of numbers representing the positions to be scaled
@@ -24561,7 +24557,7 @@ declare module Cesium {
          * @param ellipsoid  (Optional) The ellipsoid on which the positions lie.
          * @param scaleToSurface  (Optional) <code>true</code> if the positions need to be scaled to the surface before the height is added.
          */
-        function scaleToGeodeticHeight(positions: Number[], height?: Number, ellipsoid?: Ellipsoid, scaleToSurface?: Boolean): Number[];
+        function scaleToGeodeticHeight(positions: number[], height?: number, ellipsoid?: Ellipsoid, scaleToSurface?: Boolean): number[];
     }
     module PolylinePipeline {
         /**
@@ -24577,7 +24573,7 @@ declare module Cesium {
          * @param granularity  (Optional) The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          * @param ellipsoid  (Optional) The ellipsoid on which the positions lie.
          */
-        function generateArc(positions: Cartesian3[], height?: Number|Number[], granularity?: Number, ellipsoid?: Ellipsoid): Number[];
+        function generateArc(positions: Cartesian3[], height?: number|number[], granularity?: number, ellipsoid?: Ellipsoid): number[];
         /**
          * Subdivides polyline and raises all points to the specified height. Returns an array of new {Cartesian3} positions.
          * @param positions  (Required) The array of type {Cartesian3} representing positions.
@@ -24585,37 +24581,37 @@ declare module Cesium {
          * @param granularity  (Optional) The distance, in radians, between each latitude and longitude. Determines the number of positions in the buffer.
          * @param ellipsoid  (Optional) The ellipsoid on which the positions lie.
          */
-        function generateCartesianArc(positions: Cartesian3[], height?: Number|Number[], granularity?: Number, ellipsoid?: Ellipsoid): Cartesian3[];
+        function generateCartesianArc(positions: Cartesian3[], height?: number|number[], granularity?: number, ellipsoid?: Ellipsoid): Cartesian3[];
     }
     module PrimitiveType {
         /**
          * Points primitive where each vertex (or index) is a separate point.
          */
-        var POINTS: Number;
+        var POINTS: number;
         /**
          * Lines primitive where each two vertices (or indices) is a line segment.  Line segments are not necessarily connected.
          */
-        var LINES: Number;
+        var LINES: number;
         /**
          * Line loop primitive where each vertex (or index) after the first connects a line tothe previous vertex, and the last vertex implicitly connects to the first.
          */
-        var LINE_LOOP: Number;
+        var LINE_LOOP: number;
         /**
          * Line strip primitive where each vertex (or index) after the first connects a line to the previous vertex.
          */
-        var LINE_STRIP: Number;
+        var LINE_STRIP: number;
         /**
          * Triangles primitive where each three vertices (or indices) is a triangle.  Triangles do not necessarily share edges.
          */
-        var TRIANGLES: Number;
+        var TRIANGLES: number;
         /**
          * Triangle strip primitive where each vertex (or index) after the first two connect tothe previous two vertices forming a triangle.  For example, this can be used to model a wall.
          */
-        var TRIANGLE_STRIP: Number;
+        var TRIANGLE_STRIP: number;
         /**
          * Triangle fan primitive where each vertex (or index) after the first two connect tothe previous vertex and the first vertex forming a triangle.  For example, this can be usedto model a cone or circle.
          */
-        var TRIANGLE_FAN: Number;
+        var TRIANGLE_FAN: number;
     }
     module QuadraticRealPolynomial {
         /**
@@ -24624,14 +24620,14 @@ declare module Cesium {
          * @param b  (Required) The coefficient of the 1st order monomial.
          * @param c  (Required) The coefficient of the 0th order monomial.
          */
-        function computeDiscriminant(a: Number, b: Number, c: Number): Number;
+        function computeDiscriminant(a: number, b: number, c: number): number;
         /**
          * Provides the real valued roots of the quadratic polynomial with the provided coefficients.
          * @param a  (Required) The coefficient of the 2nd order monomial.
          * @param b  (Required) The coefficient of the 1st order monomial.
          * @param c  (Required) The coefficient of the 0th order monomial.
          */
-        function computeRealRoots(a: Number, b: Number, c: Number): Number[];
+        function computeRealRoots(a: number, b: number, c: number): number[];
     }
     module QuarticRealPolynomial {
         /**
@@ -24642,7 +24638,7 @@ declare module Cesium {
          * @param d  (Required) The coefficient of the 1st order monomial.
          * @param e  (Required) The coefficient of the 0th order monomial.
          */
-        function computeDiscriminant(a: Number, b: Number, c: Number, d: Number, e: Number): Number;
+        function computeDiscriminant(a: number, b: number, c: number, d: number, e: number): number;
         /**
          * Provides the real valued roots of the quartic polynomial with the provided coefficients.
          * @param a  (Required) The coefficient of the 4th order monomial.
@@ -24651,87 +24647,87 @@ declare module Cesium {
          * @param d  (Required) The coefficient of the 1st order monomial.
          * @param e  (Required) The coefficient of the 0th order monomial.
          */
-        function computeRealRoots(a: Number, b: Number, c: Number, d: Number, e: Number): Number[];
+        function computeRealRoots(a: number, b: number, c: number, d: number, e: number): number[];
     }
     module ReferenceFrame {
         /**
          * The fixed frame.
          */
-        var FIXED: Number;
+        var FIXED: number;
         /**
          * The inertial frame.
          */
-        var INERTIAL: Number;
+        var INERTIAL: number;
     }
     module ScreenSpaceEventType {
         /**
          * Represents a mouse left button down event.
          */
-        var LEFT_DOWN: Number;
+        var LEFT_DOWN: number;
         /**
          * Represents a mouse left button up event.
          */
-        var LEFT_UP: Number;
+        var LEFT_UP: number;
         /**
          * Represents a mouse left click event.
          */
-        var LEFT_CLICK: Number;
+        var LEFT_CLICK: number;
         /**
          * Represents a mouse left double click event.
          */
-        var LEFT_DOUBLE_CLICK: Number;
+        var LEFT_DOUBLE_CLICK: number;
         /**
          * Represents a mouse left button down event.
          */
-        var RIGHT_DOWN: Number;
+        var RIGHT_DOWN: number;
         /**
          * Represents a mouse right button up event.
          */
-        var RIGHT_UP: Number;
+        var RIGHT_UP: number;
         /**
          * Represents a mouse right click event.
          */
-        var RIGHT_CLICK: Number;
+        var RIGHT_CLICK: number;
         /**
          * Represents a mouse right double click event.
          */
-        var RIGHT_DOUBLE_CLICK: Number;
+        var RIGHT_DOUBLE_CLICK: number;
         /**
          * Represents a mouse middle button down event.
          */
-        var MIDDLE_DOWN: Number;
+        var MIDDLE_DOWN: number;
         /**
          * Represents a mouse middle button up event.
          */
-        var MIDDLE_UP: Number;
+        var MIDDLE_UP: number;
         /**
          * Represents a mouse middle click event.
          */
-        var MIDDLE_CLICK: Number;
+        var MIDDLE_CLICK: number;
         /**
          * Represents a mouse middle double click event.
          */
-        var MIDDLE_DOUBLE_CLICK: Number;
+        var MIDDLE_DOUBLE_CLICK: number;
         /**
          * Represents a mouse move event.
          */
-        var MOUSE_MOVE: Number;
+        var MOUSE_MOVE: number;
         /**
          * Represents a mouse wheel event.
          */
-        var WHEEL: Number;
+        var WHEEL: number;
         /**
          * Represents the start of a two-finger event on a touch surface.
          */
-        var PINCH_START: Number;
+        var PINCH_START: number;
         /**
          * Represents the end of a two-finger event on a touch surface.
          */
-        var PINCH_END: Number;
+        var PINCH_END: number;
         /**
          * Represents a change of a two-finger event on a touch surface.
          */
-        var PINCH_MOVE: Number;
+        var PINCH_MOVE: number;
     }
     module Simon1994PlanetaryPositions {
         /**
@@ -24842,7 +24838,7 @@ declare module Cesium {
          * @param upper  (Required) An array with length <code>n - 1</code> that contains the upper diagonal of the coefficient matrix.
          * @param right  (Required) An array of Cartesians with length <code>n</code> that is the right side of the system of equations.
          */
-        function solve(diagonal: Number[], lower: Number[], upper: Number[], right: Cartesian3[]): Cartesian3[];
+        function solve(diagonal: number[], lower: number[], upper: number[], right: Cartesian3[]): Cartesian3[];
     }
     module TrustedServers {
         /**
@@ -24850,13 +24846,13 @@ declare module Cesium {
          * @param host  (Required) The host to be added.
          * @param port  (Required) The port used to access the host.
          */
-        function add(host: string, port: Number): void;
+        function add(host: string, port: number): void;
         /**
          * Removes a trusted server from the registry
          * @param host  (Required) The host to be removed.
          * @param port  (Required) The port used to access the host.
          */
-        function remove(host: string, port: Number): void;
+        function remove(host: string, port: number): void;
         /**
          * Tests whether a server is trusted or not. The server must have been added with the port if it is included in the url.
          * @param url  (Required) The url to be tested against the trusted list
@@ -24871,45 +24867,45 @@ declare module Cesium {
         /**
          * Represents that no part of an object is visible.
          */
-        var NONE: Number;
+        var NONE: number;
         /**
          * Represents that part, but not all, of an object is visible
          */
-        var PARTIAL: Number;
+        var PARTIAL: number;
         /**
          * Represents that an object is visible in its entirety.
          */
-        var FULL: Number;
+        var FULL: number;
     }
     module WindingOrder {
         /**
          * Vertices are in clockwise order.
          */
-        var CLOCKWISE: Number;
+        var CLOCKWISE: number;
         /**
          * Vertices are in counter-clockwise order.
          */
-        var COUNTER_CLOCKWISE: Number;
+        var COUNTER_CLOCKWISE: number;
     }
     module Rotation {
         /**
          * The number of elements used to pack the object into an array.
          */
-        var packedLength: Number;
+        var packedLength: number;
         /**
          * Stores the provided instance into the provided array.
          * @param value  (Required) The value to pack.
          * @param array  (Required) The array to pack into.
          * @param startingIndex  (Optional) The index into the array at which to start packing the elements.
          */
-        function pack(value: Rotation, array: Number[], startingIndex?: Number): Number[];
+        function pack(value: Rotation, array: number[], startingIndex?: number): number[];
         /**
          * Retrieves an instance from a packed array.
          * @param array  (Required) The packed array.
          * @param startingIndex  (Optional) The starting index of the element to be unpacked.
          * @param result  (Optional) The object into which to store the result.
          */
-        function unpack(array: Number[], startingIndex?: Number, result?: Rotation): Rotation;
+        function unpack(array: number[], startingIndex?: number, result?: Rotation): Rotation;
         /**
          * Converts a packed array into a form suitable for interpolation.
          * @param packedArray  (Required) The packed array.
@@ -24917,7 +24913,7 @@ declare module Cesium {
          * @param lastIndex  (Optional) The index of the last element to be converted.
          * @param result  (Optional) The object into which to store the result.
          */
-        function convertPackedArrayForInterpolation(packedArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: Number[]): void;
+        function convertPackedArrayForInterpolation(packedArray: number[], startingIndex?: number, lastIndex?: number, result?: number[]): void;
         /**
          * Retrieves an instance from a packed array converted with {@link Rotation.convertPackedArrayForInterpolation}.
          * @param array  (Required) The array previously packed for interpolation.
@@ -24926,31 +24922,31 @@ declare module Cesium {
          * @param lastIndex  (Optional) The lastIndex used to convert the array.
          * @param result  (Optional) The object into which to store the result.
          */
-        function unpackInterpolationResult(array: Number[], sourceArray: Number[], startingIndex?: Number, lastIndex?: Number, result?: Rotation): Rotation;
+        function unpackInterpolationResult(array: number[], sourceArray: number[], startingIndex?: number, lastIndex?: number, result?: Rotation): Rotation;
     }
     module StripeOrientation {
         /**
          * Horizontal orientation.
          */
-        var HORIZONTAL: Number;
+        var HORIZONTAL: number;
         /**
          * Vertical orientation.
          */
-        var VERTICAL: Number;
+        var VERTICAL: number;
     }
     module ClearCommand {
         /**
          * The value to clear the color buffer to.  When <code>undefined</code>, the color buffer is not cleared.
          */
-        var color: number;
+        var color: Color;
         /**
          * The value to clear the depth buffer to.  When <code>undefined</code>, the depth buffer is not cleared.
          */
-        var depth: Number;
+        var depth: number;
         /**
          * The value to clear the stencil buffer to.  When <code>undefined</code>, the stencil buffer is not cleared.
          */
-        var stencil: Number;
+        var stencil: number;
         /**
          * The render state to apply when executing the clear command.  The following states affect clearing:scissor test, color mask, depth mask, and stencil mask.  When the render state is<code>undefined</code>, the default render state is used.
          */
@@ -25027,27 +25023,27 @@ declare module Cesium {
         /**
          * The number of red bits per component in the default framebuffer's color buffer.  The minimum is eight.
          */
-        var redBits: Number;
+        var redBits: number;
         /**
          * The number of green bits per component in the default framebuffer's color buffer.  The minimum is eight.
          */
-        var greenBits: Number;
+        var greenBits: number;
         /**
          * The number of blue bits per component in the default framebuffer's color buffer.  The minimum is eight.
          */
-        var blueBits: Number;
+        var blueBits: number;
         /**
          * The number of alpha bits per component in the default framebuffer's color buffer.  The minimum is eight.<br /><br />The alpha channel is used for GL destination alpha operations and by the HTML compositor to combine the color bufferwith the rest of the page.
          */
-        var alphaBits: Number;
+        var alphaBits: number;
         /**
          * The number of depth bits per pixel in the default bound framebuffer.  The minimum is 16 bits; mostimplementations will have 24 bits.
          */
-        var depthBits: Number;
+        var depthBits: number;
         /**
          * The number of stencil bits per pixel in the default bound framebuffer.  The minimum is eight bits.
          */
-        var stencilBits: Number;
+        var stencilBits: number;
         /**
          * <code>true</code> if the WebGL context supports antialiasing.  By defaultantialiasing is requested, but it is not supported by all systems.
          */
@@ -25095,11 +25091,11 @@ declare module Cesium {
         /**
          * The drawingBufferHeight of the underlying GL context.
          */
-        var drawingBufferHeight: Number;
+        var drawingBufferHeight: number;
         /**
          * The drawingBufferWidth of the underlying GL context.
          */
-        var drawingBufferWidth: Number;
+        var drawingBufferWidth: number;
         /**
          * Gets an object representing the currently bound framebuffer.  While this instance is not an actual{@link Framebuffer}, it is used to represent the default framebuffer in calls to{@link Texture.FromFramebuffer}.
          */
@@ -25108,7 +25104,7 @@ declare module Cesium {
          * Gets the object associated with a pick color.
          * @param pickColor  (Required) The pick color.
          */
-        function getObjectByPickColor(pickColor: number): any;
+        function getObjectByPickColor(pickColor: Color): any;
         /**
          * Creates a unique ID associated with the input object for use with color-buffer picking.The ID has an RGBA color value unique to this context.  You must call destroy()on the pick ID when destroying the input object.
          * @param object  (Required) The object to associate with the pick ID.
@@ -25119,79 +25115,79 @@ declare module Cesium {
         /**
          * The maximum number of texture units that can be used from the vertex and fragmentshader with this WebGL implementation.  The minimum is eight.  If both shaders access thesame texture unit, this counts as two texture units.
          */
-        var maximumCombinedTextureImageUnits: Number;
+        var maximumCombinedTextureImageUnits: number;
         /**
          * The approximate maximum cube mape width and height supported by this WebGL implementation.The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
          */
-        var maximumCubeMapSize: Number;
+        var maximumCubeMapSize: number;
         /**
          * The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>uniforms that can be used by a fragment shader with this WebGL implementation.  The minimum is 16.
          */
-        var maximumFragmentUniformVectors: Number;
+        var maximumFragmentUniformVectors: number;
         /**
          * The maximum number of texture units that can be used from the fragment shader with this WebGL implementation.  The minimum is eight.
          */
-        var maximumTextureImageUnits: Number;
+        var maximumTextureImageUnits: number;
         /**
          * The maximum renderbuffer width and height supported by this WebGL implementation.The minimum is 16, but most desktop and laptop implementations will support much larger sizes like 8,192.
          */
-        var maximumRenderbufferSize: Number;
+        var maximumRenderbufferSize: number;
         /**
          * The approximate maximum texture width and height supported by this WebGL implementation.The minimum is 64, but most desktop and laptop implementations will support much larger sizes like 8,192.
          */
-        var maximumTextureSize: Number;
+        var maximumTextureSize: number;
         /**
          * The maximum number of <code>vec4</code> varying variables supported by this WebGL implementation.The minimum is eight.  Matrices and arrays count as multiple <code>vec4</code>s.
          */
-        var maximumVaryingVectors: Number;
+        var maximumVaryingVectors: number;
         /**
          * The maximum number of <code>vec4</code> vertex attributes supported by this WebGL implementation.  The minimum is eight.
          */
-        var maximumVertexAttributes: Number;
+        var maximumVertexAttributes: number;
         /**
          * The maximum number of texture units that can be used from the vertex shader with this WebGL implementation.The minimum is zero, which means the GL does not support vertex texture fetch.
          */
-        var maximumVertexTextureImageUnits: Number;
+        var maximumVertexTextureImageUnits: number;
         /**
          * The maximum number of <code>vec4</code>, <code>ivec4</code>, and <code>bvec4</code>uniforms that can be used by a vertex shader with this WebGL implementation.  The minimum is 16.
          */
-        var maximumVertexUniformVectors: Number;
+        var maximumVertexUniformVectors: number;
         /**
          * The minimum aliased line width, in pixels, supported by this WebGL implementation.  It will be at most one.
          */
-        var minimumAliasedLineWidth: Number;
+        var minimumAliasedLineWidth: number;
         /**
          * The maximum aliased line width, in pixels, supported by this WebGL implementation.  It will be at least one.
          */
-        var maximumAliasedLineWidth: Number;
+        var maximumAliasedLineWidth: number;
         /**
          * The minimum aliased point size, in pixels, supported by this WebGL implementation.  It will be at most one.
          */
-        var minimumAliasedPointSize: Number;
+        var minimumAliasedPointSize: number;
         /**
          * The maximum aliased point size, in pixels, supported by this WebGL implementation.  It will be at least one.
          */
-        var maximumAliasedPointSize: Number;
+        var maximumAliasedPointSize: number;
         /**
          * The maximum supported width of the viewport.  It will be at least as large as the visible width of the associated canvas.
          */
-        var maximumViewportWidth: Number;
+        var maximumViewportWidth: number;
         /**
          * The maximum supported height of the viewport.  It will be at least as large as the visible height of the associated canvas.
          */
-        var maximumViewportHeight: Number;
+        var maximumViewportHeight: number;
         /**
          * The maximum degree of anisotropy for texture filtering
          */
-        var maximumTextureFilterAnisotropy: Number;
+        var maximumTextureFilterAnisotropy: number;
         /**
          * The maximum number of simultaneous outputs that may be written in a fragment shader.
          */
-        var maximumDrawBuffers: Number;
+        var maximumDrawBuffers: number;
         /**
          * The maximum number of color attachments supported.
          */
-        var maximumColorAttachments: Number;
+        var maximumColorAttachments: number;
         /**
          * High precision float supported (<code>highp</code>) in fragment shaders.
          */
@@ -25359,7 +25355,7 @@ declare module Cesium {
          * @param xOffset  (Optional) An offset in the x direction in the cubemap where copying begins.
          * @param yOffset  (Optional) An offset in the y direction in the cubemap where copying begins.
          */
-        function copyFrom(source: any, xOffset?: Number, yOffset?: Number): void;
+        function copyFrom(source: any, xOffset?: number, yOffset?: number): void;
         /**
          * Copies texels from the framebuffer to the cubemap's face.
          * @param xOffset  (Optional) An offset in the x direction in the cubemap where copying begins.
@@ -25369,7 +25365,7 @@ declare module Cesium {
          * @param width  (Optional) The width of the subimage to copy.
          * @param height  (Optional) The height of the subimage to copy.
          */
-        function copyFromFramebuffer(xOffset?: Number, yOffset?: Number, framebufferXOffset?: Number, framebufferYOffset?: Number, width?: Number, height?: Number): void;
+        function copyFromFramebuffer(xOffset?: number, yOffset?: number, framebufferXOffset?: number, framebufferYOffset?: number, width?: number, height?: number): void;
     }
     module DrawCommand {
         /**
@@ -25387,7 +25383,7 @@ declare module Cesium {
         /**
          * The status of the framebuffer. If the status is not WebGLConstants.FRAMEBUFFER_COMPLETE,a {@link DeveloperError} will be thrown when attempting to render to the framebuffer.
          */
-        var status: Number;
+        var status: number;
         /**
          * True if the framebuffer has a depth attachment.  Depth attachments includedepth and depth-stencil textures, and depth and depth-stencil renderbuffers.  Whenrendering to a framebuffer, a depth attachment is required for the depth test to have effect.
          */
@@ -25446,7 +25442,7 @@ declare module Cesium {
          * @param xOffset  (Optional) The offset in the x direction within the texture to copy into.
          * @param yOffset  (Optional) The offset in the y direction within the texture to copy into.
          */
-        function copyFrom(source: any, xOffset?: Number, yOffset?: Number): void;
+        function copyFrom(source: any, xOffset?: number, yOffset?: number): void;
         /**
          * TODO: This method has no documentation. Contact the library author if this method should be documented
          * @param xOffset  (Optional) The offset in the x direction within the texture to copy into.
@@ -25456,7 +25452,7 @@ declare module Cesium {
          * @param width  (Optional) optional
          * @param height  (Optional) optional
          */
-        function copyFromFramebuffer(xOffset?: Number, yOffset?: Number, framebufferXOffset?: Number, framebufferYOffset?: Number, width?: Number, height?: Number): void;
+        function copyFromFramebuffer(xOffset?: number, yOffset?: number, framebufferXOffset?: number, framebufferYOffset?: number, width?: number, height?: number): void;
         /**
          * TODO: This method has no documentation. Contact the library author if this method should be documented
          * @param hint  (Optional) optional.
@@ -25639,11 +25635,11 @@ declare module Cesium {
         /**
          * Gets the scaling factor for transforming from the canvaspixel space to canvas coordinate space.
          */
-        var resolutionScale: Number;
+        var resolutionScale: number;
         /**
          * A scalar used to mix a color with the fog color based on the distance to the camera.
          */
-        var fogDensity: Number;
+        var fogDensity: number;
         /**
          * TODO: This property has no documentation. Contact the library author if this property should be documented
          */
@@ -25707,77 +25703,77 @@ declare module Cesium {
         /**
          * Pixel values are added componentwise.  This is used in additive blending for translucency.
          */
-        var ADD: Number;
+        var ADD: number;
         /**
          * Pixel values are subtracted componentwise (source - destination).  This is used in alpha blending for translucency.
          */
-        var SUBTRACT: Number;
+        var SUBTRACT: number;
         /**
          * Pixel values are subtracted componentwise (destination - source).
          */
-        var REVERSE_SUBTRACT: Number;
+        var REVERSE_SUBTRACT: number;
     }
     module BlendFunction {
         /**
          * The blend factor is zero.
          */
-        var ZERO: Number;
+        var ZERO: number;
         /**
          * The blend factor is one.
          */
-        var ONE: Number;
+        var ONE: number;
         /**
          * The blend factor is the source color.
          */
-        var SOURCE_COLOR: Number;
+        var SOURCE_COLOR: number;
         /**
          * The blend factor is one minus the source color.
          */
-        var ONE_MINUS_SOURCE_COLOR: Number;
+        var ONE_MINUS_SOURCE_COLOR: number;
         /**
          * The blend factor is the destination color.
          */
-        var DESTINATION_COLOR: Number;
+        var DESTINATION_COLOR: number;
         /**
          * The blend factor is one minus the destination color.
          */
-        var ONE_MINUS_DESTINATION_COLOR: Number;
+        var ONE_MINUS_DESTINATION_COLOR: number;
         /**
          * The blend factor is the source alpha.
          */
-        var SOURCE_ALPHA: Number;
+        var SOURCE_ALPHA: number;
         /**
          * The blend factor is one minus the source alpha.
          */
-        var ONE_MINUS_SOURCE_ALPHA: Number;
+        var ONE_MINUS_SOURCE_ALPHA: number;
         /**
          * The blend factor is the destination alpha.
          */
-        var DESTINATION_ALPHA: Number;
+        var DESTINATION_ALPHA: number;
         /**
          * The blend factor is one minus the destination alpha.
          */
-        var ONE_MINUS_DESTINATION_ALPHA: Number;
+        var ONE_MINUS_DESTINATION_ALPHA: number;
         /**
          * The blend factor is the constant color.
          */
-        var CONSTANT_COLOR: Number;
+        var CONSTANT_COLOR: number;
         /**
          * The blend factor is one minus the constant color.
          */
-        var ONE_MINUS_CONSTANT_COLOR: Number;
+        var ONE_MINUS_CONSTANT_COLOR: number;
         /**
          * The blend factor is the constant alpha.
          */
-        var CONSTANT_ALPHA: Number;
+        var CONSTANT_ALPHA: number;
         /**
          * The blend factor is one minus the constant alpha.
          */
-        var ONE_MINUS_CONSTANT_ALPHA: Number;
+        var ONE_MINUS_CONSTANT_ALPHA: number;
         /**
          * The blend factor is the saturated source alpha.
          */
-        var SOURCE_ALPHA_SATURATE: Number;
+        var SOURCE_ALPHA_SATURATE: number;
     }
     module BlendingState {
         /**
@@ -25801,71 +25797,71 @@ declare module Cesium {
         /**
          * A left mouse button press followed by moving the mouse and releasing the button.
          */
-        var LEFT_DRAG: Number;
+        var LEFT_DRAG: number;
         /**
          * A right mouse button press followed by moving the mouse and releasing the button.
          */
-        var RIGHT_DRAG: Number;
+        var RIGHT_DRAG: number;
         /**
          * A middle mouse button press followed by moving the mouse and releasing the button.
          */
-        var MIDDLE_DRAG: Number;
+        var MIDDLE_DRAG: number;
         /**
          * Scrolling the middle mouse button.
          */
-        var WHEEL: Number;
+        var WHEEL: number;
         /**
          * A two-finger touch on a touch surface.
          */
-        var PINCH: Number;
+        var PINCH: number;
     }
     module CullFace {
         /**
          * Front-facing triangles are culled.
          */
-        var FRONT: Number;
+        var FRONT: number;
         /**
          * Back-facing triangles are culled.
          */
-        var BACK: Number;
+        var BACK: number;
         /**
          * Both front-facing and back-facing triangles are culled.
          */
-        var FRONT_AND_BACK: Number;
+        var FRONT_AND_BACK: number;
     }
     module DepthFunction {
         /**
          * The depth test never passes.
          */
-        var NEVER: Number;
+        var NEVER: number;
         /**
          * The depth test passes if the incoming depth is less than the stored depth.
          */
-        var LESS: Number;
+        var LESS: number;
         /**
          * The depth test passes if the incoming depth is equal to the stored depth.
          */
-        var EQUAL: Number;
+        var EQUAL: number;
         /**
          * The depth test passes if the incoming depth is less than or equal to the stored depth.
          */
-        var LESS_OR_EQUAL: Number;
+        var LESS_OR_EQUAL: number;
         /**
          * The depth test passes if the incoming depth is greater than the stored depth.
          */
-        var GREATER: Number;
+        var GREATER: number;
         /**
          * The depth test passes if the incoming depth is not equal to the stored depth.
          */
-        var NOT_EQUAL: Number;
+        var NOT_EQUAL: number;
         /**
          * The depth test passes if the incoming depth is greater than or equal to the stored depth.
          */
-        var GREATER_OR_EQUAL: Number;
+        var GREATER_OR_EQUAL: number;
         /**
          * The depth test always passes.
          */
-        var ALWAYS: Number;
+        var ALWAYS: number;
     }
     module DeviceOrientationCameraController {
         /**
@@ -25881,53 +25877,53 @@ declare module Cesium {
         /**
          * The position is absolute.
          */
-        var NONE: Number;
+        var NONE: number;
         /**
          * The position is clamped to the terrain.
          */
-        var CLAMP_TO_GROUND: Number;
+        var CLAMP_TO_GROUND: number;
         /**
          * The position height is the height above the terrain.
          */
-        var RELATIVE_TO_GROUND: Number;
+        var RELATIVE_TO_GROUND: number;
     }
     module HorizontalOrigin {
         /**
          * The origin is at the horizontal center of the object.
          */
-        var CENTER: Number;
+        var CENTER: number;
         /**
          * The origin is on the left side of the object.
          */
-        var LEFT: Number;
+        var LEFT: number;
         /**
          * The origin is on the right side of the object.
          */
-        var RIGHT: Number;
+        var RIGHT: number;
     }
     module LabelStyle {
         /**
          * Fill the text of the label, but do not outline.
          */
-        var FILL: Number;
+        var FILL: number;
         /**
          * Outline the text of the label, but do not fill.
          */
-        var OUTLINE: Number;
+        var OUTLINE: number;
         /**
          * Fill and outline the text of the label.
          */
-        var FILL_AND_OUTLINE: Number;
+        var FILL_AND_OUTLINE: number;
     }
     module MapMode2D {
         /**
          * The 2D map can be rotated about the z axis.
          */
-        var ROTATE: Number;
+        var ROTATE: number;
         /**
          * The 2D map can be scrolled infinitely in the horizontal direction.
          */
-        var INFINITE_SCROLL: Number;
+        var INFINITE_SCROLL: number;
     }
     module MaterialAppearance {
         module MaterialSupport {
@@ -25949,15 +25945,15 @@ declare module Cesium {
         /**
          * Play the animation once; do not loop it.
          */
-        var NONE: Number;
+        var NONE: number;
         /**
          * Loop the animation playing it from the start immediately after it stops.
          */
-        var REPEAT: Number;
+        var REPEAT: number;
         /**
          * Loop the animation.  First, playing it forward, then in reverse, then forward, and so on.
          */
-        var MIRRORED_REPEAT: Number;
+        var MIRRORED_REPEAT: number;
     }
     module PerformanceDisplay {
         /**
@@ -25973,24 +25969,24 @@ declare module Cesium {
         /**
          * Morphing between mode, e.g., 3D to 2D.
          */
-        var MORPHING: Number;
+        var MORPHING: number;
         /**
          * Columbus View mode.  A 2.5D perspective view where the map is laid outflat and objects with non-zero height are drawn above it.
          */
-        var COLUMBUS_VIEW: Number;
+        var COLUMBUS_VIEW: number;
         /**
          * 2D mode.  The map is viewed top-down with an orthographic projection.
          */
-        var SCENE2D: Number;
+        var SCENE2D: number;
         /**
          * 3D mode.  A traditional 3D perspective view of the globe.
          */
-        var SCENE3D: Number;
+        var SCENE3D: number;
         /**
          * Returns the morph time for the given scene mode.
          * @param value  (Required) The scene mode
          */
-        function getMorphTime(value: number): Number;
+        function getMorphTime(value: number): number;
     }
     module SceneTransforms {
         /**
@@ -26022,87 +26018,87 @@ declare module Cesium {
         /**
          * The object does not cast or receive shadows.
          */
-        var DISABLED: Number;
+        var DISABLED: number;
         /**
          * The object casts and receives shadows.
          */
-        var ENABLED: Number;
+        var ENABLED: number;
         /**
          * The object casts shadows only.
          */
-        var CAST_ONLY: Number;
+        var CAST_ONLY: number;
         /**
          * The object receives shadows only.
          */
-        var RECEIVE_ONLY: Number;
+        var RECEIVE_ONLY: number;
     }
     module StencilFunction {
         /**
          * The stencil test never passes.
          */
-        var NEVER: Number;
+        var NEVER: number;
         /**
          * The stencil test passes when the masked reference value is less than the masked stencil value.
          */
-        var LESS: Number;
+        var LESS: number;
         /**
          * The stencil test passes when the masked reference value is equal to the masked stencil value.
          */
-        var EQUAL: Number;
+        var EQUAL: number;
         /**
          * The stencil test passes when the masked reference value is less than or equal to the masked stencil value.
          */
-        var LESS_OR_EQUAL: Number;
+        var LESS_OR_EQUAL: number;
         /**
          * The stencil test passes when the masked reference value is greater than the masked stencil value.
          */
-        var GREATER: Number;
+        var GREATER: number;
         /**
          * The stencil test passes when the masked reference value is not equal to the masked stencil value.
          */
-        var NOT_EQUAL: Number;
+        var NOT_EQUAL: number;
         /**
          * The stencil test passes when the masked reference value is greater than or equal to the masked stencil value.
          */
-        var GREATER_OR_EQUAL: Number;
+        var GREATER_OR_EQUAL: number;
         /**
          * The stencil test always passes.
          */
-        var ALWAYS: Number;
+        var ALWAYS: number;
     }
     module StencilOperation {
         /**
          * Sets the stencil buffer value to zero.
          */
-        var ZERO: Number;
+        var ZERO: number;
         /**
          * Does not change the stencil buffer.
          */
-        var KEEP: Number;
+        var KEEP: number;
         /**
          * Replaces the stencil buffer value with the reference value.
          */
-        var REPLACE: Number;
+        var REPLACE: number;
         /**
          * Increments the stencil buffer value, clamping to unsigned byte.
          */
-        var INCREMENT: Number;
+        var INCREMENT: number;
         /**
          * Decrements the stencil buffer value, clamping to zero.
          */
-        var DECREMENT: Number;
+        var DECREMENT: number;
         /**
          * Bitwise inverts the existing stencil buffer value.
          */
-        var INVERT: Number;
+        var INVERT: number;
         /**
          * Increments the stencil buffer value, wrapping to zero when exceeding the unsigned byte range.
          */
-        var INCREMENT_WRAP: Number;
+        var INCREMENT_WRAP: number;
         /**
          * Decrements the stencil buffer value, wrapping to the maximum unsigned byte instead of going below zero.
          */
-        var DECREMENT_WRAP: Number;
+        var DECREMENT_WRAP: number;
     }
     module TileBoundingBox {
         /**
@@ -26133,7 +26129,7 @@ declare module Cesium {
          * Gets the distance from the camera to the closest point on the tile.  This is used for level-of-detail selection.
          * @param frameState  (Required) The state information of the current rendering frame.
          */
-        function distanceToCamera(frameState: FrameState): Number;
+        function distanceToCamera(frameState: FrameState): number;
     }
     module TileImagery {
         /**
@@ -26156,7 +26152,7 @@ declare module Cesium {
          * Reduces the size of the queue to a specified size by unloading the least-recently usedtiles.  Tiles that were used last frame will not be unloaded, even if that puts the numberof tiles above the specified maximum.
          * @param maximumTiles  (Required) The maximum number of tiles in the queue.
          */
-        function trimTiles(maximumTiles: Number): void;
+        function trimTiles(maximumTiles: number): void;
         /**
          * Marks a tile as rendered this frame and moves it before the first tile that was not renderedthis frame.
          * @param item  (Required) The tile that was rendered.
@@ -26167,15 +26163,15 @@ declare module Cesium {
         /**
          * The origin is at the vertical center of the object.
          */
-        var CENTER: Number;
+        var CENTER: number;
         /**
          * The origin is at the bottom of the object.
          */
-        var BOTTOM: Number;
+        var BOTTOM: number;
         /**
          * The origin is at the top of the object.
          */
-        var TOP: Number;
+        var TOP: number;
     }
     module viewerDragDropMixin {
         /**
