@@ -1,6 +1,6 @@
 /// <reference path="../typings/openlayers.d.ts" />
 
-// Current baseline: OpenLayers 3.18.2
+// Current baseline: OpenLayers 4.0.1
 
 // Basic type variables for test functions
 var voidValue: void;
@@ -346,7 +346,7 @@ feature = feature.clone();
 geometry = feature.getGeometry();
 stringValue = feature.getGeometryName();
 var featureGetId: string | number = feature.getId();
-var featureGetStyle: ol.style.Style | Array<ol.style.Style> | ol.FeatureStyleFunction = feature.getStyle();
+var featureGetStyle: ol.style.Style | Array<ol.style.Style> | ol.FeatureStyleFunction | ol.StyleFunction = feature.getStyle();
 featureStyleFunction = feature.getStyleFunction();
 voidValue = feature.setGeometry(geometry);
 voidValue = feature.setGeometryName(stringValue);
@@ -376,11 +376,11 @@ var tileLayer: ol.layer.Tile = new ol.layer.Tile({
 // ol.proj
 //
 projection = new ol.proj.Projection({
-    code:stringValue,    
+    code:stringValue,
 });
 
 //
-// ol.Map 
+// ol.Map
 //
 
 var map: ol.Map = new ol.Map({
@@ -388,7 +388,8 @@ var map: ol.Map = new ol.Map({
     layers: [tileLayer],
     target: stringValue
 });
-map.beforeRender(preRenderFunction);
+
+map.getView().animate(preRenderFunction);
 
 //
 // ol.source.ImageWMS
@@ -418,41 +419,8 @@ var wmts: ol.source.WMTS = new ol.source.WMTS({
    layer: "",
    style: "",
    matrixSet: "",
-   wrapX: true    
+   wrapX: true
 });
-
-//
-// ol.animation
-//
-var bounceOptions: olx.animation.BounceOptions;
-bounceOptions.duration = numberValue;
-bounceOptions.start = numberValue;
-bounceOptions.resolution = numberValue;
-bounceOptions.easing = easingFunction;
-preRenderFunction = ol.animation.bounce(bounceOptions);
-
-var panOptions: olx.animation.PanOptions;
-panOptions.duration = numberValue;
-panOptions.start = numberValue;
-panOptions.source = coordinate;
-panOptions.easing = easingFunction;
-preRenderFunction = ol.animation.pan(panOptions);
-
-var rotateOptions: olx.animation.RotateOptions;
-rotateOptions.duration = numberValue;
-rotateOptions.start = numberValue;
-rotateOptions.anchor = coordinate;
-rotateOptions.rotation = numberValue;
-rotateOptions.easing = easingFunction;
-preRenderFunction = ol.animation.rotate(rotateOptions);
-
-var zoomOptions: olx.animation.ZoomOptions;
-zoomOptions.duration = numberValue;
-zoomOptions.start = numberValue;
-zoomOptions.resolution = numberValue;
-zoomOptions.easing = easingFunction;
-preRenderFunction = ol.animation.zoom(zoomOptions);
-map.beforeRender(preRenderFunction);
 
 //
 // ol.coordinate
@@ -530,15 +498,15 @@ popup.setMap(popupMap);
 popup.setOffset(popupOffset);
 popup.setPosition(coordinate);
 popup.setPositioning(popupPositioning);
-popup.setPositioning(ol.Overlay.Positioning.BOTTOM_CENTER);
-popup.setPositioning(ol.Overlay.Positioning.BOTTOM_LEFT);
-popup.setPositioning(ol.Overlay.Positioning.BOTTOM_RIGHT);
-popup.setPositioning(ol.Overlay.Positioning.CENTER_CENTER);
-popup.setPositioning(ol.Overlay.Positioning.CENTER_LEFT);
-popup.setPositioning(ol.Overlay.Positioning.CENTER_RIGHT);
-popup.setPositioning(ol.Overlay.Positioning.TOP_CENTER);
-popup.setPositioning(ol.Overlay.Positioning.TOP_LEFT);
-popup.setPositioning(ol.Overlay.Positioning.TOP_RIGHT);
+popup.setPositioning(ol.OverlayPositioning.BOTTOM_CENTER);
+popup.setPositioning(ol.OverlayPositioning.BOTTOM_LEFT);
+popup.setPositioning(ol.OverlayPositioning.BOTTOM_RIGHT);
+popup.setPositioning(ol.OverlayPositioning.CENTER_CENTER);
+popup.setPositioning(ol.OverlayPositioning.CENTER_LEFT);
+popup.setPositioning(ol.OverlayPositioning.CENTER_RIGHT);
+popup.setPositioning(ol.OverlayPositioning.TOP_CENTER);
+popup.setPositioning(ol.OverlayPositioning.TOP_LEFT);
+popup.setPositioning(ol.OverlayPositioning.TOP_RIGHT);
 
 //
 // ol.format.GeoJSON
