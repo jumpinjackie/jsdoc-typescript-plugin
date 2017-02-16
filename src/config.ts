@@ -7,15 +7,15 @@ module TsdPlugin {
     /**
      * Allows a user to inject additional TS code elements at the global or module levels. Code element injection allows one to "plug the holes"
      * in a generated typescript definition if unknown/unresolved types appear in the typescript definition.
-     * 
+     *
      * Code element injection should only be the last resort. The first port of call should be to fix the API visibility of the affected types
      * in the original documented source.
      */
     export interface IUserOverride<TConf> {
 
         /**
-         * Overrides for the global namespace. Keys are the actual type 
-         * names for which the configuration applies to 
+         * Overrides for the global namespace. Keys are the actual type
+         * names for which the configuration applies to
          */
         global: Dictionary<TConf>;
 
@@ -26,7 +26,7 @@ module TsdPlugin {
          */
         module: Dictionary<Dictionary<TConf>>;
     }
-    
+
     export interface IMemberDeclaration {
 
         /**
@@ -39,14 +39,14 @@ module TsdPlugin {
          */
         declaration: string;
     }
-    
+
     export type PrimitiveType = "string" | "number";
-    
+
     export interface IEnumConfiguration {
 
         /**
-         * The list of identifiers in their original JSDoc format to process as class-like enums. Such 
-         * enums are basically classes with static constant members. Any references to this enum class 
+         * The list of identifiers in their original JSDoc format to process as class-like enums. Such
+         * enums are basically classes with static constant members. Any references to this enum class
          * will be replaced with its underlying integral type (generally number|string)
          */
         classes: Dictionary<PrimitiveType>;
@@ -58,8 +58,8 @@ module TsdPlugin {
     }
 
     /**
-     * Describes a class type augmentation. You can have a class extend another class or implement extra interfaces 
-     * 
+     * Describes a class type augmentation. You can have a class extend another class or implement extra interfaces
+     *
      * @export
      * @interface IClassTypeAugmentation
      */
@@ -67,14 +67,14 @@ module TsdPlugin {
         /**
          * The class this generated class should be extending. Only applies if when generating, the class has been
          * determined to not be inheriting from any other class
-         * 
+         *
          * @type {string}
          * @memberOf IClassTypeAugmentation
          */
         extends?: string;
         /**
          * An array of interfaces that this generated class should be implementing
-         * 
+         *
          * @type {string[]}
          * @memberOf IClassTypeAugmentation
          */
@@ -134,7 +134,7 @@ module TsdPlugin {
         /**
          * An annotation that if found in a parsed doclet, will consider said doclet to be
          * part of the public API, and any resulting emitted type to be made public as well
-         * 
+         *
          * Otherwise, a doclet is considered public if its access is not private
          */
         publicAnnotation: string;
@@ -148,7 +148,7 @@ module TsdPlugin {
         /**
          * If you have provided custom interfaces and type aliases, the types may double
          * up in the TSD file if public doclets for types of the same name are encountered.
-         * 
+         *
          * You can avoid double-ups by specifying types to ignore in this list. Such doclets
          * will be ignored, giving precedence to your user-defined aliases and interfaces.
          */
@@ -156,7 +156,7 @@ module TsdPlugin {
 
         /**
          * A list of types to always make public. Add types here if you are manually defining types in a
-         * custom header or footer and those types reference types that may not be public when the 
+         * custom header or footer and those types reference types that may not be public when the
          * source is processed by the plugin
          */
         makePublic: string[];
@@ -178,8 +178,8 @@ module TsdPlugin {
         memberReplacements: Dictionary<Readonly<IMemberDeclaration>>;
 
         /**
-         * Indicates if top-level elements (ie: doclets without parents) should be declared. Default is false, set to true 
-         * if you wrap the emitted types around a custom top-level module through the custom header/footer feature 
+         * Indicates if top-level elements (ie: doclets without parents) should be declared. Default is false, set to true
+         * if you wrap the emitted types around a custom top-level module through the custom header/footer feature
          */
         declareTopLevelElements: boolean;
 
@@ -213,13 +213,18 @@ module TsdPlugin {
          */
         processAsEnums?: Readonly<IEnumConfiguration>;
         /**
-         * Used to add type augmentations for any generated classes. 
-         * 
+         * Used to add type augmentations for any generated classes.
+         *
          * @type {Dictionary<IClassTypeAugmentation>}
          * @memberOf IPluginConfig
          */
         classTypeAugmentations?: Dictionary<Readonly<IClassTypeAugmentation>>;
 
         rewriteFunctionTypedefs?: boolean;
+
+        /**
+         * A path (if specified) to a file where all parsed and emitted public types are written to
+         */
+        dumpPublicTypesTo?: string;
     }
 }

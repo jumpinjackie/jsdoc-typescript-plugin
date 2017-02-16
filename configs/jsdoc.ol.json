@@ -52,6 +52,7 @@
         "footerFile": "./content/ol_footer.ts",
         "skipUndocumentedDoclets": false,
         "useUnionTypeForStringEnum": false,
+        "dumpPublicTypesTo": "./typings/ol-public.json",
         "memberReplacements": {
             "ol.layer.VectorTile#getSource": {
                 "description": "Return the associated source of the layer (NOTE: TypeScript currently prevents us from returning the intended type of ol.source.VectorTile, you will have to manually cast the returned value to this type)",

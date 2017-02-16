@@ -34,7 +34,7 @@ module TsdPlugin {
             ifaces: 0,
             classes: 0
         };
-        
+
         private config: IPluginConfig;
 
         constructor(config: IPluginConfig) {
@@ -66,6 +66,7 @@ module TsdPlugin {
                 headerFile: undefined,
                 footerFile: undefined,
                 memberReplacements: {},
+                dumpPublicTypesTo: undefined,
                 declareTopLevelElements: true,
                 ignoreModules: [],
                 skipUndocumentedDoclets: true,
@@ -94,7 +95,7 @@ module TsdPlugin {
         private shouldIgnoreType(fullname: string): boolean {
           return this.ignoreTypes.has(fullname);
         }
-        
+
         private ensureClassDef(name: string, factory?: () => TSClass): TSClass {
             if (!this.classes.has(name)) {
                 if (factory != null) {
@@ -122,7 +123,7 @@ module TsdPlugin {
                 return this.typedefs.get(name);
             }
         }
-        
+
         public registerTypedef(name: string, typedef: TSTypedef): boolean {
             if (!this.typedefs.has(name)) {
                 this.typedefs.set(name, typedef);
@@ -130,13 +131,13 @@ module TsdPlugin {
             }
             return false;
         }
-        
+
         private isTSInterfaceCandidate(doclet: Readonly<jsdoc.IDoclet>): boolean {
             return !TsdGenerator.isCallbackType(doclet) && //Because callback types could also be through typedefs
                    (doclet.kind == DocletKind.Typedef ||
-                   (doclet.comment || "").indexOf("@record") >= 0); 
+                   (doclet.comment || "").indexOf("@record") >= 0);
         }
-        
+
         private parseClassesAndTypedefs(doclets: Readonly<jsdoc.IDoclet>[]): void {
             for (let doclet of doclets) {
                 //On ignore list
@@ -230,7 +231,7 @@ module TsdPlugin {
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
-                
+
                 if (doclet.kind == DocletKind.Module) {
                     this.moduleDoclets.set(doclet.name, doclet);
                     this.trackedDoclets.set(doclet.longname, doclet);
@@ -239,7 +240,7 @@ module TsdPlugin {
         }
 
         private static isCallbackType(doclet: Readonly<jsdoc.IDoclet>): boolean {
-            return doclet.kind == DocletKind.Typedef && 
+            return doclet.kind == DocletKind.Typedef &&
                    doclet.type != null &&
                    doclet.type.names != null &&
                    doclet.type.names.indexOf("function") >= 0 &&
@@ -258,7 +259,7 @@ module TsdPlugin {
                 //Undocumented and we're ignoring them
                 if (doclet.undocumented && this.config.skipUndocumentedDoclets)
                     continue;
-                            
+
                 let isPublic = !TypeUtil.isPrivateDoclet(doclet, this.config);
 
                 //We've keyed class definition on longname, so memberof should
@@ -266,7 +267,7 @@ module TsdPlugin {
                 let cls: TSComposable = this.ensureClassDef(doclet.memberof);
                 let isTypedef = false;
                 let isClass = true;
-                
+
                 if (!cls) {
                     isClass = false;
                     //Failing that it would've been registered as a typedef
@@ -283,7 +284,7 @@ module TsdPlugin {
                             continue;
 
                         parentModule = ModuleUtils.cleanModuleName(parentModule);
-                        
+
                         //HACK-ish: If we found an enum, that this is a member of, skip it if it already exists
                         let parentDoclet = this.trackedDoclets.get(doclet.memberof);
                         if (parentDoclet != null && TypeUtil.isEnumDoclet(parentDoclet)) {
@@ -312,13 +313,13 @@ module TsdPlugin {
                         isTypedef = true;
                     }
                 }
-                
+
                 if (doclet.kind == DocletKind.Function) {
                     let method = new TSMethod(doclet);
                     method.setIsPublic(isPublic);
                     cls.addMember(method, logger);
                 } else if (doclet.kind == DocletKind.Constant || doclet.kind == DocletKind.Value || (doclet.kind == DocletKind.Member && doclet.params == null)) {
-                    let prop = new TSProperty(doclet, isTypedef);                   
+                    let prop = new TSProperty(doclet, isTypedef);
                     prop.setIsPublic(isPublic);
                     cls.addMember(prop, logger);
                 }
@@ -361,7 +362,7 @@ module TsdPlugin {
         private hoistPubliclyReferencedTypesToPublic(logger: ILogger): Map<string, IOutputtable> {
             let publicTypes = new Map<string, IOutputtable>();
             let context = new TypeVisibilityContext(this);
-            
+
             //First, visit all known public types and collect referenced types
             for (let typedef of this.userTypeAliases) {
                 typedef.visit(context, this.config, logger);
@@ -385,7 +386,7 @@ module TsdPlugin {
                 if (tdf.getIsPublic())
                     tdf.visit(context, this.config, logger);
             });
-            
+
             let userTypes = {};
             for (let typedef of this.userTypeAliases) {
                 userTypes[typedef.getQualifiedName()] = typedef;
@@ -393,7 +394,7 @@ module TsdPlugin {
             for (let iface of this.userInterfaces) {
                 userTypes[iface.getQualifiedName()] = iface;
             }
-            
+
             //Now that we've collected all referenced types, see what isn't public and
             //make them public
             //
@@ -404,7 +405,7 @@ module TsdPlugin {
             //
             //We repeat this process until the context is empty
             //
-            //But before we start, auto-hoist any type in the "makePublic" list 
+            //But before we start, auto-hoist any type in the "makePublic" list
             for (let typeName of this.config.makePublic) {
                 console.log(`Checking if (${typeName}) needs to be hoisted`);
                 if (this.classes.has(typeName)) {
@@ -470,7 +471,7 @@ module TsdPlugin {
                 }
                 pass++;
             }
-            
+
             return publicTypes;
         }
 
@@ -532,7 +533,7 @@ module TsdPlugin {
                     //This is an illegal module name and most likely the result of parsing an inner object property
                     //from within an AMD module (or it could be bad JSDoc documentation)
                     //
-                    //NOTE: This ultimately doesn't actually do anyting at the moment. All returns will be false and 
+                    //NOTE: This ultimately doesn't actually do anyting at the moment. All returns will be false and
                     //this type won't be added, but it should at least log something useful along the way
                     const parts = moduleNameClean.split("#");
                     const parentName = parts[0];
@@ -571,11 +572,11 @@ module TsdPlugin {
                     if (bIgnoreThisType) {
                         return false;
                     }
-                    
+
                     if (TypeUtil.isTsElementNotPublic(type)) {
                         return false;
                     }
-                    
+
                     if (ModuleUtils.isAMD(moduleNameClean)) {
                         //No nesting required for AMD modules
                         if (!root.children.has(moduleNameClean)) {
@@ -653,11 +654,11 @@ module TsdPlugin {
         public dumpDoclets(doclets: Readonly<jsdoc.IDoclet>[], streamFactory: IFileStreamFactory) {
             let fileName = `${this.config.outDir}/${this.config.rootModuleName}.doclets.txt`;
             let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
-            
+
             for (let doc of doclets) {
                 output.writeln(DumpDoclet(doc));
             }
-            
+
             output.close(() => {
                 console.log(`Saved dumped doclets to: ${fileName}`);
             });
@@ -666,7 +667,7 @@ module TsdPlugin {
         public process(doclets: Readonly<jsdoc.IDoclet>[], streamFactory: IFileStreamFactory, logger: ILogger): void {
             let fileName = `${this.config.outDir}/${this.config.rootModuleName}.d.ts`;
             let output = new IndentedOutputStream(streamFactory.createStream(fileName), streamFactory.endl);
-            
+
             //1st pass
             this.parseClassesAndTypedefs(doclets);
             //2nd pass. We process modules in this pass instead of the 1st so that enums do not get double-registered as modules as well
@@ -677,13 +678,13 @@ module TsdPlugin {
             this.processUserDefinedTypes();
             //Raise any non-public types referenced from public types to public
             let publicTypes = this.hoistPubliclyReferencedTypesToPublic(logger);
-            
+
             //Write custom header if specified
             if (this.config.headerFile != null) {
                 let header = streamFactory.readText(this.config.headerFile);
                 output.writeln(header);
             }
-            
+
             //Write the main d.ts body
             let tree = this.assembleModuleTree(logger);
             for (let i = 0; i < this.config.initialIndentation; i++) {
@@ -693,11 +694,35 @@ module TsdPlugin {
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.unindent();
             }
-            
+
             //Write custom footer if specified
             if (this.config.headerFile != null) {
                 let footer = streamFactory.readText(this.config.footerFile);
                 output.writeln(footer);
+            }
+
+            //Dump public types if required
+            if (this.config.dumpPublicTypesTo) {
+                const endl = streamFactory.endl;
+                const fs = streamFactory.createStream(this.config.dumpPublicTypesTo);
+                fs.write(`[${endl}`);
+                let bFirst = true;
+                publicTypes.forEach((value, key) => {
+                    if (!bFirst) {
+                        fs.write(`,${endl}`);
+                    }
+                    const meta = {
+                        fullName: value.getFullName(),
+                        kind: TSOutputtableKind[value.getKind()]
+                    };
+                    fs.write(JSON.stringify(meta));
+                    bFirst = false;
+                });
+                fs.write(`]`);
+                fs.on("finish", () => {
+                    console.log(`Dumped public types to: ${this.config.dumpPublicTypesTo}`);
+                });
+                fs.end();
             }
 
             output.close(() => {

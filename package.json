@@ -5,13 +5,13 @@
   "scripts": {
     "build": "tsc",
     "example-doc": "jsdoc ./examples/jsdoc3-examples -r -c ./configs/jsdoc.json -d ./docs/example",
-    "ol-doc": "jsdoc -c ./configs/jsdoc.ol.json -d ./docs/ol",
+    "ol-doc": "jsdoc -c ./configs/jsdoc.ol.json -d ./docs/ol && node tools/ol-postprocess.js ./typings/ol-public.json ./typings/openlayers.d.ts",
     "cesium-doc": "jsdoc -c ./configs/jsdoc.cesium.json -d ./docs/cesium",
     "misc-doc": "jsdoc -c ./configs/jsdoc.misc.json -d ./docs/misc",
     "bad-doc": "jsdoc -c ./configs/jsdoc.bad.json -d ./docs/bad",
     "test:misc": "yarn run misc-doc && tsc ./typings/misc.d.ts",
     "test:cesium": "yarn run cesium-doc && tsc ./typings/cesium.d.ts && tsc test/cesium-tests.ts",
-    "test:ol": "yarn run ol-doc && tsc ./typings/openlayers.d.ts && tsc test/openlayers-tests.ts",
+    "test:ol": "yarn run ol-doc && tsc ./typings/openlayers.d.ts && tsc test/openlayers-tests.ts && tsc test/ol-tests.ts",
     "test": "yarn run build && yarn run test:misc && yarn run test:ol && yarn run test:cesium"
   },
   "repository": {
@@ -33,6 +33,7 @@
     "@types/pegjs": "^0.10.0",
     "cesium": "1.27.0",
     "jsdoc": "^3.4.3",
+    "jsonfile": "^2.4.0",
     "openlayers": "4.0.1",
     "pegjs": "^0.10.0",
     "typescript": "2.1.6"
