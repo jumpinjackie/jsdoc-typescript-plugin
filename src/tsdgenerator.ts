@@ -685,12 +685,14 @@ module TsdPlugin {
                 output.writeln(header);
             }
 
+            const publicApi = new Map<string, IOutputtable>();
+
             //Write the main d.ts body
             let tree = this.assembleModuleTree(logger);
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.indent();
             }
-            ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes);
+            ModuleUtils.outputTsd(tree, output, this.config, logger, publicTypes, publicApi);
             for (let i = 0; i < this.config.initialIndentation; i++) {
                 output.unindent();
             }
@@ -707,7 +709,7 @@ module TsdPlugin {
                 const fs = streamFactory.createStream(this.config.dumpPublicTypesTo);
                 fs.write(`[${endl}`);
                 let bFirst = true;
-                publicTypes.forEach((value, key) => {
+                publicApi.forEach((value, key) => {
                     if (!bFirst) {
                         fs.write(`,${endl}`);
                     }

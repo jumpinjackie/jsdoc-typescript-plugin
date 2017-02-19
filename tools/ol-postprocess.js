@@ -43,7 +43,7 @@ jsonfile.readFile(publicJsonPath, function(err, obj) {
     // }
     //
 
-    var classes = obj.filter(function(val) {
+    var esClasses = obj.filter(function(val) {
         return val.kind == "Class";
     }).map(function(val, index) {
         return {
@@ -52,7 +52,7 @@ jsonfile.readFile(publicJsonPath, function(err, obj) {
         };
     });
 
-    classes.forEach(function(cls) {
+    esClasses.forEach(function(cls) {
         var def = "/*" + os.EOL;
         def += " * ES2015 module declaration for " + cls.export + os.EOL;
         def += " */" + os.EOL;
@@ -61,5 +61,43 @@ jsonfile.readFile(publicJsonPath, function(err, obj) {
         def += "}" + os.EOL;
         fs.appendFileSync(dtsPath, def);
         console.log("Wrote ES2015 module for: " + cls.export);
+    });
+
+    var esModules = new Map();
+    obj.filter(function(val) {
+        return val.kind == "Method"
+    }).forEach(function(meth) {
+        const tokens = meth.fullName.split(".");
+        const parent = tokens.slice(0, tokens.length - 1);
+        const dotted = parent.join(".");
+        if (dotted != "" && dotted != "ol") { //HACK: Typedefs mis-classified as functions are being emitted by the plugin, so skip them for now
+            if (!esModules.has(dotted)) {
+                esModules.set(dotted, {
+                    module: parent.join("/"),
+                    exportMembers: []
+                });
+            }
+            esModules.get(dotted).exportMembers.push({ name: tokens[tokens.length - 1], fullName: meth.fullName });
+        }
+    });
+
+    esModules.forEach(function(mod) {
+        var def = "/*" + os.EOL;
+        def += " * ES2015 module declaration for " + mod.module.split("/").join(".") + os.EOL;
+        def += " */" + os.EOL;
+        def += 'declare module "' + mod.module + '" {' + os.EOL;
+        //def += "    export default " + mod.export + ";" + os.EOL;
+        def += "    export default {" + os.EOL;
+        for (var i = 0; i < mod.exportMembers.length; i++) {
+            def += "        " + mod.exportMembers[i].name + ": " + mod.exportMembers[i].fullName;
+            if (i < mod.exportMembers.length - 1) {
+                def += ",";
+            }
+            def += os.EOL;
+        }
+        def += "    };" + os.EOL;
+        def += "}" + os.EOL;
+        fs.appendFileSync(dtsPath, def);
+        console.log("Wrote ES2015 module for: " + mod.module.split("/").join("."));
     });
 });

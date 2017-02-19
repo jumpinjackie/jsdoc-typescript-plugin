@@ -2,3 +2,4 @@
 /docs
 /build
 .vscode
+/test/*.js

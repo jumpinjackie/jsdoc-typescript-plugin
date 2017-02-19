@@ -30,11 +30,13 @@ module TsdPlugin {
             conf:        Readonly<IPluginConfig>,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>,
+            publicApi:   Map<string, IOutputtable>,
             isTopLevel:  boolean = true
         ): void {
             for (let type of module.types) {
                 //console.log(`Outputting type: ${type.getFullName()}`);
                 type.output(stream, conf, logger, publicTypes);
+                publicApi.set(type.getFullName(), type);
             }
             let childModules = module.children;
             if (isTopLevel && conf.globalModuleAliases.length > 0) {
@@ -43,7 +45,7 @@ module TsdPlugin {
                 for (const modName of conf.globalModuleAliases) {
                     if (childModules.has(modName)) {
                         const mod = childModules.get(modName);
-                        ModuleUtils.outputTsd(mod, stream, conf, logger, publicTypes, false);
+                        ModuleUtils.outputTsd(mod, stream, conf, logger, publicTypes, publicApi, false);
                     }
                 }
             }
@@ -67,7 +69,7 @@ module TsdPlugin {
                     stream.writeln(`${decl}module ${modName} {`);
                 }
                 stream.indent();
-                ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes, false);
+                ModuleUtils.outputTsd(child, stream, conf, logger, publicTypes, publicApi, false);
                 stream.unindent();
                 stream.writeln("}");
             });
