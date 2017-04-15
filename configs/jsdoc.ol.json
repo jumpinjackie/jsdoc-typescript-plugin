@@ -32,7 +32,7 @@
         "makePublic": [],
         "aliases": {
             "global": {
-                "proj4": "any",
+                "Proj4": "any",
                 "EsriJSONGeometry": "any",
                 "GeoJSONFeature": "any",
                 "GeoJSONFeatureCollection": "any",
