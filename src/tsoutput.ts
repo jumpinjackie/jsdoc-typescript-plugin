@@ -10,36 +10,36 @@ module TsdPlugin {
         UserInterface,
         UserTypeAlias
     }
-    
+
     function CamelCase(name: string) {
         return name.charAt(0).toUpperCase() + name.slice(1);
     }
-    
+
     /**
      * The default filter function for any JSON.stringify calls
      */
-    function JsDocletStringifyFilter(key: string, value: any): any { 
-        if (key === "comment") { 
-            return undefined; 
+    function JsDocletStringifyFilter(key: string, value: any): any {
+        if (key === "comment") {
+            return undefined;
         }
         if (key == "meta") {
             return undefined;
         }
-        return value; 
+        return value;
     }
-    
+
     export function DumpDoclet(doclet: jsdoc.IDoclet) {
         return JSON.stringify(doclet, JsDocletStringifyFilter, 4);
         //return JSON.stringify(doclet, null, 4);
     }
-    
+
     /**
      * Allows for additional typedefs to be registered during the pre-processing phase
      */
     export interface ITypeRegistrar {
         registerTypedef(name: string, item: IOutputtable): boolean;
     }
-    
+
     //TODO: Generic placeholder parameters are being added, which may trip up the type hoisting afterwards
     //TODO: It would be nice to filter out built-in types (ie. types in TypeScript's lib.d.ts)
     export class TypeVisibilityContext {
@@ -88,11 +88,11 @@ module TsdPlugin {
         public isEmpty(): boolean { return this.types.size === 0; }
         public getTypes(): string[] { return Array.from(this.types.keys()); }
     }
-    
+
     //This is bit of a hack, but we want fixStringEnumTypes to be available in
     //a class that quacks like a TypeVisibilityContext, so we have the opportunity
     //to fix keys in a kvp during type replacement
-    
+
     class ReadOnlyTypeVisibilityContext extends TypeVisibilityContext {
         private publicTypes: Map<string, IOutputtable>;
         constructor(reg: ITypeRegistrar, publicTypes: Map<string, IOutputtable>) {
@@ -105,16 +105,16 @@ module TsdPlugin {
         public addTypes(typeNames: string[], conf: IPluginConfig, logger: ILogger) {}
         public addType(typeName: string, conf: IPluginConfig, logger: ILogger) {}
     }
-    
+
     export class TypeUtil {
         /**
          * Normalizes the given module name
-         * 
+         *
          * @static
          * @param {string} modName
          * @param {string[]} globalModuleAliases
          * @returns {string}
-         * 
+         *
          * @memberOf TypeUtil
          */
         public static normalizeModuleName(modName: string, globalModuleAliases: string[]): string {
@@ -156,7 +156,7 @@ module TsdPlugin {
             }
             return qualifiedName;
         }
-        
+
         public static isTsElementNotPublic(type: IOutputtable): boolean {
             if (type instanceof TSMethod) {
                 return !type.getIsPublic();
@@ -166,13 +166,13 @@ module TsdPlugin {
             }
             return false;
         }
-        
+
         public static isEnumDoclet(doclet: jsdoc.IDoclet): boolean {
             return (doclet.kind == DocletKind.Member &&
                    doclet.isEnum === true &&
                    (doclet.properties || []).length > 0) || (doclet.comment || "").indexOf("@enum") >= 0;
         }
-        
+
         /**
          * Fixes any references to class-type "enums"
          */
@@ -187,7 +187,7 @@ module TsdPlugin {
                 return rt;
             });
         }
-        
+
         public static fixEnumTypes(
           typeNames:   string[],
           publicTypes: Map<string,
@@ -215,7 +215,7 @@ module TsdPlugin {
                 }
             }
         }
-        
+
         public static isPrivateDoclet(doclet: jsdoc.IDoclet, conf: IPluginConfig = null): boolean {
             //If the configuration defines a particular annotation as a public API marker and it
             //exists in the doclet's tag list, the doclet is considered part of the public API
@@ -223,29 +223,29 @@ module TsdPlugin {
                 let found = (doclet.tags || []).filter(tag => tag.originalTitle == conf.publicAnnotation);
                 if (found.length == 1) //tag found
                     return false;
-                
+
                 //In this mode, absence of the tag means not public
                 return true;
             }
-            
+
             return doclet.access == "private" ||
                    doclet.access == "protected" ||
                    doclet.undocumented == true;
         }
-        
+
         private static stripOuterParentheses(part: string): string {
             if (part.length > 2 && part[0] == "(" && part[part.length - 1] == ")") {
                 return part.substring(1, part.length - 1).trim();
             }
             return part.trim();
         }
-        
+
         public static getTypeReplacement(typeName: string, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string {
             let tn = typeName;
             //Strip off nullability qualifier if it exists
             if (tn.charAt(0) == "!")
                 tn = tn.substring(1);
-                
+
             //Look in user configured overrides
             if (conf.typeReplacements.hasOwnProperty(tn)) {
                 return conf.typeReplacements[tn];
@@ -255,7 +255,7 @@ module TsdPlugin {
                 //NOTE: Regex-based checks take precedence as we want to check for specific
                 //patterns first before trying to look for things like array or union type
                 //notation
-                
+
                 //Anonymous function with return type
                 let rgxm = tn.match(/function\((.+)\):\s+(.+)/);
                 if (rgxm) {
@@ -302,7 +302,7 @@ module TsdPlugin {
                 if (rgxm) {
                     //console.log("is kvp");
                     let keyType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[2]), conf, logger, context);
-                    
+
                     //Need to ensure this is string or number. In the event we find a string enum
                     //class, we must replace it with string
                     if (context != null) {
@@ -317,14 +317,14 @@ module TsdPlugin {
                             keyType = toFix[0];
                         }
                     }
-                    
+
                     let valueType = TypeUtil.getTypeReplacement(TypeUtil.stripOuterParentheses(rgxm[3]), conf, logger, context);
                     return "{ [key: " + keyType + "]: " + valueType + "; }";
                 }
-                
+
                 //When referenced, tildefied types should be dotted
                 tn = tn.replace("~", ".");
-                
+
                 const parsedType = Generics.parse(tn, (type: string) => {
                     if (conf.typeReplacements.hasOwnProperty(type)) {
                         return conf.typeReplacements[type];
@@ -338,11 +338,11 @@ module TsdPlugin {
                 if (context != null) {
                     context.addType(tn, conf, logger);
                 }
-                
+
                 return tn;
             }
         }
-        
+
         public static replaceFunctionTypes(parsedReturnTypes: string[], doclet: jsdoc.IDoclet, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): void {
             for (let i = 0; i < parsedReturnTypes.length; i++) {
                 if (parsedReturnTypes[i] == "Function") {
@@ -361,7 +361,7 @@ module TsdPlugin {
                 }
             }
         }
-        
+
         public static parseAndConvertTypes(typeAnno: jsdoc.IType, conf: IPluginConfig, logger: ILogger, context?: TypeVisibilityContext): string[] {
             let utypes = [];
             if (typeAnno.names.length > 0) {
@@ -375,7 +375,7 @@ module TsdPlugin {
             }
             return utypes;
         }
-        
+
         public static extractGenericTypesFromDocletTags(tags: jsdoc.ITag[]): string[] {
             let genericTypes = [];
             //@template is non-standard, but the presence of this annotation conveys
@@ -393,7 +393,7 @@ module TsdPlugin {
             return genericTypes;
         }
     }
-    
+
     export interface IOutputtable {
         getFullName(): string;
         getKind(): TSOutputtableKind;
@@ -421,7 +421,7 @@ module TsdPlugin {
             this.isPublic = true;
             this.ovReturnType = null;
         }
-        
+
         public getOverrideReturnType() {
             return this.ovReturnType;
         }
@@ -429,33 +429,33 @@ module TsdPlugin {
         public setOverrideReturnType(typeName: string): void {
             this.ovReturnType = typeName;
         }
-        
+
         public isStatic(): boolean {
             return this.doclet.scope == "static";
         }
-        
+
         public getDoclet(): jsdoc.IDoclet {
             return this.doclet;
         }
-        
+
         public inheritsDoc(): boolean {
             return this.doclet.inheritdoc === true;
         }
-        
+
         public setIsPublic(value: boolean): void {
             this.isPublic = value;
         }
-        
+
         public getIsPublic(): boolean {
             return this.isPublic;
         }
-        
+
         public getFullName(): string {
             return this.doclet.longname;
         }
-        
+
         public abstract getKind(): TSOutputtableKind;
-        
+
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
@@ -463,11 +463,11 @@ module TsdPlugin {
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void { }
-        
+
         protected getDescription(): string {
             return this.doclet.description;
         }
-        
+
         protected writeDescription(
           kind:        string,
           stream:      IndentedOutputStream,
@@ -490,14 +490,14 @@ module TsdPlugin {
             this.writeExtraDescriptionParts(kind, stream, conf, logger, publicTypes);
             stream.writeln(" */");
         }
-        
+
         public abstract output(
           stream:      IndentedOutputStream,
           conf:        IPluginConfig,
           logger:      ILogger,
           publicTypes: Map<string, IOutputtable>
         ): void;
-        
+
         public abstract visit(
           context: TypeVisibilityContext,
           conf:    IPluginConfig,
@@ -529,7 +529,7 @@ module TsdPlugin {
         }
 
         public tryGetEnumValue(): any {
-            if (this.doclet.meta && 
+            if (this.doclet.meta &&
                 this.doclet.meta.code &&
                 (this.doclet.meta.code.type == "Literal" || this.doclet.meta.code.type == "UnaryExpression")) {
                 return this.doclet.meta.code.value;
@@ -573,7 +573,7 @@ module TsdPlugin {
                 stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
-            
+
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -586,7 +586,7 @@ module TsdPlugin {
             } else {
                 this.writeDescription("property", stream, conf, logger, publicTypes);
                 let propDecl = "";
-                
+
                 if (this.isModule) {
                     propDecl += "var ";
                 } else {
@@ -620,19 +620,19 @@ module TsdPlugin {
                 stream.writeln(propDecl);
             }
         }
-        
+
         public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             if (this.doclet.type != null) {
                 TypeUtil.parseAndConvertTypes(this.doclet.type, conf, logger, context);
             }
         }
     }
-    
+
     interface IParameterContainer {
       members: jsdoc.IParameter[];
       param:   jsdoc.IParameter;
     }
-    
+
     interface ITsMemberContainer {
       members: TSMember[];
       member:  TSMember;
@@ -646,21 +646,21 @@ module TsdPlugin {
             this.isModule = false;
             this.isTypedef = false;
         }
-        
+
         public getKind(): TSOutputtableKind { return TSOutputtableKind.Method; }
-        
+
         public setIsModule(value: boolean): void {
             this.isModule = value;
         }
-        
+
         public setIsTypedef(value: boolean): void {
             this.isTypedef = value;
         }
-        
+
         protected outputReturnType(): boolean { return true; }
-        
+
         protected getMethodName(): string { return this.doclet.name; }
-        
+
         private isArgOptional(arg: jsdoc.IParameter, publicTypes: Map<string, IOutputtable>): boolean {
             //If the argument is a typedef, it will (and should) be the only argument type
             if (arg.type != null && arg.type.names.length > 0) {
@@ -692,7 +692,7 @@ module TsdPlugin {
                    arg.optional == true ||
                    arg.type.names.indexOf("undefined") >= 0;
         }
-        
+
         protected writeExtraDescriptionParts(
           kind:        string,
           stream:      IndentedOutputStream,
@@ -724,30 +724,30 @@ module TsdPlugin {
                 }
             }
         }
-        
+
         protected outputScope(): boolean {
             return true;
         }
-        
+
         protected outputGenericTypes(): boolean {
             return true;
         }
-        
+
         /**
          * Studies the doclet parameters and returns a normalized set.
-         * 
+         *
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
         private studyParameters(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): jsdoc.IParameter[] {
             let params: jsdoc.IParameter[] = [];
             let paramMap = new Map<string, IParameterContainer>();
-            
+
             let methodParams = (this.doclet.params || []).slice(0); //Clone, because we may modify, and we want to modify the clone
             let processedArgs = new Map<string, string>();
             let argCounter = 1;
 
             let arrayParents = new Map<string, string>();
-            
+
             if (methodParams.length > 0) {
                 //Let's be graceful here. If we find dotted members but no common parent identifier, make
                 //an ad-hoc parent doclet and warn about this fact (it's a documentation error)
@@ -759,7 +759,7 @@ module TsdPlugin {
                         if (parts[0].endsWith("[]")) {
                             const fixedName = parts[0].substring(0, parts[0].length - 2);
                             scanned.set(fixedName, fixedName);
-                            arrayParents.set(fixedName);
+                            arrayParents.set(fixedName, fixedName);
                         } else {
                             scanned.set(parts[0], parts[0]);
                         }
@@ -771,7 +771,7 @@ module TsdPlugin {
                         processed.set(arg.name, arg);
                     }
                 }
-                
+
                 // Now find out what scanned ones weren't processed. These are the ones we have to make ad-hoc
                 // parent doclets and warn about
                 scanned.forEach((v, k, m) => {
@@ -817,7 +817,7 @@ module TsdPlugin {
                         }
                         processedArgs.set(arg.name, arg.name);
                     }
-                    
+
                     if (arg.type != null) {
                         TypeUtil.parseAndConvertTypes(arg.type, conf, logger, context);
                         if (arg.name.indexOf(".") >= 0) { //If it's dotted is a member of the options argument
@@ -841,10 +841,10 @@ module TsdPlugin {
                     }
                 }
             }
-            
-            //Since there is no guarantee of object keys being insertion order 
+
+            //Since there is no guarantee of object keys being insertion order
             //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
-            //we'll loop the original doclet params and pick up the keyed parameter along the way 
+            //we'll loop the original doclet params and pick up the keyed parameter along the way
             for (let arg of methodParams) {
                 if (arg.type != null) {
                     let p = paramMap.get(arg.name);
@@ -854,7 +854,7 @@ module TsdPlugin {
                             let moduleName = TypeUtil.normalizeModuleName(this.doclet.memberof, conf.globalModuleAliases);
                             let typeName = this.generateOptionsInterfaceName(conf);
                             let memberDefs = [];
-                            
+
                             for (let member of p.members) {
                                 //This should be a dotted member. Split it
                                 let parts = member.name.split(".");
@@ -863,11 +863,11 @@ module TsdPlugin {
                                 retType = TypeUtil.fixEnumTypeReferences(retType, conf);
                                 memberDefs.push(`/**\n * ${member.description}\n */\n${propName}${member.optional ? "?:" : ":"} ${retType.join("|")}`);
                             }
-                            
+
                             let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                             context.registerTypedef(typeName, iface);
                             console.log(`Registered ad-hoc interface type: ${typeName} (module: ${moduleName})`);
-                            
+
                             //TODO: Hmmm, should we be modifying doclets given by JSDoc?
                             if (moduleName != null) {
                                 p.param.type.names = [
@@ -882,10 +882,10 @@ module TsdPlugin {
                     }
                 }
             }
-            
+
             return params;
         }
-        
+
         private generateOptionsInterfaceName(conf: IPluginConfig): string {
             let methodNameCamelCase = this.getMethodName();
             if (methodNameCamelCase == "constructor") {
@@ -904,7 +904,7 @@ module TsdPlugin {
             methodNameCamelCase = CamelCase(TypeUtil.cleanTypeName(methodNameCamelCase));
             return `I${methodNameCamelCase}Options`;
         }
-        
+
         public visit(context: TypeVisibilityContext, conf: IPluginConfig, logger: ILogger): void {
             this.studyParameters(context, conf, logger);
             if (this.outputReturnType()) {
@@ -918,7 +918,7 @@ module TsdPlugin {
                 }
             }
         }
-        
+
         public output(
           stream:      IndentedOutputStream,
           conf:        IPluginConfig,
@@ -930,7 +930,7 @@ module TsdPlugin {
                 stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
-            
+
             //If member override exists, it takes precedence
             if (conf.memberReplacements[this.doclet.longname] != null) {
                 let memberOv = conf.memberReplacements[this.doclet.longname];
@@ -984,7 +984,7 @@ module TsdPlugin {
                         }
                         argStr += arg.name;
                         if (!arg.variable && (forceNullable || this.isArgOptional(arg, publicTypes))) {
-                            // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument. 
+                            // In TypeScript (and most compiled languages), you can't have non-nullable arguments after a nullable argument.
                             // So by definition everything after the nullable argument has to be nullable as well
                             forceNullable = true;
                             argStr += "?: ";
@@ -1021,7 +1021,7 @@ module TsdPlugin {
                     }
                 }
                 methodDecl += argVals.join(", ") + ")";
-                
+
                 if (this.ovReturnType != null) {
                     let retToken = ": ";
                     if (this.isTypedef) {
@@ -1042,19 +1042,19 @@ module TsdPlugin {
                             }
                         }
                     }
-                    
+
                     retTypes = TypeUtil.fixEnumTypeReferences(retTypes, conf);
-                    
+
                     if (!conf.useUnionTypeForStringEnum)
                         TypeUtil.fixEnumTypes(retTypes, publicTypes, conf);
                     TypeUtil.replaceFunctionTypes(retTypes, this.doclet, conf, logger);
                     let retType = retTypes.join("|"); //If multiple, return type is TS union
-                    
+
                     let retToken = ": ";
                     if (this.isTypedef) {
                         retToken = " => ";
                     }
-                    
+
                     if (this.outputReturnType()) {
                         if (retType != null && retType != "") {
                             methodDecl += retToken + retType;
@@ -1074,27 +1074,27 @@ module TsdPlugin {
         constructor(doclet: jsdoc.IDoclet) {
             super(doclet);
         }
-        
+
         // We're re-using the class doclet here, so any generic types would've
         // already been written out
         protected outputGenericTypes(): boolean {
             return false;
         }
-        
+
         // There is no need to specify scope of constructors
         protected outputScope(): boolean {
             return false;
         }
-        
+
         // Constructors need not specify a return type
         protected outputReturnType(): boolean {
             return false;
         }
-        
+
         protected getMethodName(): string {
             return "constructor";
         }
-        
+
         public visit(
             context: TypeVisibilityContext,
             conf:    IPluginConfig,
@@ -1102,7 +1102,7 @@ module TsdPlugin {
         ): void {
             super.visit(context, conf, logger);
         }
-        
+
         public output(
           stream:      IndentedOutputStream,
           conf:        IPluginConfig,
@@ -1140,21 +1140,21 @@ module TsdPlugin {
             super();
             this.doclet = doclet;
         }
-        
+
         public getDoclet(): jsdoc.IDoclet {
             return this.doclet;
         }
-        
+
         public getFullName(): string {
             return this.doclet.longname;
         }
-        
+
         public abstract getKind(): TSOutputtableKind;
-        
+
         protected getDescription(): string {
             return this.doclet.description;
         }
-        
+
         protected writeDescription(
             kind:   string,
             stream: IndentedOutputStream,
@@ -1177,14 +1177,14 @@ module TsdPlugin {
                 stream.writeln(" */");
             }
         }
-        
+
         public abstract output(
             stream:      IndentedOutputStream,
             conf:        IPluginConfig,
             logger:      ILogger,
             publicTypes: Map<string, IOutputtable>
         ): void;
-        
+
         public abstract visit(
             context: TypeVisibilityContext,
             conf:    IPluginConfig,
@@ -1195,7 +1195,7 @@ module TsdPlugin {
     interface TSMemberResult {
         member: TSMember;
         isPublic: boolean;
-    } 
+    }
 
     /**
      * A TS type that has child members
@@ -1276,7 +1276,7 @@ module TsdPlugin {
 
         /**
          * Studies the members of this doclet and returns a normalized set.
-         * 
+         *
          * When visiting this instance, a TypeVisibilityContext is provided, otherwise it is null
          */
         protected studyMembers(
@@ -1287,9 +1287,9 @@ module TsdPlugin {
             let studiedMembers: TSMember[] = [];
             let staticMemberMap = new Map<string, ITsMemberContainer>();
             let instanceMemberMap = new Map<string, ITsMemberContainer>();
-            
+
             let members = (this.members || []).filter(m => m.getIsPublic());
-            
+
             if (members.length > 0) {
                 for (let member of members) {
                     let memberDoclet = member.getDoclet();
@@ -1313,12 +1313,12 @@ module TsdPlugin {
                             let dottedMemberName = this.getDottedMemberName(memberDoclet);
                             if (dottedMemberName != null) { //If it's dotted is a member of the options property
                                 let parts = dottedMemberName.split(".");
-                                
+
                                 //TODO: What if the part exists in both?
                                 let mbr = instanceMemberMap.get(parts[0]);
                                 if (mbr == null)
                                     mbr = staticMemberMap.get(parts[0]);
-                                
+
                                 //If we get 'foo.bar', we should have already processed argument 'foo'
                                 if (mbr == null) {
                                     //Only want to error when not visiting (ie. context is null)
@@ -1345,17 +1345,17 @@ module TsdPlugin {
                     }
                 }
             }
-            
-            //Since there is no guarantee of object keys being insertion order 
+
+            //Since there is no guarantee of object keys being insertion order
             //(http://stackoverflow.com/questions/5525795/does-javascript-guarantee-object-property-order)
-            //we'll loop the original doclet params and pick up the keyed parameter along the way 
+            //we'll loop the original doclet params and pick up the keyed parameter along the way
             for (let member of members) {
                 let memberDoclet = member.getDoclet();
                 if (member instanceof TSMethod) {
                     let p = member.isStatic() ? staticMemberMap.get(memberDoclet.name) : instanceMemberMap.get(memberDoclet.name);
                     if (p != null) {
                         studiedMembers.push(p.member);
-                    } 
+                    }
                 } else {
                     if (memberDoclet.type != null) {
                         let dottedMemberName = this.getDottedMemberName(memberDoclet);
@@ -1368,7 +1368,7 @@ module TsdPlugin {
                                     let moduleName = TypeUtil.normalizeModuleName(this.getParentModule(), conf.globalModuleAliases);
                                     let typeName = this.generateOptionsInterfaceName();
                                     let memberDefs = [];
-                                    
+
                                     for (let childMember of p.members) {
                                         let memberDoclet = childMember.getDoclet();
                                         //This should be a dotted member. Split it
@@ -1378,11 +1378,11 @@ module TsdPlugin {
                                         retType = TypeUtil.fixEnumTypeReferences(retType, conf);
                                         memberDefs.push(`/**\n * ${memberDoclet.description}\n */\n${propName}: ${retType.join("|")}`);
                                     }
-                                    
+
                                     let iface = new TSUserInterface(moduleName, typeName, memberDefs);
                                     context.registerTypedef(typeName, iface);
                                     console.log(`Registered ad-hoc interface type: ${typeName}`);
-                                    
+
                                     p.member.setOverrideReturnType(typeName);
                                 }
                             }
@@ -1390,15 +1390,15 @@ module TsdPlugin {
                     }
                 }
             }
-            
+
             return studiedMembers;
         }
-        
+
         private generateOptionsInterfaceName(): string {
             let methodNameCamelCase = CamelCase(TypeUtil.cleanTypeName(this.doclet.name));
             return `I${methodNameCamelCase}Options`;
         }
-        
+
         public getParentTypeNames(): string[] {
             return this.doclet.augments;
         }
@@ -1553,17 +1553,17 @@ module TsdPlugin {
                 stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
-            
+
             this.writeDescription(DocletKind.Typedef, stream, conf, logger);
             let hasMembers = this.members.length > 0;
-            
+
             let declareMe = "";
             if (this.getParentModule() == null && conf.declareTopLevelElements) {
                 declareMe = "declare ";
             }
-            
+
             let typeName = TypeUtil.cleanTypeName(this.doclet.name);
-            
+
             if (this.enumType == TSEnumType.Number && hasMembers) {
                 stream.writeln(`${declareMe}enum ${typeName} {`);
                 stream.indent();
@@ -1591,7 +1591,7 @@ module TsdPlugin {
             } else if (this.enumType == TSEnumType.String && hasMembers) {
                 if (!conf.useUnionTypeForStringEnum) {
                     //Write as a class with static string members
-                    //NOTE: If this is referenced in a parameter or return type, must make 
+                    //NOTE: If this is referenced in a parameter or return type, must make
                     //sure to rewrite that type as 'string' (see: fixStringEnumTypes)
                     stream.writeln(`${declareMe}class ${typeName} {`);
                     stream.indent();
@@ -1650,15 +1650,15 @@ module TsdPlugin {
      */
     export class TSClass extends TSComposable {
         public ctor: TSConstructor;
-        
+
         public getKind(): TSOutputtableKind {
             return TSOutputtableKind.Class;
         }
-        
+
         protected getDescription(): string {
             return this.doclet.classdesc || this.doclet.description;
         }
-        
+
         public getQualifiedName(): string {
             let mod = this.getParentModule();
             if (mod == null)
@@ -1698,9 +1698,9 @@ module TsdPlugin {
                 stream.writeln(DumpDoclet(this.doclet));
                 stream.writeln(" */");
             }
-            
+
             this.writeDescription(DocletKind.Class, stream, conf, logger);
-            
+
             let clsDecl = "";
             //If un-parented, the emitted class will be global and must be declared as a result
             if (this.getParentModule() == null && conf.declareTopLevelElements) {
