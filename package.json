@@ -34,8 +34,8 @@
     "cesium": "1.27.0",
     "jsdoc": "^3.4.3",
     "jsonfile": "^2.4.0",
-    "openlayers": "4.1.0",
+    "openlayers": "4.2.0",
     "pegjs": "^0.10.0",
-    "typescript": "2.2.2"
+    "typescript": "2.3.4"
   }
 }
