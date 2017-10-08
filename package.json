@@ -29,13 +29,13 @@
   },
   "homepage": "https://github.com/jumpinjackie/jsdoc-typescript-plugin#readme",
   "devDependencies": {
-    "@types/node": "^8.0.20",
+    "@types/node": "^8.0.33",
     "@types/pegjs": "^0.10.0",
     "cesium": "1.27.0",
-    "jsdoc": "^3.5.4",
-    "jsonfile": "^3.0.1",
-    "openlayers": "4.3.0",
+    "jsdoc": "^3.5.5",
+    "jsonfile": "^4.0.0",
+    "openlayers": "4.4.1",
     "pegjs": "^0.10.0",
-    "typescript": "2.4.2"
+    "typescript": "2.5.3"
   }
 }
