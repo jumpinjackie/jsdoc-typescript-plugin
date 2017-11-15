@@ -86,8 +86,9 @@ jsonfile.readFile(publicJsonPath, function(err, obj) {
         def += " * ES2015 module declaration for " + mod.module.split("/").join(".") + os.EOL;
         def += " */" + os.EOL;
         def += 'declare module "' + mod.module + '" {' + os.EOL;
-        //def += "    export default " + mod.export + ";" + os.EOL;
-        def += "    export default {" + os.EOL;
+        //This method no longer works for TS 2.6
+        /*
+        def += "    declare const _default: {" + os.EOL;
         for (var i = 0; i < mod.exportMembers.length; i++) {
             def += "        " + mod.exportMembers[i].name + ": " + mod.exportMembers[i].fullName;
             if (i < mod.exportMembers.length - 1) {
@@ -96,6 +97,10 @@ jsonfile.readFile(publicJsonPath, function(err, obj) {
             def += os.EOL;
         }
         def += "    };" + os.EOL;
+        def += "    export default _default;" + os.EOL;
+        */
+        def += "    const _default: typeof " + mod.module.split("/").join(".") + ";" + os.EOL;
+        def += "    export default _default;" + os.EOL;
         def += "}" + os.EOL;
         fs.appendFileSync(dtsPath, def);
         console.log("Wrote ES2015 module for: " + mod.module.split("/").join("."));

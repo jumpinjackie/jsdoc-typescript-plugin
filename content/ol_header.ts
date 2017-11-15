@@ -1,4 +1,4 @@
-// Type definitions for OpenLayers v4.4.1
+// Type definitions for OpenLayers v4.5.0
 // Project: http://openlayers.org/
 // Definitions by: Jackie Ng <https://github.com/jumpinjackie>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped

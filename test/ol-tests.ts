@@ -86,6 +86,10 @@ import WMTSTileGrid from 'ol/tilegrid/wmts';
 
 import Collection from 'ol/collection';
 
+import olXml from 'ol/xml';
+import olProj from 'ol/proj';
+import olExtent from 'ol/extent';
+
 const map = new Map({
   target: 'map',
   layers: [
@@ -218,3 +222,7 @@ sources.push(new WMTS({
     matrixSet: "thereisnospoon"
 }));
 sources.push(new Zoomify());
+
+olXml.parse("<Foo>Bar</Foo>");
+const tx = olProj.fromLonLat([0, 0]);
+const center = olExtent.getCenter([1, 2, 3, 4]);
